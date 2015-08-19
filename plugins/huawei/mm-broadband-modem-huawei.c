@@ -85,6 +85,7 @@ struct _MMBroadbandModemHuaweiPrivate {
     GRegex *rssi_regex;
     GRegex *rssilvl_regex;
     GRegex *hrssilvl_regex;
+    GRegex *ltersrp_regex;
 
     /* Regex for access-technology related notifications */
     GRegex *mode_regex;
@@ -4039,6 +4040,10 @@ set_ignored_unsolicited_events_handlers (MMBroadbandModemHuawei *self)
             NULL, NULL, NULL);
         mm_port_serial_at_add_unsolicited_msg_handler (
             port,
+            self->priv->ltersrp_regex,
+            NULL, NULL, NULL);
+        mm_port_serial_at_add_unsolicited_msg_handler (
+            port,
             self->priv->pdpdeact_regex,
             NULL, NULL, NULL);
         mm_port_serial_at_add_unsolicited_msg_handler (
@@ -4133,6 +4138,8 @@ mm_broadband_modem_huawei_init (MMBroadbandModemHuawei *self)
                                              G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
     self->priv->hrssilvl_regex = g_regex_new ("\\r\\n\\^HRSSILVL:\\s*(\\d+)\\r+\\n",
                                               G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
+    self->priv->ltersrp_regex = g_regex_new ("\\r\\n\\^LTERSRP:\\s*([-\\d]+),([-\\d]+)\\r+\\n",
+                                              G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
 
     /* 3GPP: <cr><lf>^MODE:5<cr><lf>
      * CDMA: <cr><lf>^MODE: 2<cr><cr><lf>
@@ -4222,6 +4229,7 @@ finalize (GObject *object)
     g_regex_unref (self->priv->rssi_regex);
     g_regex_unref (self->priv->rssilvl_regex);
     g_regex_unref (self->priv->hrssilvl_regex);
+    g_regex_unref (self->priv->ltersrp_regex);
     g_regex_unref (self->priv->mode_regex);
     g_regex_unref (self->priv->dsflowrpt_regex);
     g_regex_unref (self->priv->ndisstat_regex);
