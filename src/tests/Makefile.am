@@ -97,6 +97,9 @@ test_qcdm_serial_port_CPPFLAGS = \
 	$(MM_CFLAGS) \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
+	-I$(top_builddir)/src \
+	-I$(top_srcdir)/src/port \
+	-I$(top_builddir)/src/port \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
 	-I$(top_srcdir)/libmm-glib \
@@ -105,7 +108,7 @@ test_qcdm_serial_port_CPPFLAGS = \
 
 test_qcdm_serial_port_LDADD = \
 	$(MM_LIBS) \
-	$(top_builddir)/src/libport.la \
+	$(top_builddir)/src/port/libport.la \
 	$(top_builddir)/src/libmodem-helpers.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
 	-lutil
@@ -124,6 +127,9 @@ test_at_serial_port_CPPFLAGS = \
 	$(MM_CFLAGS) \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/src \
+	-I$(top_builddir)/src \
+	-I$(top_srcdir)/src/port \
+	-I$(top_builddir)/src/port \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
 	-I$(top_srcdir)/libmm-glib \
@@ -132,7 +138,7 @@ test_at_serial_port_CPPFLAGS = \
 
 test_at_serial_port_LDADD = \
 	$(MM_LIBS) \
-	$(top_builddir)/src/libport.la \
+	$(top_builddir)/src/port/libport.la \
 	$(top_builddir)/src/libmodem-helpers.la \
 	-lutil
 
