@@ -29,6 +29,8 @@ libport_la_CPPFLAGS = \
 	-I$(top_builddir)/include \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir)/src \
+	-I$(top_srcdir)/src/helpers \
+	-I$(top_builddir)/src/helpers \
 	-I$(top_srcdir)/libmm-glib \
 	-I${top_srcdir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated

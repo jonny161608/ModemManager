@@ -1,5 +1,5 @@
 
-SUBDIRS = port . tests
+SUBDIRS = port helpers . tests
 
 udevrulesdir = $(UDEV_BASE_DIR)/rules.d
 udevrules_DATA = \
@@ -11,50 +11,6 @@ udevrules_DATA = \
 
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 AM_LDFLAGS = $(CODE_COVERAGE_LDFLAGS)
-
-noinst_LTLIBRARIES = libmodem-helpers.la
-
-libmodem_helpers_la_CPPFLAGS = \
-	$(MM_CFLAGS) \
-	-I$(top_srcdir) \
-	-I$(top_srcdir)/include \
-	-I$(top_builddir)/include \
-	-I$(top_srcdir)/libmm-glib \
-	-I${top_srcdir}/libmm-glib/generated \
-	-I${top_builddir}/libmm-glib/generated
-
-libmodem_helpers_la_LIBADD = \
-	$(top_builddir)/libmm-glib/libmm-glib.la
-
-libmodem_helpers_la_SOURCES = \
-	mm-error-helpers.c \
-	mm-error-helpers.h \
-	mm-modem-helpers.c \
-	mm-modem-helpers.h \
-	mm-charsets.c \
-	mm-charsets.h \
-	mm-sms-part.h \
-	mm-sms-part.c \
-	mm-sms-part-3gpp.h \
-	mm-sms-part-3gpp.c \
-	mm-sms-part-cdma.h \
-	mm-sms-part-cdma.c
-
-# Additional QMI support in libmodem-helpers
-if WITH_QMI
-libmodem_helpers_la_SOURCES += \
-	mm-modem-helpers-qmi.c \
-	mm-modem-helpers-qmi.h
-libmodem_helpers_la_CPPFLAGS += $(QMI_CFLAGS)
-endif
-
-# Additional MBIM support in libmodem-helpers
-if WITH_MBIM
-libmodem_helpers_la_SOURCES += \
-	mm-modem-helpers-mbim.c \
-	mm-modem-helpers-mbim.h
-libmodem_helpers_la_CPPFLAGS += $(MBIM_CFLAGS)
-endif
 
 # Daemon specific enum types
 DAEMON_ENUMS = \
@@ -81,6 +37,8 @@ ModemManager_CPPFLAGS = \
 	$(GUDEV_CFLAGS) \
 	-I$(srcdir)/port \
 	-I$(builddir)/port \
+	-I$(srcdir)/helpers \
+	-I$(builddir)/helpers \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
@@ -95,7 +53,7 @@ ModemManager_CPPFLAGS = \
 ModemManager_LDADD = \
 	$(MM_LIBS) \
 	$(GUDEV_LIBS) \
-	$(builddir)/libmodem-helpers.la \
+	$(builddir)/helpers/libhelpers.la \
 	$(builddir)/port/libport.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
 	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la
@@ -110,7 +68,6 @@ ModemManager_SOURCES = \
 	mm-context.c \
 	mm-log.c \
 	mm-log.h \
-	mm-utils.h \
 	mm-private-boxed-types.h \
 	mm-private-boxed-types.c \
 	mm-auth.h \
