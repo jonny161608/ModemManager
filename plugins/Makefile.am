@@ -16,6 +16,7 @@ PLUGIN_COMMON_COMPILER_FLAGS = \
 	-I$(top_builddir)/src/port \
 	-I$(top_srcdir)/src/helpers \
 	-I$(top_builddir)/src/helpers \
+	-I$(top_srcdir)/src/protocol-qmi \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
 	-I$(top_srcdir)/libmm-glib \

@@ -350,6 +350,7 @@ libwmc/tests/Makefile
 src/Makefile
 src/port/Makefile
 src/helpers/Makefile
+src/protocol-qmi/Makefile
 src/tests/Makefile
 plugins/Makefile
 uml290/Makefile
