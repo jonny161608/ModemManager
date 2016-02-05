@@ -4,6 +4,7 @@ SUBDIRS = \
 	helpers       \
 	protocol-qmi  \
 	protocol-mbim \
+	iface-voice   \
 	.             \
 	tests
 
@@ -45,6 +46,7 @@ ModemManager_CPPFLAGS = \
 	-I$(builddir)/port \
 	-I$(srcdir)/helpers \
 	-I$(builddir)/helpers \
+	-I$(srcdir)/iface-voice \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
@@ -61,6 +63,7 @@ ModemManager_LDADD = \
 	$(GUDEV_LIBS) \
 	$(builddir)/helpers/libhelpers.la \
 	$(builddir)/port/libport.la \
+	$(builddir)/iface-voice/libmmifacevoice.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
 	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la
 
@@ -110,12 +113,8 @@ ModemManager_SOURCES = \
 	mm-base-modem.c \
 	mm-base-sms.h \
 	mm-base-sms.c \
-	mm-base-call.h \
-	mm-base-call.c \
 	mm-sms-list.h \
 	mm-sms-list.c \
-	mm-call-list.h \
-	mm-call-list.c \
 	mm-iface-modem.h \
 	mm-iface-modem.c \
 	mm-iface-modem-3gpp.h \
@@ -130,8 +129,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-location.c \
 	mm-iface-modem-messaging.h \
 	mm-iface-modem-messaging.c \
-	mm-iface-modem-voice.h \
-	mm-iface-modem-voice.c \
 	mm-iface-modem-time.h \
 	mm-iface-modem-time.c \
 	mm-iface-modem-firmware.h \
