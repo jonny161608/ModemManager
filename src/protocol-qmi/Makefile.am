@@ -19,6 +19,7 @@ libmmprotocolqmi_la_CPPFLAGS = \
 	-I$(top_builddir)/src/port \
 	-I$(top_srcdir)/src/helpers \
 	-I$(top_builddir)/src/helpers \
+	-I$(top_srcdir)/src/iface-oma \
 	-I$(top_srcdir)/libmm-glib \
 	-I${top_srcdir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated \

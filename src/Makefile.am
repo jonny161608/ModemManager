@@ -4,6 +4,7 @@ SUBDIRS = \
 	helpers       \
 	protocol-qmi  \
 	protocol-mbim \
+	iface-oma     \
 	iface-voice   \
 	.             \
 	tests
@@ -47,6 +48,7 @@ ModemManager_CPPFLAGS = \
 	-I$(srcdir)/helpers \
 	-I$(builddir)/helpers \
 	-I$(srcdir)/iface-voice \
+	-I$(srcdir)/iface-oma \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
@@ -63,6 +65,7 @@ ModemManager_LDADD = \
 	$(GUDEV_LIBS) \
 	$(builddir)/helpers/libhelpers.la \
 	$(builddir)/port/libport.la \
+	$(builddir)/iface-oma/libmmifaceoma.la \
 	$(builddir)/iface-voice/libmmifacevoice.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
 	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la
@@ -135,8 +138,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-firmware.c \
 	mm-iface-modem-signal.h \
 	mm-iface-modem-signal.c \
-	mm-iface-modem-oma.h \
-	mm-iface-modem-oma.c \
 	mm-broadband-modem.h \
 	mm-broadband-modem.c \
 	mm-port-probe.h \
