@@ -2,9 +2,9 @@
 AM_CFLAGS = $(CODE_COVERAGE_CFLAGS)
 AM_LDFLAGS = $(CODE_COVERAGE_LDFLAGS)
 
-noinst_LTLIBRARIES = libmmifacesimple.la
+noinst_LTLIBRARIES = libmmiface3gpp.la
 
-libmmifacesimple_la_CPPFLAGS = \
+libmmiface3gpp_la_CPPFLAGS = \
 	$(MM_CFLAGS) \
 	-I$(top_srcdir) \
 	-I$(top_srcdir)/include \
@@ -15,20 +15,21 @@ libmmifacesimple_la_CPPFLAGS = \
 	-I$(top_builddir)/src/port \
 	-I$(top_srcdir)/src/helpers \
 	-I$(top_builddir)/src/helpers \
-	-I$(top_srcdir)/src/iface-3gpp \
-	-I$(top_srcdir)/src/iface-cdma \
+	-I$(top_srcdir)/src/iface-location \
 	-I$(top_srcdir)/libmm-glib \
 	-I${top_srcdir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated
 
 if WITH_QMI
-libmmifacesimple_la_CPPFLAGS += $(QMI_CFLAGS)
+libmmiface3gpp_la_CPPFLAGS += $(QMI_CFLAGS)
 endif
 
 if WITH_MBIM
-libmmifacesimple_la_CPPFLAGS += $(MBIM_CFLAGS)
+libmmiface3gpp_la_CPPFLAGS += $(MBIM_CFLAGS)
 endif
 
-libmmifacesimple_la_SOURCES = \
-	mm-iface-modem-simple.h \
-	mm-iface-modem-simple.c
+libmmiface3gpp_la_SOURCES = \
+	mm-iface-modem-3gpp.h \
+	mm-iface-modem-3gpp.c \
+	mm-iface-modem-3gpp-ussd.h \
+	mm-iface-modem-3gpp-ussd.c

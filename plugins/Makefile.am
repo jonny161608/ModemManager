@@ -18,6 +18,7 @@ PLUGIN_COMMON_COMPILER_FLAGS = \
 	-I$(top_builddir)/src/helpers \
 	-I$(top_srcdir)/src/protocol-qmi \
 	-I$(top_srcdir)/src/protocol-mbim \
+	-I$(top_srcdir)/src/iface-3gpp \
 	-I$(top_srcdir)/src/iface-cdma \
 	-I$(top_srcdir)/src/iface-messaging \
 	-I$(top_srcdir)/src/iface-location \

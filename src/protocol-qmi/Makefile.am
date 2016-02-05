@@ -19,6 +19,7 @@ libmmprotocolqmi_la_CPPFLAGS = \
 	-I$(top_builddir)/src/port \
 	-I$(top_srcdir)/src/helpers \
 	-I$(top_builddir)/src/helpers \
+	-I$(top_srcdir)/src/iface-3gpp \
 	-I$(top_srcdir)/src/iface-cdma \
 	-I$(top_srcdir)/src/iface-messaging \
 	-I$(top_srcdir)/src/iface-location \
