@@ -483,7 +483,7 @@ mm_common_sierra_create_sim (MMIfaceModem *self,
 /* Setup ports */
 
 void
-mm_common_sierra_setup_ports (MMBroadbandModem *self)
+mm_common_sierra_setup_ports (MMBaseModem *self)
 {
     MMPortSerialAt *ports[2];
     guint i;
@@ -491,8 +491,8 @@ mm_common_sierra_setup_ports (MMBroadbandModem *self)
 
     pacsp_regex = g_regex_new ("\\r\\n\\+PACSP.*\\r\\n", G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
 
-    ports[0] = mm_base_modem_peek_port_primary (MM_BASE_MODEM (self));
-    ports[1] = mm_base_modem_peek_port_secondary (MM_BASE_MODEM (self));
+    ports[0] = mm_base_modem_peek_port_primary (self);
+    ports[1] = mm_base_modem_peek_port_secondary (self);
 
     for (i = 0; i < 2; i++) {
         if (!ports[i])

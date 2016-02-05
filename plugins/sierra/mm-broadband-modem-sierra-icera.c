@@ -97,10 +97,10 @@ modem_create_bearer (MMIfaceModem *self,
 /* Setup ports (Broadband modem class) */
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_sierra_icera_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_sierra_icera_parent_class)->setup_ports (self);
 
     mm_common_sierra_setup_ports (self);
 }
@@ -146,7 +146,7 @@ iface_modem_init (MMIfaceModem *iface)
 static void
 mm_broadband_modem_sierra_icera_class_init (MMBroadbandModemSierraIceraClass *klass)
 {
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 }

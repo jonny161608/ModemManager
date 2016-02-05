@@ -1492,7 +1492,7 @@ gps_trace_received (MMPortSerialGps *port,
 }
 
 static void
-setup_ports (MMBroadbandModem *_self)
+setup_ports (MMBaseModem *_self)
 {
     MMBroadbandModemMbm *self = MM_BROADBAND_MODEM_MBM (_self);
     MMPortSerialAt *ports[2];
@@ -1500,7 +1500,7 @@ setup_ports (MMBroadbandModem *_self)
     guint i;
 
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_mbm_parent_class)->setup_ports (_self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_mbm_parent_class)->setup_ports (_self);
 
     ports[0] = mm_base_modem_peek_port_primary (MM_BASE_MODEM (self));
     ports[1] = mm_base_modem_peek_port_secondary (MM_BASE_MODEM (self));
@@ -1694,12 +1694,13 @@ static void
 mm_broadband_modem_mbm_class_init (MMBroadbandModemMbmClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
     MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
 
     g_type_class_add_private (object_class, sizeof (MMBroadbandModemMbmPrivate));
 
     object_class->finalize = finalize;
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
     broadband_modem_class->enabling_modem_init = enabling_modem_init;
     broadband_modem_class->enabling_modem_init_finish = enabling_modem_init_finish;
 }

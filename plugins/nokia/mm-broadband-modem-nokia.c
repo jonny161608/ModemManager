@@ -335,14 +335,14 @@ static const gchar *primary_init_sequence[] = {
 };
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     MMPortSerialAt *primary;
 
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_nokia_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_nokia_parent_class)->setup_ports (self);
 
-    primary = mm_base_modem_peek_port_primary (MM_BASE_MODEM (self));
+    primary = mm_base_modem_peek_port_primary (self);
 
     g_object_set (primary,
                   MM_PORT_SERIAL_AT_INIT_SEQUENCE, primary_init_sequence,
@@ -414,9 +414,10 @@ iface_modem_init (MMIfaceModem *iface)
 static void
 mm_broadband_modem_nokia_class_init (MMBroadbandModemNokiaClass *klass)
 {
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
     MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
 
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
     broadband_modem_class->enabling_modem_init = enabling_modem_init;
     broadband_modem_class->enabling_modem_init_finish = enabling_modem_init_finish;
 }

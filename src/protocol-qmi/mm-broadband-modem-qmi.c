@@ -10943,7 +10943,7 @@ signal_load_values (MMIfaceModemSignal *self,
 /* First enabling step */
 
 static gboolean
-enabling_started_finish (MMBroadbandModem *self,
+enabling_started_finish (MMBaseModem *self,
                          GAsyncResult *res,
                          GError **error)
 {
@@ -10951,13 +10951,13 @@ enabling_started_finish (MMBroadbandModem *self,
 }
 
 static void
-parent_enabling_started_ready (MMBroadbandModem *self,
+parent_enabling_started_ready (MMBaseModem *self,
                                GAsyncResult *res,
                                GSimpleAsyncResult *simple)
 {
     GError *error = NULL;
 
-    if (!MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->enabling_started_finish (
+    if (!MM_BASE_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->enabling_started_finish (
             self,
             res,
             &error)) {
@@ -10973,7 +10973,7 @@ parent_enabling_started_ready (MMBroadbandModem *self,
 }
 
 static void
-enabling_started (MMBroadbandModem *self,
+enabling_started (MMBaseModem *self,
                   GAsyncReadyCallback callback,
                   gpointer user_data)
 {
@@ -10983,7 +10983,7 @@ enabling_started (MMBroadbandModem *self,
                                         callback,
                                         user_data,
                                         enabling_started);
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->enabling_started (
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->enabling_started (
         self,
         (GAsyncReadyCallback)parent_enabling_started_ready,
         result);
@@ -10993,7 +10993,7 @@ enabling_started (MMBroadbandModem *self,
 /* First initialization step */
 
 typedef struct {
-    MMBroadbandModem *self;
+    MMBaseModem *self;
     GSimpleAsyncResult *result;
     MMPortQmi *qmi;
     QmiService services[32];
@@ -11012,7 +11012,7 @@ initialization_started_context_complete_and_free (InitializationStartedContext *
 }
 
 static gpointer
-initialization_started_finish (MMBroadbandModem *self,
+initialization_started_finish (MMBaseModem *self,
                                GAsyncResult *res,
                                GError **error)
 {
@@ -11024,14 +11024,14 @@ initialization_started_finish (MMBroadbandModem *self,
 }
 
 static void
-parent_initialization_started_ready (MMBroadbandModem *self,
+parent_initialization_started_ready (MMBaseModem *self,
                                      GAsyncResult *res,
                                      InitializationStartedContext *ctx)
 {
     gpointer parent_ctx;
     GError *error = NULL;
 
-    parent_ctx = MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->initialization_started_finish (
+    parent_ctx = MM_BASE_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->initialization_started_finish (
         self,
         res,
         &error);
@@ -11049,7 +11049,7 @@ parent_initialization_started_ready (MMBroadbandModem *self,
 static void
 parent_initialization_started (InitializationStartedContext *ctx)
 {
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->initialization_started (
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_qmi_parent_class)->initialization_started (
         ctx->self,
         (GAsyncReadyCallback)parent_initialization_started_ready,
         ctx);
@@ -11135,7 +11135,7 @@ qmi_port_open_ready (MMPortQmi *qmi,
 }
 
 static void
-initialization_started (MMBroadbandModem *self,
+initialization_started (MMBaseModem *self,
                         GAsyncReadyCallback callback,
                         gpointer user_data)
 {
@@ -11504,6 +11504,7 @@ static void
 mm_broadband_modem_qmi_class_init (MMBroadbandModemQmiClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
     MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
 
     g_type_class_add_private (object_class, sizeof (MMBroadbandModemQmiPrivate));
@@ -11511,10 +11512,10 @@ mm_broadband_modem_qmi_class_init (MMBroadbandModemQmiClass *klass)
     object_class->finalize = finalize;
     object_class->dispose = dispose;
 
-    broadband_modem_class->initialization_started = initialization_started;
-    broadband_modem_class->initialization_started_finish = initialization_started_finish;
-    broadband_modem_class->enabling_started = enabling_started;
-    broadband_modem_class->enabling_started_finish = enabling_started_finish;
+    base_modem_class->initialization_started = initialization_started;
+    base_modem_class->initialization_started_finish = initialization_started_finish;
+    base_modem_class->enabling_started = enabling_started;
+    base_modem_class->enabling_started_finish = enabling_started_finish;
     /* Do not initialize the QMI modem through AT commands */
     broadband_modem_class->enabling_modem_init = NULL;
     broadband_modem_class->enabling_modem_init_finish = NULL;

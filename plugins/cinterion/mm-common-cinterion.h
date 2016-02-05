@@ -44,7 +44,7 @@ gboolean              mm_common_cinterion_disable_location_gathering_finish (MMI
                                                                              GAsyncResult *res,
                                                                              GError **error);
 
-void                  mm_common_cinterion_setup_gps_port                    (MMBroadbandModem *self);
+void                  mm_common_cinterion_setup_gps_port                    (MMBaseModem *self);
 
 void                  mm_common_cinterion_peek_parent_location_interface    (MMIfaceModemLocation *iface);
 

@@ -46,31 +46,6 @@ struct _MMBroadbandModem {
 struct _MMBroadbandModemClass {
     MMBaseModemClass parent;
 
-    /* Setup ports, e.g. to setup unsolicited response handlers.
-     * Plugins which need specific setups should chain up parent's port setup
-     * as well. */
-    void (* setup_ports) (MMBroadbandModem *self);
-
-    /* First and last initialization steps.
-     * Actually, this is not really the first step, setup_ports() is */
-    void     (* initialization_started)        (MMBroadbandModem *self,
-                                                GAsyncReadyCallback callback,
-                                                gpointer user_data);
-    gpointer (* initialization_started_finish) (MMBroadbandModem *self,
-                                                GAsyncResult *res,
-                                                GError **error);
-    gboolean (* initialization_stopped)        (MMBroadbandModem *self,
-                                                gpointer started_context,
-                                                GError **error);
-
-    /* First enabling step */
-    void     (* enabling_started)        (MMBroadbandModem *self,
-                                          GAsyncReadyCallback callback,
-                                          gpointer user_data);
-    gboolean (* enabling_started_finish) (MMBroadbandModem *self,
-                                          GAsyncResult *res,
-                                          GError **error);
-
     /* Modem initialization. During the 'enabling' step, this setup will be
      * called in order to initialize the modem, only if it wasn't hotplugged,
      * as we assume that a hotplugged modem is already initialized. */
@@ -80,11 +55,6 @@ struct _MMBroadbandModemClass {
     gboolean (* enabling_modem_init_finish) (MMBroadbandModem *self,
                                              GAsyncResult *res,
                                              GError **error);
-
-
-    /* Last disabling step */
-    gboolean (* disabling_stopped) (MMBroadbandModem *self,
-                                    GError **error);
 };
 
 GType mm_broadband_modem_get_type (void);

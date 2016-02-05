@@ -1828,10 +1828,10 @@ modem_time_check_support (MMIfaceModemTime *self,
 /* Setup ports (Broadband modem class) */
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_icera_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_icera_parent_class)->setup_ports (self);
 
     /* Now reset the unsolicited messages we'll handle when enabled */
     set_unsolicited_events_handlers (MM_BROADBAND_MODEM_ICERA (self), FALSE);
@@ -1985,14 +1985,14 @@ static void
 mm_broadband_modem_icera_class_init (MMBroadbandModemIceraClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
     g_type_class_add_private (object_class, sizeof (MMBroadbandModemIceraPrivate));
 
     object_class->get_property = get_property;
     object_class->set_property = set_property;
     object_class->finalize = finalize;
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 
     properties[PROP_DEFAULT_IP_METHOD] =
         g_param_spec_enum (MM_BROADBAND_MODEM_ICERA_DEFAULT_IP_METHOD,

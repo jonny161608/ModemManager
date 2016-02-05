@@ -870,10 +870,10 @@ set_current_modes (MMIfaceModem *self,
 /* Setup ports (Broadband modem class) */
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_simtech_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_simtech_parent_class)->setup_ports (self);
 
     /* Now reset the unsolicited messages we'll handle when enabled */
     set_unsolicited_events_handlers (MM_BROADBAND_MODEM_SIMTECH (self), FALSE);
@@ -936,7 +936,7 @@ iface_modem_init (MMIfaceModem *iface)
 static void
 mm_broadband_modem_simtech_class_init (MMBroadbandModemSimtechClass *klass)
 {
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 }

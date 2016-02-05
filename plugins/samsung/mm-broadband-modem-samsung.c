@@ -36,16 +36,16 @@ G_DEFINE_TYPE (MMBroadbandModemSamsung, mm_broadband_modem_samsung, MM_TYPE_BROA
 /* Setup ports (Broadband modem class) */
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     MMPortSerialAt *ports[2];
     guint i;
 
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_samsung_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_samsung_parent_class)->setup_ports (self);
 
-    ports[0] = mm_base_modem_peek_port_primary (MM_BASE_MODEM (self));
-    ports[1] = mm_base_modem_peek_port_secondary (MM_BASE_MODEM (self));
+    ports[0] = mm_base_modem_peek_port_primary (self);
+    ports[1] = mm_base_modem_peek_port_secondary (self);
 
     /* Configure AT ports */
     for (i = 0; i < 2; i++) {
@@ -86,7 +86,7 @@ mm_broadband_modem_samsung_init (MMBroadbandModemSamsung *self)
 static void
 mm_broadband_modem_samsung_class_init (MMBroadbandModemSamsungClass *klass)
 {
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 }

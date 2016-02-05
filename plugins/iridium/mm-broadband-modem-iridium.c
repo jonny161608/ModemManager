@@ -329,16 +329,16 @@ static const gchar *primary_init_sequence[] = {
 };
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     MMPortSerialAt *primary;
 
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_iridium_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_iridium_parent_class)->setup_ports (self);
 
     /* Set 9600 baudrate by default in the AT port */
     mm_dbg ("Baudrate will be set to 9600 bps...");
-    primary = mm_base_modem_peek_port_primary (MM_BASE_MODEM (self));
+    primary = mm_base_modem_peek_port_primary (self);
     if (!primary)
         return;
 
@@ -436,7 +436,7 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 static void
 mm_broadband_modem_iridium_class_init (MMBroadbandModemIridiumClass *klass)
 {
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 }

@@ -702,10 +702,10 @@ modem_3gpp_cleanup_unsolicited_events (MMIfaceModem3gpp *self,
 /* Setup ports (Broadband modem class) */
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_zte_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_zte_parent_class)->setup_ports (self);
 
     /* Now reset the unsolicited messages we'll handle when enabled */
     mm_common_zte_set_unsolicited_events_handlers (MM_BROADBAND_MODEM (self),
@@ -787,10 +787,10 @@ static void
 mm_broadband_modem_zte_class_init (MMBroadbandModemZteClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
     g_type_class_add_private (object_class, sizeof (MMBroadbandModemZtePrivate));
 
     object_class->finalize = finalize;
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 }

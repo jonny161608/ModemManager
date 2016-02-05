@@ -70,35 +70,35 @@ struct _MMBaseModem {
 struct _MMBaseModemClass {
     MmGdbusObjectSkeletonClass parent;
 
-    /* Modem initialization.
-     * As soon as the ports are organized, this method gets called */
-    void (* initialize) (MMBaseModem *self,
-                         GCancellable *cancellable,
-                         GAsyncReadyCallback callback,
-                         gpointer user_data);
-    gboolean (*initialize_finish) (MMBaseModem *self,
-                                   GAsyncResult *res,
-                                   GError **error);
 
-    /* Modem enabling.
-     * User action requested from DBus, usually */
-    void (* enable) (MMBaseModem *self,
-                     GCancellable *cancellable,
-                     GAsyncReadyCallback callback,
-                     gpointer user_data);
-    gboolean (*enable_finish) (MMBaseModem *self,
-                               GAsyncResult *res,
-                               GError **error);
+    /* Setup ports, e.g. to setup unsolicited response handlers.
+     * Plugins which need specific setups should chain up parent's port setup
+     * as well. */
+    void (* setup_ports) (MMBaseModem *self);
 
-    /* Modem disabling.
-     * User action requested from DBus, usually */
-    void (* disable) (MMBaseModem *self,
-                      GCancellable *cancellable,
-                      GAsyncReadyCallback callback,
-                      gpointer user_data);
-    gboolean (*disable_finish) (MMBaseModem *self,
-                                GAsyncResult *res,
-                                GError **error);
+    /* First and last initialization steps.
+     * Actually, this is not really the first step, setup_ports() is */
+    void     (* initialization_started)        (MMBaseModem *self,
+                                                GAsyncReadyCallback callback,
+                                                gpointer user_data);
+    gpointer (* initialization_started_finish) (MMBaseModem *self,
+                                                GAsyncResult *res,
+                                                GError **error);
+    gboolean (* initialization_stopped)        (MMBaseModem *self,
+                                                gpointer started_context,
+                                                GError **error);
+
+    /* First enabling step */
+    void     (* enabling_started)        (MMBaseModem *self,
+                                          GAsyncReadyCallback callback,
+                                          gpointer user_data);
+    gboolean (* enabling_started_finish) (MMBaseModem *self,
+                                          GAsyncResult *res,
+                                          GError **error);
+
+    /* Last disabling step */
+    gboolean (* disabling_stopped) (MMBaseModem *self,
+                                    GError **error);
 };
 
 GType mm_base_modem_get_type (void);

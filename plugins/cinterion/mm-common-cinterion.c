@@ -435,16 +435,16 @@ trace_received (MMPortSerialGps *port,
 }
 
 void
-mm_common_cinterion_setup_gps_port (MMBroadbandModem *self)
+mm_common_cinterion_setup_gps_port (MMBaseModem *self)
 {
     MMPortSerialGps *gps_data_port;
 
-    gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
+    gps_data_port = mm_base_modem_peek_port_gps (self);
     if (gps_data_port) {
         /* It may happen that the modem was started with GPS already enabled, or
          * maybe ModemManager got rebooted and it was left enabled before. We'll make
          * sure that it is disabled when we initialize the modem */
-        mm_base_modem_at_command_full (MM_BASE_MODEM (self),
+        mm_base_modem_at_command_full (self,
                                        mm_base_modem_peek_best_at_port (MM_BASE_MODEM (self), NULL),
                                        "AT^SGPSS=0",
                                        3, FALSE, FALSE, NULL, NULL, NULL);

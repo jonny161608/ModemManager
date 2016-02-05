@@ -706,34 +706,34 @@ trace_received (MMPortSerialGps *port,
 }
 
 static void
-setup_ports (MMBroadbandModem *self)
+setup_ports (MMBaseModem *self)
 {
     MMPortSerialAt *gps_control_port;
     MMPortSerialGps *gps_data_port;
 
     /* Call parent's setup ports first always */
-    MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_hso_parent_class)->setup_ports (self);
+    MM_BASE_MODEM_CLASS (mm_broadband_modem_hso_parent_class)->setup_ports (self);
 
     /* _OWANCALL unsolicited messages are only expected in the primary port. */
     mm_port_serial_at_add_unsolicited_msg_handler (
-        mm_base_modem_peek_port_primary (MM_BASE_MODEM (self)),
+        mm_base_modem_peek_port_primary (self),
         MM_BROADBAND_MODEM_HSO (self)->priv->_owancall_regex,
         NULL, NULL, NULL);
 
-    g_object_set (mm_base_modem_peek_port_primary (MM_BASE_MODEM (self)),
+    g_object_set (mm_base_modem_peek_port_primary (self),
                   MM_PORT_SERIAL_SEND_DELAY, (guint64) 0,
                   /* built-in echo removal conflicts with unsolicited _OWANCALL
                    * messages, which are not <CR><LF> prefixed. */
                   MM_PORT_SERIAL_AT_REMOVE_ECHO, FALSE,
                   NULL);
 
-    gps_control_port = mm_base_modem_peek_port_gps_control (MM_BASE_MODEM (self));
-    gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
+    gps_control_port = mm_base_modem_peek_port_gps_control (self);
+    gps_data_port = mm_base_modem_peek_port_gps (self);
     if (gps_control_port && gps_data_port) {
         /* It may happen that the modem was started with GPS already enabled, or
          * maybe ModemManager got rebooted and it was left enabled before. We'll make
          * sure that it is disabled when we initialize the modem */
-        mm_base_modem_at_command_full (MM_BASE_MODEM (self),
+        mm_base_modem_at_command_full (self,
                                        gps_control_port,
                                        "_OGPS=0",
                                        3, FALSE, FALSE, NULL, NULL, NULL);
@@ -828,10 +828,10 @@ static void
 mm_broadband_modem_hso_class_init (MMBroadbandModemHsoClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
-    MMBroadbandModemClass *broadband_modem_class = MM_BROADBAND_MODEM_CLASS (klass);
+    MMBaseModemClass *base_modem_class = MM_BASE_MODEM_CLASS (klass);
 
     g_type_class_add_private (object_class, sizeof (MMBroadbandModemHsoPrivate));
 
     object_class->finalize = finalize;
-    broadband_modem_class->setup_ports = setup_ports;
+    base_modem_class->setup_ports = setup_ports;
 }
