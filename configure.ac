@@ -352,6 +352,7 @@ src/port/Makefile
 src/helpers/Makefile
 src/protocol-qmi/Makefile
 src/protocol-mbim/Makefile
+src/iface-modem/Makefile
 src/iface-3gpp/Makefile
 src/iface-cdma/Makefile
 src/iface-simple/Makefile
