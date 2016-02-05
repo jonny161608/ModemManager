@@ -24,7 +24,6 @@
 #define _LIBMM_INSIDE_MM
 #include <libmm-glib.h>
 
-#include "mm-iface-modem-messaging.h"
 #include "mm-call-list.h"
 #include "mm-base-call.h"
 #include "mm-log.h"

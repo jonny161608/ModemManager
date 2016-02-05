@@ -20,6 +20,7 @@
 #include <glib-object.h>
 
 #include "mm-base-modem.h"
+#include "mm-base-sms.h"
 #include "mm-sms-part.h"
 
 #define MM_TYPE_SMS_LIST            (mm_sms_list_get_type ())

@@ -1,16 +1,17 @@
 
 SUBDIRS = \
-	port           \
-	helpers        \
-	protocol-qmi   \
-	protocol-mbim  \
-	iface-location \
-	iface-signal   \
-	iface-firmware \
-	iface-time     \
-	iface-oma      \
-	iface-voice    \
-	.              \
+	port            \
+	helpers         \
+	protocol-qmi    \
+	protocol-mbim   \
+	iface-messaging \
+	iface-location  \
+	iface-signal    \
+	iface-firmware  \
+	iface-time      \
+	iface-oma       \
+	iface-voice     \
+	.               \
 	tests
 
 udevrulesdir = $(UDEV_BASE_DIR)/rules.d
@@ -51,6 +52,7 @@ ModemManager_CPPFLAGS = \
 	-I$(builddir)/port \
 	-I$(srcdir)/helpers \
 	-I$(builddir)/helpers \
+	-I$(srcdir)/iface-messaging \
 	-I$(srcdir)/iface-location \
 	-I$(srcdir)/iface-voice \
 	-I$(srcdir)/iface-oma \
@@ -73,6 +75,7 @@ ModemManager_LDADD = \
 	$(GUDEV_LIBS) \
 	$(builddir)/helpers/libhelpers.la \
 	$(builddir)/port/libport.la \
+	$(builddir)/iface-messaging/libmmifacemessaging.la \
 	$(builddir)/iface-location/libmmifacelocation.la \
 	$(builddir)/iface-signal/libmmifacesignal.la \
 	$(builddir)/iface-firmware/libmmifacefirmware.la \
@@ -126,10 +129,6 @@ ModemManager_SOURCES = \
 	mm-base-modem-at.c \
 	mm-base-modem.h \
 	mm-base-modem.c \
-	mm-base-sms.h \
-	mm-base-sms.c \
-	mm-sms-list.h \
-	mm-sms-list.c \
 	mm-iface-modem.h \
 	mm-iface-modem.c \
 	mm-iface-modem-3gpp.h \
@@ -140,8 +139,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-cdma.c \
 	mm-iface-modem-simple.h \
 	mm-iface-modem-simple.c \
-	mm-iface-modem-messaging.h \
-	mm-iface-modem-messaging.c \
 	mm-broadband-modem.h \
 	mm-broadband-modem.c \
 	mm-port-probe.h \
