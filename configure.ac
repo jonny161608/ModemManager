@@ -352,6 +352,7 @@ src/port/Makefile
 src/helpers/Makefile
 src/protocol-qmi/Makefile
 src/protocol-mbim/Makefile
+src/iface-location/Makefile
 src/iface-signal/Makefile
 src/iface-firmware/Makefile
 src/iface-time/Makefile

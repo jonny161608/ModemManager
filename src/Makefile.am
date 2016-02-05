@@ -4,6 +4,7 @@ SUBDIRS = \
 	helpers        \
 	protocol-qmi   \
 	protocol-mbim  \
+	iface-location \
 	iface-signal   \
 	iface-firmware \
 	iface-time     \
@@ -50,6 +51,7 @@ ModemManager_CPPFLAGS = \
 	-I$(builddir)/port \
 	-I$(srcdir)/helpers \
 	-I$(builddir)/helpers \
+	-I$(srcdir)/iface-location \
 	-I$(srcdir)/iface-voice \
 	-I$(srcdir)/iface-oma \
 	-I$(srcdir)/iface-time \
@@ -71,6 +73,7 @@ ModemManager_LDADD = \
 	$(GUDEV_LIBS) \
 	$(builddir)/helpers/libhelpers.la \
 	$(builddir)/port/libport.la \
+	$(builddir)/iface-location/libmmifacelocation.la \
 	$(builddir)/iface-signal/libmmifacesignal.la \
 	$(builddir)/iface-firmware/libmmifacefirmware.la \
 	$(builddir)/iface-time/libmmifacetime.la \
@@ -137,8 +140,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-cdma.c \
 	mm-iface-modem-simple.h \
 	mm-iface-modem-simple.c \
-	mm-iface-modem-location.h \
-	mm-iface-modem-location.c \
 	mm-iface-modem-messaging.h \
 	mm-iface-modem-messaging.c \
 	mm-broadband-modem.h \
