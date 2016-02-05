@@ -1,9 +1,10 @@
 
 SUBDIRS = \
-	port         \
-	helpers      \
-	protocol-qmi \
-	.            \
+	port          \
+	helpers       \
+	protocol-qmi  \
+	protocol-mbim \
+	.             \
 	tests
 
 udevrulesdir = $(UDEV_BASE_DIR)/rules.d
@@ -66,6 +67,11 @@ ModemManager_LDADD = \
 if WITH_QMI
 ModemManager_CPPFLAGS += -I$(srcdir)/protocol-qmi $(QMI_CFLAGS)
 ModemManager_LDADD += $(builddir)/protocol-qmi/libmmprotocolqmi.la $(QMI_LIBS)
+endif
+
+if WITH_MBIM
+ModemManager_CPPFLAGS += -I$(srcdir)/protocol-mbim $(MBIM_CFLAGS)
+ModemManager_LDADD += $(builddir)/protocol-mbim/libmmprotocolmbim.la $(MBIM_LIBS)
 endif
 
 nodist_ModemManager_SOURCES = \
@@ -160,21 +166,6 @@ endif
 # Additional suspend/resume support via upower
 if SUSPEND_RESUME_UPOWER
 ModemManager_SOURCES += mm-sleep-monitor.h mm-sleep-monitor-upower.c
-endif
-
-# Additional MBIM support in ModemManager
-if WITH_MBIM
-ModemManager_SOURCES += \
-	mm-sms-mbim.h \
-	mm-sms-mbim.c \
-	mm-sim-mbim.h \
-	mm-sim-mbim.c \
-	mm-bearer-mbim.h \
-	mm-bearer-mbim.c \
-	mm-broadband-modem-mbim.h \
-	mm-broadband-modem-mbim.c
-ModemManager_CPPFLAGS += $(MBIM_CFLAGS)
-ModemManager_LDADD += $(MBIM_LIBS)
 endif
 
 EXTRA_DIST = \
