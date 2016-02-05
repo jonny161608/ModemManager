@@ -1,4 +1,4 @@
-AC_PREREQ([2.63])
+ AC_PREREQ([2.63])
 
 dnl-----------------------------------------------------------------------------
 dnl Package and library versioning support
@@ -352,6 +352,7 @@ src/port/Makefile
 src/helpers/Makefile
 src/protocol-qmi/Makefile
 src/protocol-mbim/Makefile
+src/iface-simple/Makefile
 src/iface-messaging/Makefile
 src/iface-location/Makefile
 src/iface-signal/Makefile
