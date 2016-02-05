@@ -18,6 +18,7 @@ PLUGIN_COMMON_COMPILER_FLAGS = \
 	-I$(top_builddir)/src/helpers \
 	-I$(top_srcdir)/src/protocol-qmi \
 	-I$(top_srcdir)/src/protocol-mbim \
+	-I$(top_srcdir)/src/iface-time \
 	-I$(top_srcdir)/src/iface-voice \
 	-I$(top_srcdir)/include \
 	-I$(top_builddir)/include \
