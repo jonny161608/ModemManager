@@ -202,7 +202,7 @@ sms_send (MMBaseSms *self,
                   MM_BASE_SMS_MODEM, &ctx->modem,
                   NULL);
 
-    ctx->current = mm_base_sms_get_parts (self);;
+    ctx->current = mm_base_sms_peek_parts (self);;
     sms_send_next_part (ctx);
 }
 
@@ -330,7 +330,7 @@ sms_delete (MMBaseSms *self,
                   NULL);
 
     /* Go on deleting parts */
-    ctx->current = mm_base_sms_get_parts (self);
+    ctx->current = mm_base_sms_peek_parts (self);
     delete_next_part (ctx);
 }
 

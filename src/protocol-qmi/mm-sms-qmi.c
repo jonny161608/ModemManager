@@ -177,7 +177,7 @@ store_ready (QmiClientWms *client,
     qmi_message_wms_raw_write_output_unref (output);
 
     /* Set the index in the part we hold */
-    parts = mm_base_sms_get_parts (ctx->self);
+    parts = mm_base_sms_peek_parts (ctx->self);
     mm_sms_part_set_index ((MMSmsPart *)parts->data, (guint)idx);
 
     /* Go on with next one */
@@ -278,7 +278,7 @@ sms_store (MMBaseSms *self,
                   MM_BASE_SMS_MODEM, &ctx->modem,
                   NULL);
 
-    ctx->current = mm_base_sms_get_parts (self);
+    ctx->current = mm_base_sms_peek_parts (self);
 
     /* Check whether we support the given SMS type */
     if (!check_sms_type_support (MM_SMS_QMI (self), ctx->modem, (MMSmsPart *)ctx->current->data, &error)) {
@@ -598,7 +598,7 @@ sms_send (MMBaseSms *self,
     /* If the SMS is STORED, try to send from storage */
     ctx->from_storage = (mm_base_sms_get_storage (self) != MM_SMS_STORAGE_UNKNOWN);
 
-    ctx->current = mm_base_sms_get_parts (self);
+    ctx->current = mm_base_sms_peek_parts (self);
 
     /* Check whether we support the given SMS type */
     if (!check_sms_type_support (MM_SMS_QMI (self), ctx->modem, (MMSmsPart *)ctx->current->data, &error)) {
@@ -750,7 +750,7 @@ sms_delete (MMBaseSms *self,
                   NULL);
 
     /* Go on deleting parts */
-    ctx->current = mm_base_sms_get_parts (self);
+    ctx->current = mm_base_sms_peek_parts (self);
     delete_next_part (ctx);
 }
 

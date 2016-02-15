@@ -102,6 +102,8 @@ gboolean   mm_base_sms_multipart_take_part (MMBaseSms *self,
                                             MMSmsPart *part,
                                             GError **error);
 
+MMBaseModem  *mm_base_sms_peek_modem (MMBaseSms *self);
+
 void          mm_base_sms_export      (MMBaseSms *self);
 void          mm_base_sms_unexport    (MMBaseSms *self);
 const gchar  *mm_base_sms_get_path    (MMBaseSms *self);
@@ -109,7 +111,7 @@ MMSmsStorage  mm_base_sms_get_storage (MMBaseSms *self);
 
 gboolean     mm_base_sms_has_part_index (MMBaseSms *self,
                                          guint index);
-GList       *mm_base_sms_get_parts      (MMBaseSms *self);
+GList       *mm_base_sms_peek_parts     (MMBaseSms *self);
 
 gboolean     mm_base_sms_is_multipart            (MMBaseSms *self);
 guint        mm_base_sms_get_multipart_reference (MMBaseSms *self);

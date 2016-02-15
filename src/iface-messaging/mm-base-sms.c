@@ -530,7 +530,7 @@ handle_send_ready (MMBaseSms *self,
             /* Update state */
             mm_gdbus_sms_set_state (MM_GDBUS_SMS (ctx->self), MM_SMS_STATE_SENT);
             /* Grab last message reference */
-            l = g_list_last (mm_base_sms_get_parts (ctx->self));
+            l = g_list_last (mm_base_sms_peek_parts (ctx->self));
             mm_gdbus_sms_set_message_reference (MM_GDBUS_SMS (ctx->self),
                                                 mm_sms_part_get_message_reference ((MMSmsPart *)l->data));
         }
@@ -766,9 +766,17 @@ mm_base_sms_has_part_index (MMBaseSms *self,
 }
 
 GList *
-mm_base_sms_get_parts (MMBaseSms *self)
+mm_base_sms_peek_parts (MMBaseSms *self)
 {
     return self->priv->parts;
+}
+
+/*****************************************************************************/
+
+MMBaseModem *
+mm_base_sms_peek_modem (MMBaseSms *self)
+{
+    return self->priv->modem;
 }
 
 /*****************************************************************************/

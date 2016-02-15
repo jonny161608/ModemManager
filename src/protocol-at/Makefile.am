@@ -41,6 +41,8 @@ endif
 libmmprotocolat_la_SOURCES = \
 	mm-sim.h \
 	mm-sim.c \
+	mm-sms.h \
+	mm-sms.c \
 	mm-broadband-bearer.h \
 	mm-broadband-bearer.c \
 	mm-broadband-modem.h \
