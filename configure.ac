@@ -350,6 +350,7 @@ libwmc/tests/Makefile
 src/Makefile
 src/port/Makefile
 src/helpers/Makefile
+src/protocol-at/Makefile
 src/protocol-qmi/Makefile
 src/protocol-mbim/Makefile
 src/iface-modem/Makefile

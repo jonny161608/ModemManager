@@ -22,6 +22,7 @@ libmmprotocolmbim_la_CPPFLAGS = \
 	-I$(top_srcdir)/src/iface-modem \
 	-I$(top_srcdir)/src/iface-3gpp \
 	-I$(top_srcdir)/src/iface-messaging \
+	-I$(top_srcdir)/src/protocol-at \
 	-I$(top_srcdir)/libmm-glib \
 	-I${top_srcdir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated \

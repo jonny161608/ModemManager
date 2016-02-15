@@ -2,6 +2,7 @@
 SUBDIRS = \
 	port            \
 	helpers         \
+	protocol-at     \
 	protocol-qmi    \
 	protocol-mbim   \
 	iface-modem     \
@@ -94,6 +95,7 @@ ModemManager_LDADD = \
 	$(builddir)/iface-time/libmmifacetime.la \
 	$(builddir)/iface-oma/libmmifaceoma.la \
 	$(builddir)/iface-voice/libmmifacevoice.la \
+	$(builddir)/protocol-at/libmmprotocolat.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
 	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la
 
@@ -131,20 +133,14 @@ ModemManager_SOURCES = \
 	mm-plugin-manager.h \
 	mm-base-sim.h \
 	mm-base-sim.c \
-	mm-sim.h \
-	mm-sim.c \
 	mm-base-bearer.h \
 	mm-base-bearer.c \
-	mm-broadband-bearer.h \
-	mm-broadband-bearer.c \
 	mm-bearer-list.h \
 	mm-bearer-list.c \
 	mm-base-modem-at.h \
 	mm-base-modem-at.c \
 	mm-base-modem.h \
 	mm-base-modem.c \
-	mm-broadband-modem.h \
-	mm-broadband-modem.c \
 	mm-port-probe.h \
 	mm-port-probe.c \
 	mm-port-probe-at.h \

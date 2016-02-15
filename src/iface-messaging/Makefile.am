@@ -16,6 +16,7 @@ libmmifacemessaging_la_CPPFLAGS = \
 	-I$(top_srcdir)/src/helpers \
 	-I$(top_builddir)/src/helpers \
 	-I$(top_builddir)/src/iface-modem \
+	-I$(top_builddir)/src/protocol-at \
 	-I$(top_srcdir)/libmm-glib \
 	-I${top_srcdir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated

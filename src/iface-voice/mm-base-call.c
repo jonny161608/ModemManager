@@ -25,7 +25,6 @@
 #include <libmm-glib.h>
 
 #include "mm-base-call.h"
-#include "mm-broadband-modem.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-voice.h"
 #include "mm-base-modem-at.h"
