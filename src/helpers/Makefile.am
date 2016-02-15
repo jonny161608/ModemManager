@@ -15,9 +15,6 @@ libhelpers_la_CPPFLAGS = \
 	-I${top_srcdir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated
 
-libhelpers_la_LIBADD = \
-	$(top_builddir)/libmm-glib/libmm-glib.la
-
 libhelpers_la_SOURCES = \
 	mm-utils.h \
 	mm-error-helpers.c \

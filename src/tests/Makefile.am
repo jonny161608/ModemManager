@@ -36,6 +36,7 @@ test_modem_helpers_CPPFLAGS = \
 
 test_modem_helpers_LDADD = \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(MM_LIBS)
 
 if WITH_QMI
@@ -64,6 +65,7 @@ test_modem_helpers_qmi_CPPFLAGS = \
 
 test_modem_helpers_qmi_LDADD = \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(MM_LIBS) \
 	$(QMI_LIBS)
 endif
@@ -87,6 +89,7 @@ test_charsets_CPPFLAGS = \
 
 test_charsets_LDADD = \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(MM_LIBS)
 
 if WITH_QMI
@@ -116,6 +119,7 @@ test_qcdm_serial_port_LDADD = \
 	$(MM_LIBS) \
 	$(top_builddir)/src/port/libport.la \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
 	-lutil
 
@@ -146,6 +150,7 @@ test_at_serial_port_LDADD = \
 	$(MM_LIBS) \
 	$(top_builddir)/src/port/libport.la \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	-lutil
 
 if WITH_QMI
@@ -172,6 +177,7 @@ test_sms_part_3gpp_CPPFLAGS = \
 
 test_sms_part_3gpp_LDADD = \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(MM_LIBS)
 
 if WITH_QMI
@@ -198,6 +204,7 @@ test_sms_part_cdma_CPPFLAGS = \
 
 test_sms_part_cdma_LDADD = \
 	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(MM_LIBS)
 
 if WITH_QMI

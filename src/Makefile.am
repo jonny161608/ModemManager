@@ -82,7 +82,6 @@ ModemManager_CPPFLAGS = \
 ModemManager_LDADD = \
 	$(MM_LIBS) \
 	$(GUDEV_LIBS) \
-	$(builddir)/helpers/libhelpers.la \
 	$(builddir)/port/libport.la \
 	$(builddir)/iface-modem/libmmifacemodem.la \
 	$(builddir)/iface-3gpp/libmmiface3gpp.la \
@@ -96,8 +95,10 @@ ModemManager_LDADD = \
 	$(builddir)/iface-oma/libmmifaceoma.la \
 	$(builddir)/iface-voice/libmmifacevoice.la \
 	$(builddir)/protocol-at/libmmprotocolat.la \
+	$(builddir)/helpers/libhelpers.la \
 	$(top_builddir)/libqcdm/src/libqcdm.la \
-	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la
+	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la
 
 if WITH_QMI
 ModemManager_CPPFLAGS += -I$(srcdir)/protocol-qmi $(QMI_CFLAGS)

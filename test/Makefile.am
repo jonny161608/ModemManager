@@ -21,7 +21,8 @@ mmtty_CPPFLAGS = \
 mmtty_LDADD = \
 	$(MM_LIBS) \
 	$(top_builddir)/src/port/libport.la \
-	$(top_builddir)/src/helpers/libhelpers.la
+	$(top_builddir)/src/helpers/libhelpers.la \
+	$(top_builddir)/libmm-glib/libmm-glib.la
 
 EXTRA_DIST = \
 	mmcli-test-sms
