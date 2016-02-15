@@ -31,7 +31,7 @@
 
 #include "mm-sim-sierra.h"
 
-G_DEFINE_TYPE (MMSimSierra, mm_sim_sierra, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimSierra, mm_sim_sierra, MM_TYPE_SIM)
 
 /*****************************************************************************/
 /* SIM identifier loading */

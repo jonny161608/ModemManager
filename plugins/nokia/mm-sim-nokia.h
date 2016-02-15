@@ -19,7 +19,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 
 #define MM_TYPE_SIM_NOKIA            (mm_sim_nokia_get_type ())
 #define MM_SIM_NOKIA(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_SIM_NOKIA, MMSimNokia))
@@ -32,11 +32,11 @@ typedef struct _MMSimNokia MMSimNokia;
 typedef struct _MMSimNokiaClass MMSimNokiaClass;
 
 struct _MMSimNokia {
-    MMBaseSim parent;
+    MMSim parent;
 };
 
 struct _MMSimNokiaClass {
-    MMBaseSimClass parent;
+    MMSimClass parent;
 };
 
 GType mm_sim_nokia_get_type (void);

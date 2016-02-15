@@ -20,7 +20,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 
 #define MM_TYPE_SIM_IRIDIUM            (mm_sim_iridium_get_type ())
 #define MM_SIM_IRIDIUM(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_SIM_IRIDIUM, MMSimIridium))
@@ -33,11 +33,11 @@ typedef struct _MMSimIridium MMSimIridium;
 typedef struct _MMSimIridiumClass MMSimIridiumClass;
 
 struct _MMSimIridium {
-    MMBaseSim parent;
+    MMSim parent;
 };
 
 struct _MMSimIridiumClass {
-    MMBaseSimClass parent;
+    MMSimClass parent;
 };
 
 GType mm_sim_iridium_get_type (void);

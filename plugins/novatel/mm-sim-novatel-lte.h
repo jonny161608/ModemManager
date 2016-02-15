@@ -19,7 +19,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 
 #define MM_TYPE_SIM_NOVATEL_LTE            (mm_sim_novatel_lte_get_type ())
 #define MM_SIM_NOVATEL_LTE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_SIM_NOVATEL_LTE, MMSimNovatelLte))
@@ -32,11 +32,11 @@ typedef struct _MMSimNovatelLte MMSimNovatelLte;
 typedef struct _MMSimNovatelLteClass MMSimNovatelLteClass;
 
 struct _MMSimNovatelLte {
-    MMBaseSim parent;
+    MMSim parent;
 };
 
 struct _MMSimNovatelLteClass {
-    MMBaseSimClass parent;
+    MMSimClass parent;
 };
 
 GType mm_sim_novatel_lte_get_type (void);

@@ -163,6 +163,8 @@ gboolean     mm_base_sim_send_puk_finish   (MMBaseSim *self,
 
 void         mm_base_sim_export            (MMBaseSim *self);
 
-const gchar *mm_base_sim_get_path          (MMBaseSim *sim);
+const gchar *mm_base_sim_get_path          (MMBaseSim *self);
+
+MMBaseModem *mm_base_sim_peek_modem        (MMBaseSim *self);
 
 #endif /* MM_BASE_SIM_H */

@@ -19,7 +19,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 
 #define MM_TYPE_SIM_MBM            (mm_sim_mbm_get_type ())
 #define MM_SIM_MBM(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_SIM_MBM, MMSimMbm))
@@ -32,11 +32,11 @@ typedef struct _MMSimMbm MMSimMbm;
 typedef struct _MMSimMbmClass MMSimMbmClass;
 
 struct _MMSimMbm {
-    MMBaseSim parent;
+    MMSim parent;
 };
 
 struct _MMSimMbmClass {
-    MMBaseSimClass parent;
+    MMSimClass parent;
 };
 
 GType mm_sim_mbm_get_type (void);

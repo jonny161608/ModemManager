@@ -31,7 +31,7 @@
 
 #include "mm-sim-huawei.h"
 
-G_DEFINE_TYPE (MMSimHuawei, mm_sim_huawei, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimHuawei, mm_sim_huawei, MM_TYPE_SIM)
 
 /*****************************************************************************/
 /* SIM identifier loading */

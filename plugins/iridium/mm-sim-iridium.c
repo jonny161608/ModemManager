@@ -27,7 +27,7 @@
 
 #include "mm-sim-iridium.h"
 
-G_DEFINE_TYPE (MMSimIridium, mm_sim_iridium, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimIridium, mm_sim_iridium, MM_TYPE_SIM)
 
 /*****************************************************************************/
 

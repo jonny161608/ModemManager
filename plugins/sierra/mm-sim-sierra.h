@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 
 #define MM_TYPE_SIM_SIERRA            (mm_sim_sierra_get_type ())
 #define MM_SIM_SIERRA(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_SIM_SIERRA, MMSimSierra))
@@ -34,11 +34,11 @@ typedef struct _MMSimSierra MMSimSierra;
 typedef struct _MMSimSierraClass MMSimSierraClass;
 
 struct _MMSimSierra {
-    MMBaseSim parent;
+    MMSim parent;
 };
 
 struct _MMSimSierraClass {
-    MMBaseSimClass parent;
+    MMSimClass parent;
 };
 
 GType mm_sim_sierra_get_type (void);

@@ -26,7 +26,7 @@
 
 #include "mm-sim-pantech.h"
 
-G_DEFINE_TYPE (MMSimPantech, mm_sim_pantech, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimPantech, mm_sim_pantech, MM_TYPE_SIM)
 
 /*****************************************************************************/
 

@@ -29,7 +29,7 @@
 
 #include "mm-sim-novatel-lte.h"
 
-G_DEFINE_TYPE (MMSimNovatelLte, mm_sim_novatel_lte, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimNovatelLte, mm_sim_novatel_lte, MM_TYPE_SIM)
 
 /*****************************************************************************/
 /* IMSI loading */

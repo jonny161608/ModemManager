@@ -41,7 +41,7 @@
 #include "mm-broadband-bearer.h"
 #include "mm-sms-list.h"
 #include "mm-sms-part-3gpp.h"
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 #include "mm-log.h"
 #include "mm-modem-helpers.h"
 #include "mm-error-helpers.h"
@@ -204,7 +204,7 @@ modem_create_sim_finish (MMIfaceModem *self,
                          GAsyncResult *res,
                          GError **error)
 {
-    return mm_base_sim_new_finish (res, error);
+    return MM_BASE_SIM (mm_sim_new_finish (res, error));
 }
 
 static void
@@ -213,10 +213,10 @@ modem_create_sim (MMIfaceModem *self,
                   gpointer user_data)
 {
     /* New generic SIM */
-    mm_base_sim_new (MM_BASE_MODEM (self),
-                     NULL, /* cancellable */
-                     callback,
-                     user_data);
+    mm_sim_new (MM_BASE_MODEM (self),
+                NULL, /* cancellable */
+                callback,
+                user_data);
 }
 
 /*****************************************************************************/

@@ -26,7 +26,7 @@
 
 #include "mm-sim-nokia.h"
 
-G_DEFINE_TYPE (MMSimNokia, mm_sim_nokia, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimNokia, mm_sim_nokia, MM_TYPE_SIM)
 
 /*****************************************************************************/
 

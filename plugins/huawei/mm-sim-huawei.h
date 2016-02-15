@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "mm-base-sim.h"
+#include "mm-sim.h"
 
 #define MM_TYPE_SIM_HUAWEI            (mm_sim_huawei_get_type ())
 #define MM_SIM_HUAWEI(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), MM_TYPE_SIM_HUAWEI, MMSimHuawei))
@@ -34,11 +34,11 @@ typedef struct _MMSimHuawei MMSimHuawei;
 typedef struct _MMSimHuaweiClass MMSimHuaweiClass;
 
 struct _MMSimHuawei {
-    MMBaseSim parent;
+    MMSim parent;
 };
 
 struct _MMSimHuaweiClass {
-    MMBaseSimClass parent;
+    MMSimClass parent;
 };
 
 GType mm_sim_huawei_get_type (void);

@@ -28,7 +28,7 @@
 #include "mm-base-modem-at.h"
 #include "mm-sim-mbm.h"
 
-G_DEFINE_TYPE (MMSimMbm, mm_sim_mbm, MM_TYPE_BASE_SIM)
+G_DEFINE_TYPE (MMSimMbm, mm_sim_mbm, MM_TYPE_SIM)
 
 /*****************************************************************************/
 /* SEND PIN/PUK (Generic implementation) */
