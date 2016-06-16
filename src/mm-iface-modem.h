@@ -36,6 +36,7 @@
 #define MM_IFACE_MODEM_STATE         "iface-modem-state"
 #define MM_IFACE_MODEM_SIM           "iface-modem-sim"
 #define MM_IFACE_MODEM_BEARER_LIST   "iface-modem-bearer-list"
+#define MM_IFACE_MODEM_FORCE_POWER   "iface-modem-force-power"
 
 typedef struct _MMIfaceModem MMIfaceModem;
 

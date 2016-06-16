@@ -3129,6 +3129,11 @@ mm_broadband_modem_mbim_new (const gchar *device,
                          MM_BASE_MODEM_PLUGIN, plugin,
                          MM_BASE_MODEM_VENDOR_ID, vendor_id,
                          MM_BASE_MODEM_PRODUCT_ID, product_id,
+                         /* We require power set operations always, even if the
+                          * one reported by the modem is already the same one.
+                          * This is so that we can apply the FCC auth unconditionally
+                          * during power up. */
+                         MM_IFACE_MODEM_FORCE_POWER, TRUE,
                          NULL);
 }
 

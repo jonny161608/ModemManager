@@ -3287,8 +3287,16 @@ modem_power_off_ready (MMIfaceModem *self,
 static void
 set_power_state (SetPowerStateContext *ctx)
 {
+    gboolean force_power;
+
+    g_object_get (ctx->self,
+                  MM_IFACE_MODEM_FORCE_POWER, &force_power,
+                  NULL);
+
     /* Already done if we're in the desired power state */
-    if (ctx->previous_real_power_state == ctx->power_state) {
+    if (force_power)
+        mm_dbg ("Power operation forced by the plugin");
+    else if (ctx->previous_real_power_state == ctx->power_state) {
         mm_dbg ("No need to change power state: already in '%s' power state",
                 mm_modem_power_state_get_string (ctx->power_state));
         /* If the real and cached ones are different, set the real one */
@@ -5119,6 +5127,14 @@ iface_modem_init (gpointer g_iface)
                               "List of bearers handled by the modem",
                               MM_TYPE_BEARER_LIST,
                               G_PARAM_READWRITE));
+
+    g_object_interface_install_property
+        (g_iface,
+         g_param_spec_boolean (MM_IFACE_MODEM_FORCE_POWER,
+                               "Force power",
+                               "Force power set operation even if reported the same one",
+                               FALSE,
+                               G_PARAM_READWRITE));
 
     initialized = TRUE;
 }

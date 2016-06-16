@@ -112,6 +112,7 @@ enum {
     PROP_MODEM_MESSAGING_SMS_DEFAULT_STORAGE,
     PROP_MODEM_VOICE_CALL_LIST,
     PROP_MODEM_SIMPLE_STATUS,
+    PROP_MODEM_FORCE_POWER,
     PROP_LAST
 };
 
@@ -141,6 +142,7 @@ struct _MMBroadbandModemPrivate {
     guint modem_cind_max_signal_quality;
     guint modem_cind_indicator_roaming;
     guint modem_cind_indicator_service;
+    gboolean modem_force_power;
 
     /*<--- Modem 3GPP interface --->*/
     /* Properties */
@@ -10091,6 +10093,9 @@ set_property (GObject *object,
         g_clear_object (&self->priv->modem_simple_status);
         self->priv->modem_simple_status = g_value_dup_object (value);
         break;
+    case PROP_MODEM_FORCE_POWER:
+        self->priv->modem_force_power = g_value_get_boolean (value);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -10193,6 +10198,9 @@ get_property (GObject *object,
     case PROP_MODEM_SIMPLE_STATUS:
         g_value_set_object (value, self->priv->modem_simple_status);
         break;
+    case PROP_MODEM_FORCE_POWER:
+        g_value_set_boolean (value, self->priv->modem_force_power);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -10221,6 +10229,7 @@ mm_broadband_modem_init (MMBroadbandModem *self)
     self->priv->modem_messaging_sms_default_storage = MM_SMS_STORAGE_UNKNOWN;
     self->priv->current_sms_mem1_storage = MM_SMS_STORAGE_UNKNOWN;
     self->priv->current_sms_mem2_storage = MM_SMS_STORAGE_UNKNOWN;
+    self->priv->modem_force_power = FALSE;
 }
 
 static void
@@ -10671,4 +10680,8 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
     g_object_class_override_property (object_class,
                                       PROP_MODEM_SIMPLE_STATUS,
                                       MM_IFACE_MODEM_SIMPLE_STATUS);
+
+    g_object_class_override_property (object_class,
+                                      PROP_MODEM_FORCE_POWER,
+                                      MM_IFACE_MODEM_FORCE_POWER);
 }
