@@ -103,30 +103,6 @@ mm_common_build_ports_string (const MMModemPortInfo *ports,
 }
 
 gchar *
-mm_common_build_sms_storages_string (const MMSmsStorage *storages,
-                                     guint n_storages)
-{
-    gboolean first = TRUE;
-    GString *str;
-    guint i;
-
-    if (!storages || !n_storages)
-        return g_strdup ("none");
-
-    str = g_string_new ("");
-    for (i = 0; i < n_storages; i++) {
-        g_string_append_printf (str, "%s%s",
-                                first ? "" : ", ",
-                                mm_sms_storage_get_string (storages[i]));
-
-        if (first)
-            first = FALSE;
-    }
-
-    return g_string_free (str, FALSE);
-}
-
-gchar *
 mm_common_build_mode_combinations_string (const MMModemModeCombination *modes,
                                           guint n_modes)
 {
@@ -156,67 +132,6 @@ mm_common_build_mode_combinations_string (const MMModemModeCombination *modes,
     }
 
     return g_string_free (str, FALSE);
-}
-
-GArray *
-mm_common_sms_storages_variant_to_garray (GVariant *variant)
-{
-    GArray *array = NULL;
-
-    if (variant) {
-        GVariantIter iter;
-        guint n;
-
-        g_variant_iter_init (&iter, variant);
-        n = g_variant_iter_n_children (&iter);
-
-        if (n > 0) {
-            guint32 storage;
-
-            array = g_array_sized_new (FALSE, FALSE, sizeof (MMSmsStorage), n);
-            while (g_variant_iter_loop (&iter, "u", &storage))
-                g_array_append_val (array, storage);
-        }
-    }
-
-    return array;
-}
-
-MMSmsStorage *
-mm_common_sms_storages_variant_to_array (GVariant *variant,
-                                         guint *n_storages)
-{
-    GArray *array;
-
-    array = mm_common_sms_storages_variant_to_garray (variant);
-    if (n_storages)
-        *n_storages = array->len;
-    return (MMSmsStorage *) g_array_free (array, FALSE);
-}
-
-GVariant *
-mm_common_sms_storages_array_to_variant (const MMSmsStorage *storages,
-                                         guint n_storages)
-{
-    GVariantBuilder builder;
-    guint i;
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE ("au"));
-
-    for (i = 0; i < n_storages; i++)
-        g_variant_builder_add_value (&builder,
-                                     g_variant_new_uint32 ((guint32)storages[i]));
-    return g_variant_builder_end (&builder);
-}
-
-GVariant *
-mm_common_sms_storages_garray_to_variant (GArray *array)
-{
-    if (array)
-        return mm_common_sms_storages_array_to_variant ((const MMSmsStorage *)array->data,
-                                                        array->len);
-
-    return mm_common_sms_storages_array_to_variant (NULL, 0);
 }
 
 static void
@@ -949,72 +864,6 @@ mm_common_get_allowed_auth_from_string (const gchar *str,
     return allowed_auth;
 }
 
-MMSmsStorage
-mm_common_get_sms_storage_from_string (const gchar *str,
-                                       GError **error)
-{
-    GEnumClass *enum_class;
-    guint i;
-
-    enum_class = G_ENUM_CLASS (g_type_class_ref (MM_TYPE_SMS_STORAGE));
-
-    for (i = 0; enum_class->values[i].value_nick; i++) {
-        if (!g_ascii_strcasecmp (str, enum_class->values[i].value_nick))
-            return enum_class->values[i].value;
-    }
-
-    g_set_error (error,
-                 MM_CORE_ERROR,
-                 MM_CORE_ERROR_INVALID_ARGS,
-                 "Couldn't match '%s' with a valid MMSmsStorage value",
-                 str);
-    return MM_SMS_STORAGE_UNKNOWN;
-}
-
-MMSmsCdmaTeleserviceId
-mm_common_get_sms_cdma_teleservice_id_from_string (const gchar *str,
-                                                   GError **error)
-{
-    GEnumClass *enum_class;
-    guint i;
-
-    enum_class = G_ENUM_CLASS (g_type_class_ref (MM_TYPE_SMS_CDMA_TELESERVICE_ID));
-
-    for (i = 0; enum_class->values[i].value_nick; i++) {
-        if (!g_ascii_strcasecmp (str, enum_class->values[i].value_nick))
-            return enum_class->values[i].value;
-    }
-
-    g_set_error (error,
-                 MM_CORE_ERROR,
-                 MM_CORE_ERROR_INVALID_ARGS,
-                 "Couldn't match '%s' with a valid MMSmsCdmaTeleserviceId value",
-                 str);
-    return MM_SMS_CDMA_TELESERVICE_ID_UNKNOWN;
-}
-
-MMSmsCdmaServiceCategory
-mm_common_get_sms_cdma_service_category_from_string (const gchar *str,
-                                                     GError **error)
-{
-    GEnumClass *enum_class;
-    guint i;
-
-    enum_class = G_ENUM_CLASS (g_type_class_ref (MM_TYPE_SMS_CDMA_SERVICE_CATEGORY));
-
-    for (i = 0; enum_class->values[i].value_nick; i++) {
-        if (!g_ascii_strcasecmp (str, enum_class->values[i].value_nick))
-            return enum_class->values[i].value;
-    }
-
-    g_set_error (error,
-                 MM_CORE_ERROR,
-                 MM_CORE_ERROR_INVALID_ARGS,
-                 "Couldn't match '%s' with a valid MMSmsCdmaServiceCategory value",
-                 str);
-    return MM_SMS_CDMA_SERVICE_CATEGORY_UNKNOWN;
-}
-
 MMCallDirection
 mm_common_get_call_direction_from_string (const gchar *str,
                                           GError **error)
@@ -1536,50 +1385,6 @@ mm_get_string_unquoted_from_match_info (GMatchInfo *match_info,
 
 /*****************************************************************************/
 
-const gchar *
-mm_sms_delivery_state_get_string_extended (guint delivery_state)
-{
-    if (delivery_state > 0x02 && delivery_state < 0x20) {
-        if (delivery_state < 0x10)
-            return "completed-reason-reserved";
-        else
-            return "completed-sc-specific-reason";
-    }
-
-    if (delivery_state > 0x25 && delivery_state < 0x40) {
-        if (delivery_state < 0x30)
-            return "temporary-error-reason-reserved";
-        else
-            return "temporary-error-sc-specific-reason";
-    }
-
-    if (delivery_state > 0x49 && delivery_state < 0x60) {
-        if (delivery_state < 0x50)
-            return "error-reason-reserved";
-        else
-            return "error-sc-specific-reason";
-    }
-
-    if (delivery_state > 0x65 && delivery_state < 0x80) {
-        if (delivery_state < 0x70)
-            return "temporary-fatal-error-reason-reserved";
-        else
-            return "temporary-fatal-error-sc-specific-reason";
-    }
-
-    if (delivery_state >= 0x80 && delivery_state < 0x100)
-        return "unknown-reason-reserved";
-
-    if (delivery_state >= 0x100)
-        return "unknown";
-
-    /* Otherwise, use the MMSmsDeliveryState enum as we can match the known
-     * value */
-    return mm_sms_delivery_state_get_string ((MMSmsDeliveryState)delivery_state);
-}
-
-/*****************************************************************************/
-
 /* From hostap, Copyright (c) 2002-2005, Jouni Malinen <jkmaline@cc.hut.fi> */
 
 static gint
@@ -1695,3 +1500,201 @@ mm_utils_check_for_single_value (guint32 value)
 
     return TRUE;
 }
+
+/*****************************************************************************/
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
+gchar *
+mm_common_build_sms_storages_string (const MMSmsStorage *storages,
+                                     guint n_storages)
+{
+    gboolean first = TRUE;
+    GString *str;
+    guint i;
+
+    if (!storages || !n_storages)
+        return g_strdup ("none");
+
+    str = g_string_new ("");
+    for (i = 0; i < n_storages; i++) {
+        g_string_append_printf (str, "%s%s",
+                                first ? "" : ", ",
+                                mm_sms_storage_get_string (storages[i]));
+
+        if (first)
+            first = FALSE;
+    }
+
+    return g_string_free (str, FALSE);
+}
+
+MMSmsStorage
+mm_common_get_sms_storage_from_string (const gchar *str,
+                                       GError **error)
+{
+    GEnumClass *enum_class;
+    guint i;
+
+    enum_class = G_ENUM_CLASS (g_type_class_ref (MM_TYPE_SMS_STORAGE));
+
+    for (i = 0; enum_class->values[i].value_nick; i++) {
+        if (!g_ascii_strcasecmp (str, enum_class->values[i].value_nick))
+            return enum_class->values[i].value;
+    }
+
+    g_set_error (error,
+                 MM_CORE_ERROR,
+                 MM_CORE_ERROR_INVALID_ARGS,
+                 "Couldn't match '%s' with a valid MMSmsStorage value",
+                 str);
+    return MM_SMS_STORAGE_UNKNOWN;
+}
+
+MMSmsCdmaTeleserviceId
+mm_common_get_sms_cdma_teleservice_id_from_string (const gchar *str,
+                                                   GError **error)
+{
+    GEnumClass *enum_class;
+    guint i;
+
+    enum_class = G_ENUM_CLASS (g_type_class_ref (MM_TYPE_SMS_CDMA_TELESERVICE_ID));
+
+    for (i = 0; enum_class->values[i].value_nick; i++) {
+        if (!g_ascii_strcasecmp (str, enum_class->values[i].value_nick))
+            return enum_class->values[i].value;
+    }
+
+    g_set_error (error,
+                 MM_CORE_ERROR,
+                 MM_CORE_ERROR_INVALID_ARGS,
+                 "Couldn't match '%s' with a valid MMSmsCdmaTeleserviceId value",
+                 str);
+    return MM_SMS_CDMA_TELESERVICE_ID_UNKNOWN;
+}
+
+MMSmsCdmaServiceCategory
+mm_common_get_sms_cdma_service_category_from_string (const gchar *str,
+                                                     GError **error)
+{
+    GEnumClass *enum_class;
+    guint i;
+
+    enum_class = G_ENUM_CLASS (g_type_class_ref (MM_TYPE_SMS_CDMA_SERVICE_CATEGORY));
+
+    for (i = 0; enum_class->values[i].value_nick; i++) {
+        if (!g_ascii_strcasecmp (str, enum_class->values[i].value_nick))
+            return enum_class->values[i].value;
+    }
+
+    g_set_error (error,
+                 MM_CORE_ERROR,
+                 MM_CORE_ERROR_INVALID_ARGS,
+                 "Couldn't match '%s' with a valid MMSmsCdmaServiceCategory value",
+                 str);
+    return MM_SMS_CDMA_SERVICE_CATEGORY_UNKNOWN;
+}
+
+GArray *
+mm_common_sms_storages_variant_to_garray (GVariant *variant)
+{
+    GArray *array = NULL;
+
+    if (variant) {
+        GVariantIter iter;
+        guint n;
+
+        g_variant_iter_init (&iter, variant);
+        n = g_variant_iter_n_children (&iter);
+
+        if (n > 0) {
+            guint32 storage;
+
+            array = g_array_sized_new (FALSE, FALSE, sizeof (MMSmsStorage), n);
+            while (g_variant_iter_loop (&iter, "u", &storage))
+                g_array_append_val (array, storage);
+        }
+    }
+
+    return array;
+}
+
+MMSmsStorage *
+mm_common_sms_storages_variant_to_array (GVariant *variant,
+                                         guint *n_storages)
+{
+    GArray *array;
+
+    array = mm_common_sms_storages_variant_to_garray (variant);
+    if (n_storages)
+        *n_storages = array->len;
+    return (MMSmsStorage *) g_array_free (array, FALSE);
+}
+
+GVariant *
+mm_common_sms_storages_array_to_variant (const MMSmsStorage *storages,
+                                         guint n_storages)
+{
+    GVariantBuilder builder;
+    guint i;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("au"));
+
+    for (i = 0; i < n_storages; i++)
+        g_variant_builder_add_value (&builder,
+                                     g_variant_new_uint32 ((guint32)storages[i]));
+    return g_variant_builder_end (&builder);
+}
+
+GVariant *
+mm_common_sms_storages_garray_to_variant (GArray *array)
+{
+    if (array)
+        return mm_common_sms_storages_array_to_variant ((const MMSmsStorage *)array->data,
+                                                        array->len);
+
+    return mm_common_sms_storages_array_to_variant (NULL, 0);
+}
+
+const gchar *
+mm_sms_delivery_state_get_string_extended (guint delivery_state)
+{
+    if (delivery_state > 0x02 && delivery_state < 0x20) {
+        if (delivery_state < 0x10)
+            return "completed-reason-reserved";
+        else
+            return "completed-sc-specific-reason";
+    }
+
+    if (delivery_state > 0x25 && delivery_state < 0x40) {
+        if (delivery_state < 0x30)
+            return "temporary-error-reason-reserved";
+        else
+            return "temporary-error-sc-specific-reason";
+    }
+
+    if (delivery_state > 0x49 && delivery_state < 0x60) {
+        if (delivery_state < 0x50)
+            return "error-reason-reserved";
+        else
+            return "error-sc-specific-reason";
+    }
+
+    if (delivery_state > 0x65 && delivery_state < 0x80) {
+        if (delivery_state < 0x70)
+            return "temporary-fatal-error-reason-reserved";
+        else
+            return "temporary-fatal-error-sc-specific-reason";
+    }
+
+    if (delivery_state >= 0x80 && delivery_state < 0x100)
+        return "unknown-reason-reserved";
+
+    if (delivery_state >= 0x100)
+        return "unknown";
+
+    /* Otherwise, use the MMSmsDeliveryState enum as we can match the known
+     * value */
+    return mm_sms_delivery_state_get_string ((MMSmsDeliveryState)delivery_state);
+}
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */

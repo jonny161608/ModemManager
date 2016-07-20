@@ -28,7 +28,9 @@
 #define _LIBMM_INSIDE_MM
 #include <libmm-glib.h>
 
-#include "mm-sms-part.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-sms-part.h"
+#endif
 #include "mm-modem-helpers.h"
 #include "mm-log.h"
 
@@ -1789,134 +1791,6 @@ mm_3gpp_parse_creg_response (GMatchInfo *info,
     return TRUE;
 }
 
-/*************************************************************************/
-
-#define CMGF_TAG "+CMGF:"
-
-gboolean
-mm_3gpp_parse_cmgf_test_response (const gchar *reply,
-                                  gboolean *sms_pdu_supported,
-                                  gboolean *sms_text_supported,
-                                  GError **error)
-{
-    GRegex *r;
-    GMatchInfo *match_info;
-    gchar *s;
-    guint32 min = -1, max = -1;
-
-    /* Strip whitespace and response tag */
-    if (g_str_has_prefix (reply, CMGF_TAG))
-        reply += strlen (CMGF_TAG);
-    while (isspace (*reply))
-        reply++;
-
-    r = g_regex_new ("\\(?\\s*(\\d+)\\s*[-,]?\\s*(\\d+)?\\s*\\)?", 0, 0, error);
-    if (!r)
-        return FALSE;
-
-    if (!g_regex_match_full (r, reply, strlen (reply), 0, 0, &match_info, NULL)) {
-        g_set_error (error,
-                     MM_CORE_ERROR,
-                     MM_CORE_ERROR_FAILED,
-                     "Failed to parse CMGF query result '%s'",
-                     reply);
-        g_match_info_free (match_info);
-        g_regex_unref (r);
-        return FALSE;
-    }
-
-    s = g_match_info_fetch (match_info, 1);
-    if (s)
-        min = atoi (s);
-    g_free (s);
-
-    s = g_match_info_fetch (match_info, 2);
-    if (s)
-        max = atoi (s);
-    g_free (s);
-
-    /* CMGF=0 for PDU mode */
-    *sms_pdu_supported = (min == 0);
-
-    /* CMGF=1 for Text mode */
-    *sms_text_supported = (max >= 1);
-
-    g_match_info_free (match_info);
-    g_regex_unref (r);
-    return TRUE;
-}
-
-/*************************************************************************/
-
-MM3gppPduInfo *
-mm_3gpp_parse_cmgr_read_response (const gchar *reply,
-                                  guint index,
-                                  GError **error)
-{
-    GRegex *r;
-    GMatchInfo *match_info;
-    gint count;
-    gint status;
-    gchar *pdu;
-    MM3gppPduInfo *info = NULL;
-
-    /* +CMGR: <stat>,<alpha>,<length>(whitespace)<pdu> */
-    /* The <alpha> and <length> fields are matched, but not currently used */
-    r = g_regex_new ("\\+CMGR:\\s*(\\d+)\\s*,([^,]*),\\s*(\\d+)\\s*([^\\r\\n]*)", 0, 0, NULL);
-    g_assert (r);
-
-    if (!g_regex_match_full (r, reply, strlen (reply), 0, 0, &match_info, NULL)) {
-        g_set_error (error,
-                     MM_CORE_ERROR,
-                     MM_CORE_ERROR_FAILED,
-                     "Failed to parse CMGR read result: response didn't match '%s'",
-                     reply);
-        goto done;
-    }
-
-    /* g_match_info_get_match_count includes match #0 */
-    if ((count = g_match_info_get_match_count (match_info)) != 5) {
-        g_set_error (error,
-                     MM_CORE_ERROR,
-                     MM_CORE_ERROR_FAILED,
-                     "Failed to match CMGR fields (matched %d) '%s'",
-                     count,
-                     reply);
-        goto done;
-    }
-
-    if (!mm_get_int_from_match_info (match_info, 1, &status)) {
-        g_set_error (error,
-                     MM_CORE_ERROR,
-                     MM_CORE_ERROR_FAILED,
-                     "Failed to extract CMGR status field '%s'",
-                     reply);
-        goto done;
-    }
-
-
-    pdu = mm_get_string_unquoted_from_match_info (match_info, 4);
-    if (!pdu) {
-        g_set_error (error,
-                     MM_CORE_ERROR,
-                     MM_CORE_ERROR_FAILED,
-                     "Failed to extract CMGR pdu field '%s'",
-                     reply);
-        goto done;
-    }
-
-    info = g_new0 (MM3gppPduInfo, 1);
-    info->index = index;
-    info->status = status;
-    info->pdu = pdu;
-
-done:
-    g_match_info_free (match_info);
-    g_regex_unref (r);
-
-    return info;
-}
-
 /*****************************************************************************/
 /* AT+CRSM response parser */
 
@@ -2487,197 +2361,6 @@ mm_3gpp_parse_cfun_query_generic_response (const gchar        *response,
 
 /*************************************************************************/
 
-static MMSmsStorage
-storage_from_str (const gchar *str)
-{
-    if (g_str_equal (str, "SM"))
-        return MM_SMS_STORAGE_SM;
-    if (g_str_equal (str, "ME"))
-        return MM_SMS_STORAGE_ME;
-    if (g_str_equal (str, "MT"))
-        return MM_SMS_STORAGE_MT;
-    if (g_str_equal (str, "SR"))
-        return MM_SMS_STORAGE_SR;
-    if (g_str_equal (str, "BM"))
-        return MM_SMS_STORAGE_BM;
-    if (g_str_equal (str, "TA"))
-        return MM_SMS_STORAGE_TA;
-    return MM_SMS_STORAGE_UNKNOWN;
-}
-
-gboolean
-mm_3gpp_parse_cpms_test_response (const gchar *reply,
-                                  GArray **mem1,
-                                  GArray **mem2,
-                                  GArray **mem3)
-{
-    GRegex *r;
-    gchar **split;
-    guint i;
-    GArray *tmp1 = NULL;
-    GArray *tmp2 = NULL;
-    GArray *tmp3 = NULL;
-
-    g_assert (mem1 != NULL);
-    g_assert (mem2 != NULL);
-    g_assert (mem3 != NULL);
-
-#define N_EXPECTED_GROUPS 3
-
-    split = mm_split_string_groups (mm_strip_tag (reply, "+CPMS:"));
-    if (!split)
-        return FALSE;
-
-    if (g_strv_length (split) != N_EXPECTED_GROUPS) {
-        mm_warn ("Cannot parse +CPMS test response: invalid number of groups (%u != %u)",
-                 g_strv_length (split), N_EXPECTED_GROUPS);
-        g_strfreev (split);
-        return FALSE;
-    }
-
-    r = g_regex_new ("\\s*\"([^,\\)]+)\"\\s*", 0, 0, NULL);
-    g_assert (r);
-
-    for (i = 0; i < N_EXPECTED_GROUPS; i++) {
-        GMatchInfo *match_info = NULL;
-        GArray *array;
-
-        /* We always return a valid array, even if it may be empty */
-        array = g_array_new (FALSE, FALSE, sizeof (MMSmsStorage));
-
-        /* Got a range group to match */
-        if (g_regex_match_full (r, split[i], strlen (split[i]), 0, 0, &match_info, NULL)) {
-            while (g_match_info_matches (match_info)) {
-                gchar *str;
-
-                str = g_match_info_fetch (match_info, 1);
-                if (str) {
-                    MMSmsStorage storage;
-
-                    storage = storage_from_str (str);
-                    g_array_append_val (array, storage);
-                    g_free (str);
-                }
-
-                g_match_info_next (match_info, NULL);
-            }
-        }
-        g_match_info_free (match_info);
-
-        if (!tmp1)
-            tmp1 = array;
-        else if (!tmp2)
-            tmp2 = array;
-        else if (!tmp3)
-            tmp3 = array;
-        else
-            g_assert_not_reached ();
-    }
-
-    g_strfreev (split);
-    g_regex_unref (r);
-
-    g_warn_if_fail (tmp1 != NULL);
-    g_warn_if_fail (tmp2 != NULL);
-    g_warn_if_fail (tmp3 != NULL);
-
-    /* Only return TRUE if all sets have been parsed correctly
-     * (even if the arrays may be empty) */
-    if (tmp1 && tmp2 && tmp3) {
-        *mem1 = tmp1;
-        *mem2 = tmp2;
-        *mem3 = tmp3;
-        return TRUE;
-    }
-
-    /* Otherwise, cleanup and return FALSE */
-    if (tmp1)
-        g_array_unref (tmp1);
-    if (tmp2)
-        g_array_unref (tmp2);
-    if (tmp3)
-        g_array_unref (tmp3);
-    return FALSE;
-}
-
-/**********************************************************************
- * AT+CPMS?
- * +CPMS: <memr>,<usedr>,<totalr>,<memw>,<usedw>,<totalw>, <mems>,<useds>,<totals>
- */
-
-#define CPMS_QUERY_REGEX "\\+CPMS:\\s*\"(?P<memr>.*)\",[0-9]+,[0-9]+,\"(?P<memw>.*)\",[0-9]+,[0-9]+,\"(?P<mems>.*)\",[0-9]+,[0-9]"
-
-gboolean
-mm_3gpp_parse_cpms_query_response (const gchar *reply,
-                                   MMSmsStorage *memr,
-                                   MMSmsStorage *memw,
-                                   GError **error)
-{
-    GRegex *r = NULL;
-    gboolean ret = FALSE;
-    GMatchInfo *match_info = NULL;
-
-    r = g_regex_new (CPMS_QUERY_REGEX, G_REGEX_RAW, 0, NULL);
-
-    g_assert (r);
-
-    if (!g_regex_match (r, reply, 0, &match_info)) {
-        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
-                     "Could not parse CPMS query reponse '%s'", reply);
-        goto end;
-    }
-
-    if (!g_match_info_matches (match_info)) {
-        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
-                     "Could not find matches in CPMS query reply '%s'", reply);
-        goto end;
-    }
-
-    if (!mm_3gpp_get_cpms_storage_match (match_info, "memr", memr, error)) {
-        goto end;
-    }
-
-    if (!mm_3gpp_get_cpms_storage_match (match_info, "memw", memw, error)) {
-        goto end;
-    }
-
-    ret = TRUE;
-
-end:
-    if (r != NULL)
-        g_regex_unref (r);
-
-    if (match_info != NULL)
-        g_match_info_free (match_info);
-
-    return ret;
-}
-
-gboolean
-mm_3gpp_get_cpms_storage_match (GMatchInfo *match_info,
-                                const gchar *match_name,
-                                MMSmsStorage *storage,
-                                GError **error)
-{
-    gboolean ret = TRUE;
-    gchar *str = NULL;
-
-    str = g_match_info_fetch_named (match_info, match_name);
-    if (str == NULL || str[0] == '\0') {
-        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
-                     "Could not find '%s' from CPMS reply", match_name);
-        ret = FALSE;
-    } else {
-        *storage = storage_from_str (str);
-    }
-
-    g_free (str);
-
-    return ret;
-}
-
-/*************************************************************************/
-
 gboolean
 mm_3gpp_parse_cscs_test_response (const gchar *reply,
                                   MMModemCharset *out_charsets)
@@ -3173,72 +2856,6 @@ done:
     g_regex_unref (r);
 
     return array;
-}
-
-/*************************************************************************/
-
-void
-mm_3gpp_pdu_info_free (MM3gppPduInfo *info)
-{
-    g_free (info->pdu);
-    g_free (info);
-}
-
-void
-mm_3gpp_pdu_info_list_free (GList *info_list)
-{
-    g_list_free_full (info_list, (GDestroyNotify)mm_3gpp_pdu_info_free);
-}
-
-GList *
-mm_3gpp_parse_pdu_cmgl_response (const gchar *str,
-                                 GError **error)
-{
-    GError *inner_error = NULL;
-    GList *list = NULL;
-    GMatchInfo *match_info;
-    GRegex *r;
-
-    /*
-     * +CMGL: <index>, <status>, [<alpha>], <length>
-     *   or
-     * +CMGL: <index>, <status>, <length>
-     *
-     * We just read <index>, <stat> and the PDU itself.
-     */
-    r = g_regex_new ("\\+CMGL:\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,(.*)\\r\\n([^\\r\\n]*)(\\r\\n)?",
-                     G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
-    g_assert (r != NULL);
-
-    g_regex_match_full (r, str, strlen (str), 0, 0, &match_info, &inner_error);
-    while (!inner_error && g_match_info_matches (match_info)) {
-        MM3gppPduInfo *info;
-
-        info = g_new0 (MM3gppPduInfo, 1);
-        if (mm_get_int_from_match_info (match_info, 1, &info->index) &&
-            mm_get_int_from_match_info (match_info, 2, &info->status) &&
-            (info->pdu = mm_get_string_unquoted_from_match_info (match_info, 4)) != NULL) {
-            /* Append to our list of results and keep on */
-            list = g_list_append (list, info);
-            g_match_info_next (match_info, &inner_error);
-        } else {
-            inner_error = g_error_new (MM_CORE_ERROR,
-                                       MM_CORE_ERROR_FAILED,
-                                       "Error parsing +CMGL response: '%s'",
-                                       str);
-        }
-    }
-
-    g_match_info_free (match_info);
-    g_regex_unref (r);
-
-    if (inner_error) {
-        g_propagate_error (error, inner_error);
-        mm_3gpp_pdu_info_list_free (list);
-        return NULL;
-    }
-
-    return list;
 }
 
 /*************************************************************************/
@@ -4238,3 +3855,396 @@ mm_parse_cclk_response (const char *response,
 
     return ret;
 }
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
+/*****************************************************************************/
+/* Messaging specific helpers and utilities */
+/*****************************************************************************/
+
+/*************************************************************************/
+
+#define CMGF_TAG "+CMGF:"
+
+gboolean
+mm_3gpp_parse_cmgf_test_response (const gchar *reply,
+                                  gboolean *sms_pdu_supported,
+                                  gboolean *sms_text_supported,
+                                  GError **error)
+{
+    GRegex *r;
+    GMatchInfo *match_info;
+    gchar *s;
+    guint32 min = -1, max = -1;
+
+    /* Strip whitespace and response tag */
+    if (g_str_has_prefix (reply, CMGF_TAG))
+        reply += strlen (CMGF_TAG);
+    while (isspace (*reply))
+        reply++;
+
+    r = g_regex_new ("\\(?\\s*(\\d+)\\s*[-,]?\\s*(\\d+)?\\s*\\)?", 0, 0, error);
+    if (!r)
+        return FALSE;
+
+    if (!g_regex_match_full (r, reply, strlen (reply), 0, 0, &match_info, NULL)) {
+        g_set_error (error,
+                     MM_CORE_ERROR,
+                     MM_CORE_ERROR_FAILED,
+                     "Failed to parse CMGF query result '%s'",
+                     reply);
+        g_match_info_free (match_info);
+        g_regex_unref (r);
+        return FALSE;
+    }
+
+    s = g_match_info_fetch (match_info, 1);
+    if (s)
+        min = atoi (s);
+    g_free (s);
+
+    s = g_match_info_fetch (match_info, 2);
+    if (s)
+        max = atoi (s);
+    g_free (s);
+
+    /* CMGF=0 for PDU mode */
+    *sms_pdu_supported = (min == 0);
+
+    /* CMGF=1 for Text mode */
+    *sms_text_supported = (max >= 1);
+
+    g_match_info_free (match_info);
+    g_regex_unref (r);
+    return TRUE;
+}
+
+/*************************************************************************/
+
+MM3gppPduInfo *
+mm_3gpp_parse_cmgr_read_response (const gchar *reply,
+                                  guint index,
+                                  GError **error)
+{
+    GRegex *r;
+    GMatchInfo *match_info;
+    gint count;
+    gint status;
+    gchar *pdu;
+    MM3gppPduInfo *info = NULL;
+
+    /* +CMGR: <stat>,<alpha>,<length>(whitespace)<pdu> */
+    /* The <alpha> and <length> fields are matched, but not currently used */
+    r = g_regex_new ("\\+CMGR:\\s*(\\d+)\\s*,([^,]*),\\s*(\\d+)\\s*([^\\r\\n]*)", 0, 0, NULL);
+    g_assert (r);
+
+    if (!g_regex_match_full (r, reply, strlen (reply), 0, 0, &match_info, NULL)) {
+        g_set_error (error,
+                     MM_CORE_ERROR,
+                     MM_CORE_ERROR_FAILED,
+                     "Failed to parse CMGR read result: response didn't match '%s'",
+                     reply);
+        goto done;
+    }
+
+    /* g_match_info_get_match_count includes match #0 */
+    if ((count = g_match_info_get_match_count (match_info)) != 5) {
+        g_set_error (error,
+                     MM_CORE_ERROR,
+                     MM_CORE_ERROR_FAILED,
+                     "Failed to match CMGR fields (matched %d) '%s'",
+                     count,
+                     reply);
+        goto done;
+    }
+
+    if (!mm_get_int_from_match_info (match_info, 1, &status)) {
+        g_set_error (error,
+                     MM_CORE_ERROR,
+                     MM_CORE_ERROR_FAILED,
+                     "Failed to extract CMGR status field '%s'",
+                     reply);
+        goto done;
+    }
+
+
+    pdu = mm_get_string_unquoted_from_match_info (match_info, 4);
+    if (!pdu) {
+        g_set_error (error,
+                     MM_CORE_ERROR,
+                     MM_CORE_ERROR_FAILED,
+                     "Failed to extract CMGR pdu field '%s'",
+                     reply);
+        goto done;
+    }
+
+    info = g_new0 (MM3gppPduInfo, 1);
+    info->index = index;
+    info->status = status;
+    info->pdu = pdu;
+
+done:
+    g_match_info_free (match_info);
+    g_regex_unref (r);
+
+    return info;
+}
+
+/*************************************************************************/
+
+static MMSmsStorage
+storage_from_str (const gchar *str)
+{
+    if (g_str_equal (str, "SM"))
+        return MM_SMS_STORAGE_SM;
+    if (g_str_equal (str, "ME"))
+        return MM_SMS_STORAGE_ME;
+    if (g_str_equal (str, "MT"))
+        return MM_SMS_STORAGE_MT;
+    if (g_str_equal (str, "SR"))
+        return MM_SMS_STORAGE_SR;
+    if (g_str_equal (str, "BM"))
+        return MM_SMS_STORAGE_BM;
+    if (g_str_equal (str, "TA"))
+        return MM_SMS_STORAGE_TA;
+    return MM_SMS_STORAGE_UNKNOWN;
+}
+
+gboolean
+mm_3gpp_parse_cpms_test_response (const gchar *reply,
+                                  GArray **mem1,
+                                  GArray **mem2,
+                                  GArray **mem3)
+{
+    GRegex *r;
+    gchar **split;
+    guint i;
+    GArray *tmp1 = NULL;
+    GArray *tmp2 = NULL;
+    GArray *tmp3 = NULL;
+
+    g_assert (mem1 != NULL);
+    g_assert (mem2 != NULL);
+    g_assert (mem3 != NULL);
+
+#define N_EXPECTED_GROUPS 3
+
+    split = mm_split_string_groups (mm_strip_tag (reply, "+CPMS:"));
+    if (!split)
+        return FALSE;
+
+    if (g_strv_length (split) != N_EXPECTED_GROUPS) {
+        mm_warn ("Cannot parse +CPMS test response: invalid number of groups (%u != %u)",
+                 g_strv_length (split), N_EXPECTED_GROUPS);
+        g_strfreev (split);
+        return FALSE;
+    }
+
+    r = g_regex_new ("\\s*\"([^,\\)]+)\"\\s*", 0, 0, NULL);
+    g_assert (r);
+
+    for (i = 0; i < N_EXPECTED_GROUPS; i++) {
+        GMatchInfo *match_info = NULL;
+        GArray *array;
+
+        /* We always return a valid array, even if it may be empty */
+        array = g_array_new (FALSE, FALSE, sizeof (MMSmsStorage));
+
+        /* Got a range group to match */
+        if (g_regex_match_full (r, split[i], strlen (split[i]), 0, 0, &match_info, NULL)) {
+            while (g_match_info_matches (match_info)) {
+                gchar *str;
+
+                str = g_match_info_fetch (match_info, 1);
+                if (str) {
+                    MMSmsStorage storage;
+
+                    storage = storage_from_str (str);
+                    g_array_append_val (array, storage);
+                    g_free (str);
+                }
+
+                g_match_info_next (match_info, NULL);
+            }
+        }
+        g_match_info_free (match_info);
+
+        if (!tmp1)
+            tmp1 = array;
+        else if (!tmp2)
+            tmp2 = array;
+        else if (!tmp3)
+            tmp3 = array;
+        else
+            g_assert_not_reached ();
+    }
+
+    g_strfreev (split);
+    g_regex_unref (r);
+
+    g_warn_if_fail (tmp1 != NULL);
+    g_warn_if_fail (tmp2 != NULL);
+    g_warn_if_fail (tmp3 != NULL);
+
+    /* Only return TRUE if all sets have been parsed correctly
+     * (even if the arrays may be empty) */
+    if (tmp1 && tmp2 && tmp3) {
+        *mem1 = tmp1;
+        *mem2 = tmp2;
+        *mem3 = tmp3;
+        return TRUE;
+    }
+
+    /* Otherwise, cleanup and return FALSE */
+    if (tmp1)
+        g_array_unref (tmp1);
+    if (tmp2)
+        g_array_unref (tmp2);
+    if (tmp3)
+        g_array_unref (tmp3);
+    return FALSE;
+}
+
+/**********************************************************************
+ * AT+CPMS?
+ * +CPMS: <memr>,<usedr>,<totalr>,<memw>,<usedw>,<totalw>, <mems>,<useds>,<totals>
+ */
+
+#define CPMS_QUERY_REGEX "\\+CPMS:\\s*\"(?P<memr>.*)\",[0-9]+,[0-9]+,\"(?P<memw>.*)\",[0-9]+,[0-9]+,\"(?P<mems>.*)\",[0-9]+,[0-9]"
+
+gboolean
+mm_3gpp_parse_cpms_query_response (const gchar *reply,
+                                   MMSmsStorage *memr,
+                                   MMSmsStorage *memw,
+                                   GError **error)
+{
+    GRegex *r = NULL;
+    gboolean ret = FALSE;
+    GMatchInfo *match_info = NULL;
+
+    r = g_regex_new (CPMS_QUERY_REGEX, G_REGEX_RAW, 0, NULL);
+
+    g_assert(r);
+
+    if (!g_regex_match (r, reply, 0, &match_info)) {
+        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                     "Could not parse CPMS query reponse '%s'", reply);
+        goto end;
+    }
+
+    if (!g_match_info_matches (match_info)) {
+        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                     "Could not find matches in CPMS query reply '%s'", reply);
+        goto end;
+    }
+
+    if (!mm_3gpp_get_cpms_storage_match (match_info, "memr", memr, error)) {
+        goto end;
+    }
+
+    if (!mm_3gpp_get_cpms_storage_match (match_info, "memw", memw, error)) {
+        goto end;
+    }
+
+    ret = TRUE;
+
+end:
+    if (r != NULL)
+        g_regex_unref (r);
+
+    if (match_info != NULL)
+        g_match_info_free (match_info);
+
+    return ret;
+}
+
+gboolean
+mm_3gpp_get_cpms_storage_match (GMatchInfo *match_info,
+                                const gchar *match_name,
+                                MMSmsStorage *storage,
+                                GError **error)
+{
+    gboolean ret = TRUE;
+    gchar *str = NULL;
+
+    str = g_match_info_fetch_named (match_info, match_name);
+    if (str == NULL || str[0] == '\0') {
+        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                     "Could not find '%s' from CPMS reply", match_name);
+        ret = FALSE;
+    } else {
+        *storage = storage_from_str (str);
+    }
+
+    g_free (str);
+
+    return ret;
+}
+
+/*************************************************************************/
+
+void
+mm_3gpp_pdu_info_free (MM3gppPduInfo *info)
+{
+    g_free (info->pdu);
+    g_free (info);
+}
+
+void
+mm_3gpp_pdu_info_list_free (GList *info_list)
+{
+    g_list_free_full (info_list, (GDestroyNotify)mm_3gpp_pdu_info_free);
+}
+
+GList *
+mm_3gpp_parse_pdu_cmgl_response (const gchar *str,
+                                 GError **error)
+{
+    GError *inner_error = NULL;
+    GList *list = NULL;
+    GMatchInfo *match_info;
+    GRegex *r;
+
+    /*
+     * +CMGL: <index>, <status>, [<alpha>], <length>
+     *   or
+     * +CMGL: <index>, <status>, <length>
+     *
+     * We just read <index>, <stat> and the PDU itself.
+     */
+    r = g_regex_new ("\\+CMGL:\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,(.*)\\r\\n([^\\r\\n]*)(\\r\\n)?",
+                     G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
+    g_assert (r != NULL);
+
+    g_regex_match_full (r, str, strlen (str), 0, 0, &match_info, &inner_error);
+    while (!inner_error && g_match_info_matches (match_info)) {
+        MM3gppPduInfo *info;
+
+        info = g_new0 (MM3gppPduInfo, 1);
+        if (mm_get_int_from_match_info (match_info, 1, &info->index) &&
+            mm_get_int_from_match_info (match_info, 2, &info->status) &&
+            (info->pdu = mm_get_string_unquoted_from_match_info (match_info, 4)) != NULL) {
+            /* Append to our list of results and keep on */
+            list = g_list_append (list, info);
+            g_match_info_next (match_info, &inner_error);
+        } else {
+            inner_error = g_error_new (MM_CORE_ERROR,
+                                       MM_CORE_ERROR_FAILED,
+                                       "Error parsing +CMGL response: '%s'",
+                                       str);
+        }
+    }
+
+    g_match_info_free (match_info);
+    g_regex_unref (r);
+
+    if (inner_error) {
+        g_propagate_error (error, inner_error);
+        mm_3gpp_pdu_info_list_free (list);
+        return NULL;
+    }
+
+    return list;
+}
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */

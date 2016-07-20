@@ -117,6 +117,10 @@ MMModemCharset mm_broadband_modem_get_current_charset (MMBroadbandModem *self);
 gchar *mm_broadband_modem_create_device_identifier (MMBroadbandModem *self,
                                                     const gchar *ati,
                                                     const gchar *ati1);
+/* Helper to update SIM hot swap */
+void mm_broadband_modem_update_sim_hot_swap_detected (MMBroadbandModem *self);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 /* Locking/unlocking SMS storages */
 void     mm_broadband_modem_lock_sms_storages        (MMBroadbandModem *self,
@@ -130,7 +134,6 @@ gboolean mm_broadband_modem_lock_sms_storages_finish (MMBroadbandModem *self,
 void     mm_broadband_modem_unlock_sms_storages      (MMBroadbandModem *self,
                                                       gboolean mem1,
                                                       gboolean mem2);
-/* Helper to update SIM hot swap */
-void mm_broadband_modem_update_sim_hot_swap_detected (MMBroadbandModem *self);
+#endif
 
 #endif /* MM_BROADBAND_MODEM_H */

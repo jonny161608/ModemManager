@@ -40,6 +40,9 @@
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include <ModemManager-enums-location.h>
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include <ModemManager-enums-messaging.h>
+#endif
 
 /* Public header with errors */
 #include <ModemManager-errors.h>

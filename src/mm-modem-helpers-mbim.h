@@ -36,9 +36,13 @@ GList *mm_3gpp_network_info_list_from_mbim_providers (const MbimProvider *const 
 
 GError *mm_mobile_equipment_error_from_mbim_nw_error (MbimNwError nw_error);
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* MBIM/SMS to MM translations */
 
 MMSmsState mm_sms_state_from_mbim_message_status (MbimSmsStatus status);
+
+#endif
 
 #endif  /* MM_MODEM_HELPERS_MBIM_H */

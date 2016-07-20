@@ -18,10 +18,14 @@
 
 #include <glib.h>
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /* AT+CPMS=? (Preferred SMS storage) response parser */
 gboolean mm_thuraya_3gpp_parse_cpms_test_response (const gchar *reply,
                                                    GArray **mem1,
                                                    GArray **mem2,
                                                    GArray **mem3);
+
+#endif
 
 #endif  /* MM_MODEM_HELPERS_THURAYA_H */

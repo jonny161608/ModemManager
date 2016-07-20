@@ -67,7 +67,9 @@ get_proxy_type (GDBusObjectManagerClient *manager,
     if (g_once_init_enter (&once_init_value)) {
         lookup_hash = g_hash_table_new (g_str_hash, g_str_equal);
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem",                GSIZE_TO_POINTER (MM_TYPE_MODEM));
+#if MM_INTERFACE_MESSAGING_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Messaging",      GSIZE_TO_POINTER (MM_TYPE_MODEM_MESSAGING));
+#endif
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Voice",          GSIZE_TO_POINTER (MM_TYPE_MODEM_VOICE));
 #if MM_INTERFACE_LOCATION_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Location",       GSIZE_TO_POINTER (MM_TYPE_MODEM_LOCATION));

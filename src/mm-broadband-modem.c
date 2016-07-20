@@ -37,7 +37,11 @@
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
 #endif
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+# include "mm-sms-list.h"
+# include "mm-sms-part-3gpp.h"
+#endif
 #include "mm-iface-modem-voice.h"
 #include "mm-iface-modem-time.h"
 #include "mm-iface-modem-firmware.h"
@@ -45,8 +49,6 @@
 #include "mm-iface-modem-oma.h"
 #include "mm-broadband-bearer.h"
 #include "mm-bearer-list.h"
-#include "mm-sms-list.h"
-#include "mm-sms-part-3gpp.h"
 #include "mm-call-list.h"
 #include "mm-base-sim.h"
 #include "mm-log.h"
@@ -67,7 +69,9 @@ static void iface_modem_simple_init (MMIfaceModemSimple *iface);
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 static void iface_modem_voice_init (MMIfaceModemVoice *iface);
 static void iface_modem_time_init (MMIfaceModemTime *iface);
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
@@ -83,7 +87,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModem, mm_broadband_modem, MM_TYPE_BASE_MODEM
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_VOICE, iface_modem_voice_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
@@ -100,7 +106,9 @@ enum {
 #if MM_INTERFACE_LOCATION_SUPPORTED
     PROP_MODEM_LOCATION_DBUS_SKELETON,
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     PROP_MODEM_MESSAGING_DBUS_SKELETON,
+#endif
     PROP_MODEM_VOICE_DBUS_SKELETON,
     PROP_MODEM_TIME_DBUS_SKELETON,
     PROP_MODEM_SIGNAL_DBUS_SKELETON,
@@ -118,9 +126,11 @@ enum {
     PROP_MODEM_CDMA_EVDO_REGISTRATION_STATE,
     PROP_MODEM_CDMA_CDMA1X_NETWORK_SUPPORTED,
     PROP_MODEM_CDMA_EVDO_NETWORK_SUPPORTED,
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     PROP_MODEM_MESSAGING_SMS_LIST,
     PROP_MODEM_MESSAGING_SMS_PDU_MODE,
     PROP_MODEM_MESSAGING_SMS_DEFAULT_STORAGE,
+#endif
     PROP_MODEM_VOICE_CALL_LIST,
     PROP_MODEM_SIMPLE_STATUS,
     PROP_MODEM_SIM_HOT_SWAP_SUPPORTED,
@@ -208,6 +218,7 @@ struct _MMBroadbandModemPrivate {
     GObject *modem_location_dbus_skeleton;
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     /*<--- Modem Messaging interface --->*/
     /* Properties */
     GObject *modem_messaging_dbus_skeleton;
@@ -220,6 +231,7 @@ struct _MMBroadbandModemPrivate {
     MMSmsStorage current_sms_mem1_storage;
     gboolean mem2_storage_locked;
     MMSmsStorage current_sms_mem2_storage;
+#endif
 
     /*<--- Modem Voice interface --->*/
     /* Properties */
@@ -5235,6 +5247,8 @@ modem_3gpp_ussd_check_support (MMIfaceModem3gppUssd *self,
                               task);
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* Check if Messaging supported (Messaging interface) */
 
@@ -6508,6 +6522,8 @@ modem_messaging_create_sms (MMIfaceModemMessaging *self)
 {
     return mm_base_sms_new (MM_BASE_MODEM (self));
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* Check if Voice supported (Voice interface) */
@@ -8967,7 +8983,9 @@ typedef enum {
     DISABLING_STEP_IFACE_SIGNAL,
     DISABLING_STEP_IFACE_OMA,
     DISABLING_STEP_IFACE_TIME,
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     DISABLING_STEP_IFACE_MESSAGING,
+#endif
     DISABLING_STEP_IFACE_VOICE,
 #if MM_INTERFACE_LOCATION_SUPPORTED
     DISABLING_STEP_IFACE_LOCATION,
@@ -9061,7 +9079,9 @@ INTERFACE_DISABLE_READY_FN (iface_modem_cdma,      MM_IFACE_MODEM_CDMA,      TRU
 #if MM_INTERFACE_LOCATION_SUPPORTED
 INTERFACE_DISABLE_READY_FN (iface_modem_location,  MM_IFACE_MODEM_LOCATION,  FALSE)
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 INTERFACE_DISABLE_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALSE)
+#endif
 INTERFACE_DISABLE_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 INTERFACE_DISABLE_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
 INTERFACE_DISABLE_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
@@ -9209,6 +9229,7 @@ disabling_step (GTask *task)
         /* Fall down to next step */
         ctx->step++;
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case DISABLING_STEP_IFACE_MESSAGING:
         if (ctx->self->priv->modem_messaging_dbus_skeleton) {
             mm_dbg ("Modem has messaging capabilities, disabling the Messaging interface...");
@@ -9220,6 +9241,7 @@ disabling_step (GTask *task)
         }
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case DISABLING_STEP_IFACE_VOICE:
         if (ctx->self->priv->modem_voice_dbus_skeleton) {
@@ -9344,7 +9366,9 @@ typedef enum {
 #if MM_INTERFACE_LOCATION_SUPPORTED
     ENABLING_STEP_IFACE_LOCATION,
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     ENABLING_STEP_IFACE_MESSAGING,
+#endif
     ENABLING_STEP_IFACE_VOICE,
     ENABLING_STEP_IFACE_TIME,
     ENABLING_STEP_IFACE_SIGNAL,
@@ -9426,7 +9450,9 @@ INTERFACE_ENABLE_READY_FN (iface_modem_cdma,      MM_IFACE_MODEM_CDMA,      TRUE
 #if MM_INTERFACE_LOCATION_SUPPORTED
 INTERFACE_ENABLE_READY_FN (iface_modem_location,  MM_IFACE_MODEM_LOCATION,  FALSE)
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 INTERFACE_ENABLE_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALSE)
+#endif
 INTERFACE_ENABLE_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 INTERFACE_ENABLE_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
 INTERFACE_ENABLE_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
@@ -9587,6 +9613,7 @@ enabling_step (GTask *task)
         ctx->step++;
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case ENABLING_STEP_IFACE_MESSAGING:
         if (ctx->self->priv->modem_messaging_dbus_skeleton) {
             mm_dbg ("Modem has messaging capabilities, enabling the Messaging interface...");
@@ -9599,6 +9626,7 @@ enabling_step (GTask *task)
         }
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case ENABLING_STEP_IFACE_VOICE:
         if (ctx->self->priv->modem_voice_dbus_skeleton) {
@@ -9772,7 +9800,9 @@ typedef enum {
 #if MM_INTERFACE_LOCATION_SUPPORTED
     INITIALIZE_STEP_IFACE_LOCATION,
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     INITIALIZE_STEP_IFACE_MESSAGING,
+#endif
     INITIALIZE_STEP_IFACE_VOICE,
     INITIALIZE_STEP_IFACE_TIME,
     INITIALIZE_STEP_IFACE_SIGNAL,
@@ -9959,7 +9989,9 @@ INTERFACE_INIT_READY_FN (iface_modem_cdma,      MM_IFACE_MODEM_CDMA,      TRUE)
 #if MM_INTERFACE_LOCATION_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_location,  MM_IFACE_MODEM_LOCATION,  FALSE)
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALSE)
+#endif
 INTERFACE_INIT_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 INTERFACE_INIT_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
 INTERFACE_INIT_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
@@ -10068,6 +10100,7 @@ initialize_step (GTask *task)
         return;
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case INITIALIZE_STEP_IFACE_MESSAGING:
         /* Initialize the Messaging interface */
         mm_iface_modem_messaging_initialize (MM_IFACE_MODEM_MESSAGING (ctx->self),
@@ -10075,6 +10108,7 @@ initialize_step (GTask *task)
                                              (GAsyncReadyCallback)iface_modem_messaging_initialize_ready,
                                              task);
         return;
+#endif
 
     case INITIALIZE_STEP_IFACE_VOICE:
         /* Initialize the Voice interface */
@@ -10220,7 +10254,9 @@ sim_hot_swap_enabled:
 #if MM_INTERFACE_LOCATION_SUPPORTED
                 mm_iface_modem_location_shutdown (MM_IFACE_MODEM_LOCATION (ctx->self));
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
                 mm_iface_modem_messaging_shutdown (MM_IFACE_MODEM_MESSAGING (ctx->self));
+#endif
                 mm_iface_modem_voice_shutdown (MM_IFACE_MODEM_VOICE (ctx->self));
                 mm_iface_modem_time_shutdown (MM_IFACE_MODEM_TIME (ctx->self));
                 mm_iface_modem_simple_shutdown (MM_IFACE_MODEM_SIMPLE (ctx->self));
@@ -10457,10 +10493,12 @@ set_property (GObject *object,
         self->priv->modem_location_dbus_skeleton = g_value_dup_object (value);
         break;
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case PROP_MODEM_MESSAGING_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_messaging_dbus_skeleton);
         self->priv->modem_messaging_dbus_skeleton = g_value_dup_object (value);
         break;
+#endif
     case PROP_MODEM_VOICE_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_voice_dbus_skeleton);
         self->priv->modem_voice_dbus_skeleton = g_value_dup_object (value);
@@ -10519,19 +10557,21 @@ set_property (GObject *object,
     case PROP_MODEM_CDMA_EVDO_NETWORK_SUPPORTED:
         self->priv->modem_cdma_evdo_network_supported = g_value_get_boolean (value);
         break;
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case PROP_MODEM_MESSAGING_SMS_LIST:
         g_clear_object (&self->priv->modem_messaging_sms_list);
         self->priv->modem_messaging_sms_list = g_value_dup_object (value);
-        break;
-    case PROP_MODEM_VOICE_CALL_LIST:
-        g_clear_object (&self->priv->modem_voice_call_list);
-        self->priv->modem_voice_call_list = g_value_dup_object (value);
         break;
     case PROP_MODEM_MESSAGING_SMS_PDU_MODE:
         self->priv->modem_messaging_sms_pdu_mode = g_value_get_boolean (value);
         break;
     case PROP_MODEM_MESSAGING_SMS_DEFAULT_STORAGE:
         self->priv->modem_messaging_sms_default_storage = g_value_get_enum (value);
+        break;
+#endif
+    case PROP_MODEM_VOICE_CALL_LIST:
+        g_clear_object (&self->priv->modem_voice_call_list);
+        self->priv->modem_voice_call_list = g_value_dup_object (value);
         break;
     case PROP_MODEM_SIMPLE_STATUS:
         g_clear_object (&self->priv->modem_simple_status);
@@ -10578,9 +10618,11 @@ get_property (GObject *object,
         g_value_set_object (value, self->priv->modem_location_dbus_skeleton);
         break;
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case PROP_MODEM_MESSAGING_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_messaging_dbus_skeleton);
         break;
+#endif
     case PROP_MODEM_VOICE_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_voice_dbus_skeleton);
         break;
@@ -10632,17 +10674,19 @@ get_property (GObject *object,
     case PROP_MODEM_CDMA_EVDO_NETWORK_SUPPORTED:
         g_value_set_boolean (value, self->priv->modem_cdma_evdo_network_supported);
         break;
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case PROP_MODEM_MESSAGING_SMS_LIST:
         g_value_set_object (value, self->priv->modem_messaging_sms_list);
-        break;
-    case PROP_MODEM_VOICE_CALL_LIST:
-        g_value_set_object (value, self->priv->modem_voice_call_list);
         break;
     case PROP_MODEM_MESSAGING_SMS_PDU_MODE:
         g_value_set_boolean (value, self->priv->modem_messaging_sms_pdu_mode);
         break;
     case PROP_MODEM_MESSAGING_SMS_DEFAULT_STORAGE:
         g_value_set_enum (value, self->priv->modem_messaging_sms_default_storage);
+        break;
+#endif
+    case PROP_MODEM_VOICE_CALL_LIST:
+        g_value_set_object (value, self->priv->modem_voice_call_list);
         break;
     case PROP_MODEM_SIMPLE_STATUS:
         g_value_set_object (value, self->priv->modem_simple_status);
@@ -10681,14 +10725,18 @@ mm_broadband_modem_init (MMBroadbandModem *self)
     self->priv->modem_cdma_evdo_registration_state = MM_MODEM_CDMA_REGISTRATION_STATE_UNKNOWN;
     self->priv->modem_cdma_cdma1x_network_supported = TRUE;
     self->priv->modem_cdma_evdo_network_supported = TRUE;
-    self->priv->modem_messaging_sms_default_storage = MM_SMS_STORAGE_UNKNOWN;
-    self->priv->current_sms_mem1_storage = MM_SMS_STORAGE_UNKNOWN;
-    self->priv->current_sms_mem2_storage = MM_SMS_STORAGE_UNKNOWN;
+
     self->priv->sim_hot_swap_supported = FALSE;
     self->priv->modem_cmer_enable_mode = MM_3GPP_CMER_MODE_NONE;
     self->priv->modem_cmer_disable_mode = MM_3GPP_CMER_MODE_NONE;
     self->priv->modem_cmer_ind = MM_3GPP_CMER_IND_NONE;
     self->priv->flow_control = MM_FLOW_CONTROL_NONE;
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+    self->priv->modem_messaging_sms_default_storage = MM_SMS_STORAGE_UNKNOWN;
+    self->priv->current_sms_mem1_storage = MM_SMS_STORAGE_UNKNOWN;
+    self->priv->current_sms_mem2_storage = MM_SMS_STORAGE_UNKNOWN;
+#endif
 }
 
 static void
@@ -10740,10 +10788,13 @@ dispose (GObject *object)
     }
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     if (self->priv->modem_messaging_dbus_skeleton) {
         mm_iface_modem_messaging_shutdown (MM_IFACE_MODEM_MESSAGING (object));
         g_clear_object (&self->priv->modem_messaging_dbus_skeleton);
     }
+    g_clear_object (&self->priv->modem_messaging_sms_list);
+#endif
 
     if (self->priv->modem_voice_dbus_skeleton) {
         mm_iface_modem_voice_shutdown (MM_IFACE_MODEM_VOICE (object));
@@ -10762,7 +10813,6 @@ dispose (GObject *object)
 
     g_clear_object (&self->priv->modem_sim);
     g_clear_object (&self->priv->modem_bearer_list);
-    g_clear_object (&self->priv->modem_messaging_sms_list);
     g_clear_object (&self->priv->modem_voice_call_list);
     g_clear_object (&self->priv->modem_simple_status);
 
@@ -10942,6 +10992,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
 
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -10965,6 +11017,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->init_current_storages = modem_messaging_init_current_storages;
     iface->init_current_storages_finish = modem_messaging_init_current_storages_finish;
 }
+
+#endif
 
 static void
 iface_modem_voice_init (MMIfaceModemVoice *iface)
@@ -11067,9 +11121,11 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
                                       MM_IFACE_MODEM_LOCATION_DBUS_SKELETON);
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     g_object_class_override_property (object_class,
                                       PROP_MODEM_MESSAGING_DBUS_SKELETON,
                                       MM_IFACE_MODEM_MESSAGING_DBUS_SKELETON);
+#endif
 
     g_object_class_override_property (object_class,
                                       PROP_MODEM_VOICE_DBUS_SKELETON,
@@ -11139,13 +11195,10 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
                                       PROP_MODEM_CDMA_EVDO_NETWORK_SUPPORTED,
                                       MM_IFACE_MODEM_CDMA_EVDO_NETWORK_SUPPORTED);
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     g_object_class_override_property (object_class,
                                       PROP_MODEM_MESSAGING_SMS_LIST,
                                       MM_IFACE_MODEM_MESSAGING_SMS_LIST);
-
-    g_object_class_override_property (object_class,
-                                      PROP_MODEM_VOICE_CALL_LIST,
-                                      MM_IFACE_MODEM_VOICE_CALL_LIST);
 
     g_object_class_override_property (object_class,
                                       PROP_MODEM_MESSAGING_SMS_PDU_MODE,
@@ -11154,6 +11207,11 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
     g_object_class_override_property (object_class,
                                       PROP_MODEM_MESSAGING_SMS_DEFAULT_STORAGE,
                                       MM_IFACE_MODEM_MESSAGING_SMS_DEFAULT_STORAGE);
+#endif
+
+    g_object_class_override_property (object_class,
+                                      PROP_MODEM_VOICE_CALL_LIST,
+                                      MM_IFACE_MODEM_VOICE_CALL_LIST);
 
     g_object_class_override_property (object_class,
                                       PROP_MODEM_SIMPLE_STATUS,

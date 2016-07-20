@@ -307,6 +307,8 @@ mm_object_peek_modem_location (MMObject *self)
 
 /*****************************************************************************/
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /**
  * mm_object_get_modem_messaging:
  * @self: A #MMObject.
@@ -340,6 +342,8 @@ mm_object_peek_modem_messaging (MMObject *self)
 
     return (MMModemMessaging *)mm_gdbus_object_peek_modem_messaging (MM_GDBUS_OBJECT (self));
 }
+
+#endif /*  MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 

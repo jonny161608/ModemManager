@@ -28,7 +28,9 @@
 #include "mm-log.h"
 #include "mm-errors-types.h"
 #include "mm-iface-modem.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #include "mm-iface-modem-3gpp.h"
 #include "mm-modem-helpers.h"
 #include "mm-base-modem-at.h"
@@ -36,13 +38,19 @@
 #include "mm-sim-nokia.h"
 
 static void iface_modem_init (MMIfaceModem *iface);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 
 static MMIfaceModem *iface_modem_parent;
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemNokia, mm_broadband_modem_nokia, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init));
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
+                        )
 
 /*****************************************************************************/
 /* Create SIM (Modem interface) */
@@ -372,6 +380,8 @@ mm_broadband_modem_nokia_init (MMBroadbandModemNokia *self)
 {
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -379,6 +389,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->check_support = NULL;
     iface->check_support_finish = NULL;
 }
+
+#endif
 
 static void
 iface_modem_init (MMIfaceModem *iface)

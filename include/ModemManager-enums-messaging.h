@@ -1,0 +1,426 @@
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details:
+ *
+ * Copyright (C) 2011 Red Hat, Inc.
+ * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2016 Aleksander Morgado <aleksander@aleksander.es>
+ */
+
+#ifndef _MODEMMANAGER_ENUMS_MESSAGING_H_
+#define _MODEMMANAGER_ENUMS_MESSAGING_H_
+
+#if !defined (__MODEM_MANAGER_H_INSIDE__)
+#error "Only <ModemManager.h> can be included directly."
+#endif
+
+/**
+ * SECTION:mm-enums-messaging
+ * @short_description: Messaging-specific enumerations and types in the API.
+ *
+ * This section defines enumerations and types that are used in the
+ * ModemManager Messaging interface.
+ **/
+
+/**
+ * MMSmsPduType:
+ * @MM_SMS_PDU_TYPE_UNKNOWN: Unknown type.
+ * @MM_SMS_PDU_TYPE_DELIVER: 3GPP Mobile-Terminated (MT) message.
+ * @MM_SMS_PDU_TYPE_SUBMIT: 3GPP Mobile-Originated (MO) message.
+ * @MM_SMS_PDU_TYPE_STATUS_REPORT: 3GPP status report (MT).
+ * @MM_SMS_PDU_TYPE_CDMA_DELIVER: 3GPP2 Mobile-Terminated (MT) message.
+ * @MM_SMS_PDU_TYPE_CDMA_SUBMIT: 3GPP2 Mobile-Originated (MO) message.
+ * @MM_SMS_PDU_TYPE_CDMA_CANCELLATION: 3GPP2 Cancellation (MO) message.
+ * @MM_SMS_PDU_TYPE_CDMA_DELIVERY_ACKNOWLEDGEMENT: 3GPP2 Delivery Acknowledgement (MT) message.
+ * @MM_SMS_PDU_TYPE_CDMA_USER_ACKNOWLEDGEMENT: 3GPP2 User Acknowledgement (MT or MO) message.
+ * @MM_SMS_PDU_TYPE_CDMA_READ_ACKNOWLEDGEMENT: 3GPP2 Read Acknowledgement (MT or MO) message.
+ *
+ * Type of PDUs used in the SMS.
+ */
+typedef enum { /*< underscore_name=mm_sms_pdu_type >*/
+    MM_SMS_PDU_TYPE_UNKNOWN = 0,
+    MM_SMS_PDU_TYPE_DELIVER       = 1,
+    MM_SMS_PDU_TYPE_SUBMIT        = 2,
+    MM_SMS_PDU_TYPE_STATUS_REPORT = 3,
+    MM_SMS_PDU_TYPE_CDMA_DELIVER                  = 32,
+    MM_SMS_PDU_TYPE_CDMA_SUBMIT                   = 33,
+    MM_SMS_PDU_TYPE_CDMA_CANCELLATION             = 34,
+    MM_SMS_PDU_TYPE_CDMA_DELIVERY_ACKNOWLEDGEMENT = 35,
+    MM_SMS_PDU_TYPE_CDMA_USER_ACKNOWLEDGEMENT     = 36,
+    MM_SMS_PDU_TYPE_CDMA_READ_ACKNOWLEDGEMENT     = 37,
+} MMSmsPduType;
+
+/**
+ * MMSmsState:
+ * @MM_SMS_STATE_UNKNOWN: State unknown or not reportable.
+ * @MM_SMS_STATE_STORED: The message has been neither received nor yet sent.
+ * @MM_SMS_STATE_RECEIVING: The message is being received but is not yet complete.
+ * @MM_SMS_STATE_RECEIVED: The message has been completely received.
+ * @MM_SMS_STATE_SENDING: The message is queued for delivery.
+ * @MM_SMS_STATE_SENT: The message was successfully sent.
+ *
+ * State of a given SMS.
+ */
+typedef enum { /*< underscore_name=mm_sms_state >*/
+    MM_SMS_STATE_UNKNOWN   = 0,
+    MM_SMS_STATE_STORED    = 1,
+    MM_SMS_STATE_RECEIVING = 2,
+    MM_SMS_STATE_RECEIVED  = 3,
+    MM_SMS_STATE_SENDING   = 4,
+    MM_SMS_STATE_SENT      = 5,
+} MMSmsState;
+
+/**
+ * MMSmsDeliveryState:
+ * @MM_SMS_DELIVERY_STATE_COMPLETED_RECEIVED: Delivery completed, message received by the SME.
+ * @MM_SMS_DELIVERY_STATE_COMPLETED_FORWARDED_UNCONFIRMED: Forwarded by the SC to the SME but the SC is unable to confirm delivery.
+ * @MM_SMS_DELIVERY_STATE_COMPLETED_REPLACED_BY_SC: Message replaced by the SC.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_CONGESTION: Temporary error, congestion.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_SME_BUSY: Temporary error, SME busy.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_NO_RESPONSE_FROM_SME: Temporary error, no response from the SME.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_SERVICE_REJECTED: Temporary error, service rejected.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_QOS_NOT_AVAILABLE: Temporary error, QoS not available.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_IN_SME: Temporary error in the SME.
+ * @MM_SMS_DELIVERY_STATE_ERROR_REMOTE_PROCEDURE: Permanent remote procedure error.
+ * @MM_SMS_DELIVERY_STATE_ERROR_INCOMPATIBLE_DESTINATION: Permanent error, incompatible destination.
+ * @MM_SMS_DELIVERY_STATE_ERROR_CONNECTION_REJECTED: Permanent error, connection rejected by the SME.
+ * @MM_SMS_DELIVERY_STATE_ERROR_NOT_OBTAINABLE: Permanent error, not obtainable.
+ * @MM_SMS_DELIVERY_STATE_ERROR_QOS_NOT_AVAILABLE: Permanent error, QoS not available.
+ * @MM_SMS_DELIVERY_STATE_ERROR_NO_INTERWORKING_AVAILABLE: Permanent error, no interworking available.
+ * @MM_SMS_DELIVERY_STATE_ERROR_VALIDITY_PERIOD_EXPIRED: Permanent error, message validity period expired.
+ * @MM_SMS_DELIVERY_STATE_ERROR_DELETED_BY_ORIGINATING_SME: Permanent error, deleted by originating SME.
+ * @MM_SMS_DELIVERY_STATE_ERROR_DELETED_BY_SC_ADMINISTRATION: Permanent error, deleted by SC administration.
+ * @MM_SMS_DELIVERY_STATE_ERROR_MESSAGE_DOES_NOT_EXIST: Permanent error, message does no longer exist.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_CONGESTION: Permanent error, congestion.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_SME_BUSY: Permanent error, SME busy.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_NO_RESPONSE_FROM_SME: Permanent error, no response from the SME.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_SERVICE_REJECTED: Permanent error, service rejected.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_QOS_NOT_AVAILABLE: Permanent error, QoS not available.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_IN_SME: Permanent error in SME.
+ * @MM_SMS_DELIVERY_STATE_UNKNOWN: Unknown state.
+ * @MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_ADDRESS_VACANT: Permanent error in network, address vacant.
+ * @MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_ADDRESS_TRANSLATION_FAILURE: Permanent error in network, address translation failure.
+ * @MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_NETWORK_RESOURCE_OUTAGE: Permanent error in network, network resource outage.
+ * @MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_NETWORK_FAILURE: Permanent error in network, network failure.
+ * @MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_INVALID_TELESERVICE_ID: Permanent error in network, invalid teleservice id.
+ * @MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_OTHER: Permanent error, other network problem.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_NO_PAGE_RESPONSE: Permanent error in terminal, no page response.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_BUSY: Permanent error in terminal, destination busy.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_NO_ACKNOWLEDGMENT: Permanent error in terminal, no acknowledgement.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_RESOURCE_SHORTAGE: Permanent error in terminal, destination resource shortage.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_SMS_DELIVERY_POSTPONED: Permanent error in terminal, SMS delivery postponed.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_OUT_OF_SERVICE: Permanent error in terminal, destination out of service.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_NO_LONGER_AT_THIS_ADDRESS: Permanent error in terminal, destination no longer at this address.
+ * @MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_OTHER: Permanent error, other terminal problem.
+ * @MM_SMS_DELIVERY_STATE_RADIO_INTERFACE_PROBLEM_RESOURCE_SHORTAGE: Permanent error in radio interface, resource shortage.
+ * @MM_SMS_DELIVERY_STATE_RADIO_INTERFACE_PROBLEM_INCOMPATIBILITY: Permanent error in radio interface, problem incompatibility.
+ * @MM_SMS_DELIVERY_STATE_RADIO_INTERFACE_PROBLEM_OTHER: Permanent error, other radio interface problem.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_ENCODING: Permanent error, encoding.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SMS_ORIGINATION_DENIED: Permanent error, SMS origination denied.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SMS_TERMINATION_DENIED: Permanent error, SMS termination denied.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SUPPLEMENTARY_SERVICE_NOT_SUPPORTED: Permanent error, supplementary service not supported.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SMS_NOT_SUPPORTED: Permanent error, SMS not supported.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_MISSING_EXPECTED_PARAMETER: Permanent error, missing expected parameter.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_MISSING_MANDATORY_PARAMETER: Permanent error, missing mandatory parameter.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_UNRECOGNIZED_PARAMETER_VALUE: Permanent error, unrecognized parameter value.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_UNEXPECTED_PARAMETER_VALUE: Permanent error, unexpected parameter value.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_USER_DATA_SIZE_ERROR: Permanent error, user data size error.
+ * @MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_OTHER: Permanent error, other general problem.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_ADDRESS_VACANT: Temporary error in network, address vacant.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_ADDRESS_TRANSLATION_FAILURE: Temporary error in network, address translation failure.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_NETWORK_RESOURCE_OUTAGE: Temporary error in network, network resource outage.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_NETWORK_FAILURE: Temporary error in network, network failure.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_INVALID_TELESERVICE_ID: Temporary error in network, invalid teleservice id.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_OTHER: Temporary error, other network problem.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_NO_PAGE_RESPONSE: Temporary error in terminal, no page response.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_BUSY: Temporary error in terminal, destination busy.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_NO_ACKNOWLEDGMENT: Temporary error in terminal, no acknowledgement.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_RESOURCE_SHORTAGE: Temporary error in terminal, destination resource shortage.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_SMS_DELIVERY_POSTPONED: Temporary error in terminal, SMS delivery postponed.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_OUT_OF_SERVICE: Temporary error in terminal, destination out of service.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_NO_LONGER_AT_THIS_ADDRESS: Temporary error in terminal, destination no longer at this address.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_OTHER: Temporary error, other terminal problem.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_RADIO_INTERFACE_PROBLEM_RESOURCE_SHORTAGE: Temporary error in radio interface, resource shortage.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_RADIO_INTERFACE_PROBLEM_INCOMPATIBILITY: Temporary error in radio interface, problem incompatibility.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_RADIO_INTERFACE_PROBLEM_OTHER: Temporary error, other radio interface problem.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_ENCODING: Temporary error, encoding.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SMS_ORIGINATION_DENIED: Temporary error, SMS origination denied.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SMS_TERMINATION_DENIED: Temporary error, SMS termination denied.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SUPPLEMENTARY_SERVICE_NOT_SUPPORTED: Temporary error, supplementary service not supported.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SMS_NOT_SUPPORTED: Temporary error, SMS not supported.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_MISSING_EXPECTED_PARAMETER: Temporary error, missing expected parameter.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_MISSING_MANDATORY_PARAMETER: Temporary error, missing mandatory parameter.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_UNRECOGNIZED_PARAMETER_VALUE: Temporary error, unrecognized parameter value.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_UNEXPECTED_PARAMETER_VALUE: Temporary error, unexpected parameter value.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_USER_DATA_SIZE_ERROR: Temporary error, user data size error.
+ * @MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_OTHER: Temporary error, other general problem.
+ *
+ * Enumeration of known SMS delivery states as defined in 3GPP TS 03.40 and
+ * 3GPP2 N.S0005-O, section 6.5.2.125.
+ *
+ * States out of the known ranges may also be valid (either reserved or SC-specific).
+ */
+typedef enum { /*< underscore_name=mm_sms_delivery_state >*/
+    /* --------------- 3GPP specific errors ---------------------- */
+
+    /* Completed deliveries */
+    MM_SMS_DELIVERY_STATE_COMPLETED_RECEIVED              = 0x00,
+    MM_SMS_DELIVERY_STATE_COMPLETED_FORWARDED_UNCONFIRMED = 0x01,
+    MM_SMS_DELIVERY_STATE_COMPLETED_REPLACED_BY_SC        = 0x02,
+
+    /* Temporary failures */
+    MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_CONGESTION           = 0x20,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_SME_BUSY             = 0x21,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_NO_RESPONSE_FROM_SME = 0x22,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_SERVICE_REJECTED     = 0x23,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_QOS_NOT_AVAILABLE    = 0x24,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_ERROR_IN_SME               = 0x25,
+
+    /* Permanent failures */
+    MM_SMS_DELIVERY_STATE_ERROR_REMOTE_PROCEDURE             = 0x40,
+    MM_SMS_DELIVERY_STATE_ERROR_INCOMPATIBLE_DESTINATION     = 0x41,
+    MM_SMS_DELIVERY_STATE_ERROR_CONNECTION_REJECTED          = 0x42,
+    MM_SMS_DELIVERY_STATE_ERROR_NOT_OBTAINABLE               = 0x43,
+    MM_SMS_DELIVERY_STATE_ERROR_QOS_NOT_AVAILABLE            = 0x44,
+    MM_SMS_DELIVERY_STATE_ERROR_NO_INTERWORKING_AVAILABLE    = 0x45,
+    MM_SMS_DELIVERY_STATE_ERROR_VALIDITY_PERIOD_EXPIRED      = 0x46,
+    MM_SMS_DELIVERY_STATE_ERROR_DELETED_BY_ORIGINATING_SME   = 0x47,
+    MM_SMS_DELIVERY_STATE_ERROR_DELETED_BY_SC_ADMINISTRATION = 0x48,
+    MM_SMS_DELIVERY_STATE_ERROR_MESSAGE_DOES_NOT_EXIST       = 0x49,
+
+    /* Temporary failures that became permanent */
+    MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_CONGESTION           = 0x60,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_SME_BUSY             = 0x61,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_NO_RESPONSE_FROM_SME = 0x62,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_SERVICE_REJECTED     = 0x63,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_QOS_NOT_AVAILABLE    = 0x64,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_FATAL_ERROR_IN_SME               = 0x65,
+
+    /* Unknown, out of any possible valid value [0x00-0xFF] */
+    MM_SMS_DELIVERY_STATE_UNKNOWN = 0x100,
+
+    /* --------------- 3GPP2 specific errors ---------------------- */
+
+    /* Network problems */
+    MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_ADDRESS_VACANT              = 0x200,
+    MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_ADDRESS_TRANSLATION_FAILURE = 0x201,
+    MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_NETWORK_RESOURCE_OUTAGE     = 0x202,
+    MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_NETWORK_FAILURE             = 0x203,
+    MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_INVALID_TELESERVICE_ID      = 0x204,
+    MM_SMS_DELIVERY_STATE_NETWORK_PROBLEM_OTHER                       = 0x205,
+    /* Terminal problems */
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_NO_PAGE_RESPONSE                      = 0x220,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_BUSY                      = 0x221,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_NO_ACKNOWLEDGMENT                     = 0x222,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_RESOURCE_SHORTAGE         = 0x223,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_SMS_DELIVERY_POSTPONED                = 0x224,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_OUT_OF_SERVICE            = 0x225,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_DESTINATION_NO_LONGER_AT_THIS_ADDRESS = 0x226,
+    MM_SMS_DELIVERY_STATE_TERMINAL_PROBLEM_OTHER                                 = 0x227,
+    /* Radio problems */
+    MM_SMS_DELIVERY_STATE_RADIO_INTERFACE_PROBLEM_RESOURCE_SHORTAGE = 0x240,
+    MM_SMS_DELIVERY_STATE_RADIO_INTERFACE_PROBLEM_INCOMPATIBILITY   = 0x241,
+    MM_SMS_DELIVERY_STATE_RADIO_INTERFACE_PROBLEM_OTHER             = 0x242,
+    /* General problems */
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_ENCODING                            = 0x260,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SMS_ORIGINATION_DENIED              = 0x261,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SMS_TERMINATION_DENIED              = 0x262,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SUPPLEMENTARY_SERVICE_NOT_SUPPORTED = 0x263,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_SMS_NOT_SUPPORTED                   = 0x264,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_MISSING_EXPECTED_PARAMETER          = 0x266,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_MISSING_MANDATORY_PARAMETER         = 0x267,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_UNRECOGNIZED_PARAMETER_VALUE        = 0x268,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_UNEXPECTED_PARAMETER_VALUE          = 0x269,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_USER_DATA_SIZE_ERROR                = 0x26A,
+    MM_SMS_DELIVERY_STATE_GENERAL_PROBLEM_OTHER                               = 0x26B,
+
+    /* Temporary network problems */
+    MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_ADDRESS_VACANT              = 0x300,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_ADDRESS_TRANSLATION_FAILURE = 0x301,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_NETWORK_RESOURCE_OUTAGE     = 0x302,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_NETWORK_FAILURE             = 0x303,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_INVALID_TELESERVICE_ID      = 0x304,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_NETWORK_PROBLEM_OTHER                       = 0x305,
+    /* Temporary terminal problems */
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_NO_PAGE_RESPONSE                      = 0x320,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_BUSY                      = 0x321,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_NO_ACKNOWLEDGMENT                     = 0x322,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_RESOURCE_SHORTAGE         = 0x323,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_SMS_DELIVERY_POSTPONED                = 0x324,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_OUT_OF_SERVICE            = 0x325,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_DESTINATION_NO_LONGER_AT_THIS_ADDRESS = 0x326,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_TERMINAL_PROBLEM_OTHER                                 = 0x327,
+    /* Temporary radio problems */
+    MM_SMS_DELIVERY_STATE_TEMPORARY_RADIO_INTERFACE_PROBLEM_RESOURCE_SHORTAGE = 0x340,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_RADIO_INTERFACE_PROBLEM_INCOMPATIBILITY   = 0x341,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_RADIO_INTERFACE_PROBLEM_OTHER             = 0x342,
+    /* Temporary general problems */
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_ENCODING                            = 0x360,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SMS_ORIGINATION_DENIED              = 0x361,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SMS_TERMINATION_DENIED              = 0x362,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SUPPLEMENTARY_SERVICE_NOT_SUPPORTED = 0x363,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_SMS_NOT_SUPPORTED                   = 0x364,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_MISSING_EXPECTED_PARAMETER          = 0x366,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_MISSING_MANDATORY_PARAMETER         = 0x367,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_UNRECOGNIZED_PARAMETER_VALUE        = 0x368,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_UNEXPECTED_PARAMETER_VALUE          = 0x369,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_USER_DATA_SIZE_ERROR                = 0x36A,
+    MM_SMS_DELIVERY_STATE_TEMPORARY_GENERAL_PROBLEM_OTHER                               = 0x36B,
+} MMSmsDeliveryState;
+
+/**
+ * MMSmsStorage:
+ * @MM_SMS_STORAGE_UNKNOWN: Storage unknown.
+ * @MM_SMS_STORAGE_SM: SIM card storage area.
+ * @MM_SMS_STORAGE_ME: Mobile equipment storage area.
+ * @MM_SMS_STORAGE_MT: Sum of SIM and Mobile equipment storages
+ * @MM_SMS_STORAGE_SR: Status report message storage area.
+ * @MM_SMS_STORAGE_BM: Broadcast message storage area.
+ * @MM_SMS_STORAGE_TA: Terminal adaptor message storage area.
+ *
+ * Storage for SMS messages.
+ */
+typedef enum { /*< underscore_name=mm_sms_storage >*/
+    MM_SMS_STORAGE_UNKNOWN = 0,
+    MM_SMS_STORAGE_SM      = 1,
+    MM_SMS_STORAGE_ME      = 2,
+    MM_SMS_STORAGE_MT      = 3,
+    MM_SMS_STORAGE_SR      = 4,
+    MM_SMS_STORAGE_BM      = 5,
+    MM_SMS_STORAGE_TA      = 6,
+} MMSmsStorage;
+
+/**
+ * MMSmsValidityType:
+ * @MM_SMS_VALIDITY_TYPE_UNKNOWN: Validity type unknown.
+ * @MM_SMS_VALIDITY_TYPE_RELATIVE: Relative validity.
+ * @MM_SMS_VALIDITY_TYPE_ABSOLUTE: Absolute validity.
+ * @MM_SMS_VALIDITY_TYPE_ENHANCED: Enhanced validity.
+ *
+ * Type of SMS validity value.
+ */
+typedef enum { /*< underscore_name=mm_sms_validity_type >*/
+    MM_SMS_VALIDITY_TYPE_UNKNOWN  = 0,
+    MM_SMS_VALIDITY_TYPE_RELATIVE = 1,
+    MM_SMS_VALIDITY_TYPE_ABSOLUTE = 2,
+    MM_SMS_VALIDITY_TYPE_ENHANCED = 3,
+} MMSmsValidityType;
+
+/**
+ * MMSmsCdmaTeleserviceId:
+ * @MM_SMS_CDMA_TELESERVICE_ID_UNKNOWN: Unknown.
+ * @MM_SMS_CDMA_TELESERVICE_ID_CMT91: IS-91 Extended Protocol Enhanced Services.
+ * @MM_SMS_CDMA_TELESERVICE_ID_WPT: Wireless Paging Teleservice.
+ * @MM_SMS_CDMA_TELESERVICE_ID_WMT: Wireless Messaging Teleservice.
+ * @MM_SMS_CDMA_TELESERVICE_ID_VMN: Voice Mail Notification.
+ * @MM_SMS_CDMA_TELESERVICE_ID_WAP: Wireless Application Protocol.
+ * @MM_SMS_CDMA_TELESERVICE_ID_WEMT: Wireless Enhanced Messaging Teleservice.
+ * @MM_SMS_CDMA_TELESERVICE_ID_SCPT: Service Category Programming Teleservice.
+ * @MM_SMS_CDMA_TELESERVICE_ID_CATPT: Card Application Toolkit Protocol Teleservice.
+ *
+ * Teleservice IDs supported for CDMA SMS, as defined in 3GPP2 X.S0004-550-E
+ * (section 2.256) and 3GPP2 C.S0015-B (section 3.4.3.1).
+ */
+typedef enum { /*< underscore_name=mm_sms_cdma_teleservice_id >*/
+    MM_SMS_CDMA_TELESERVICE_ID_UNKNOWN = 0x0000,
+    MM_SMS_CDMA_TELESERVICE_ID_CMT91   = 0x1000,
+    MM_SMS_CDMA_TELESERVICE_ID_WPT     = 0x1001,
+    MM_SMS_CDMA_TELESERVICE_ID_WMT     = 0x1002,
+    MM_SMS_CDMA_TELESERVICE_ID_VMN     = 0x1003,
+    MM_SMS_CDMA_TELESERVICE_ID_WAP     = 0x1004,
+    MM_SMS_CDMA_TELESERVICE_ID_WEMT    = 0x1005,
+    MM_SMS_CDMA_TELESERVICE_ID_SCPT    = 0x1006,
+    MM_SMS_CDMA_TELESERVICE_ID_CATPT   = 0x1007,
+} MMSmsCdmaTeleserviceId;
+
+/**
+ * MMSmsCdmaServiceCategory:
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_UNKNOWN: Unknown.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_EMERGENCY_BROADCAST: Emergency broadcast.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_ADMINISTRATIVE: Administrative.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_MAINTENANCE: Maintenance.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_LOCAL: General news (local).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_REGIONAL: General news (regional).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_NATIONAL: General news (national).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_INTERNATIONAL: General news (international).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_LOCAL: Business/Financial news (local).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_REGIONAL: Business/Financial news (regional).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_NATIONAL: Business/Financial news (national).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_INTERNATIONAL: Business/Financial news (international).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_LOCAL: Sports news (local).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_REGIONAL: Sports news (regional).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_NATIONAL: Sports news (national).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_INTERNATIONAL: Sports news (international).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_LOCAL: Entertainment news (local).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_REGIONAL: Entertainment news (regional).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_NATIONAL: Entertainment news (national).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_INTERNATIONAL: Entertainment news (international).
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_LOCAL_WEATHER: Local weather.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_TRAFFIC_REPORT: Area traffic report.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_FLIGHT_SCHEDULES: Local airport flight schedules.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_RESTAURANTS: Restaurants.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_LODGINGS: Lodgings.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_RETAIL_DIRECTORY: Retail directory.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_ADVERTISEMENTS: Advertisements.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_STOCK_QUOTES: Stock quotes.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_EMPLOYMENT: Employment.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_HOSPITALS: Medical / Health / Hospitals.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_TECHNOLOGY_NEWS: Technology news.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_MULTICATEGORY: Multi-category.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_PRESIDENTIAL_ALERT: Presidential alert.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_EXTREME_THREAT: Extreme threat.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_SEVERE_THREAT: Severe threat.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY: Child abduction emergency.
+ * @MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_TEST: CMAS test.
+ *
+ * Service category for CDMA SMS, as defined in 3GPP2 C.R1001-D (section 9.3).
+ */
+typedef enum { /*< underscore_name=mm_sms_cdma_service_category >*/
+    MM_SMS_CDMA_SERVICE_CATEGORY_UNKNOWN                          = 0x0000,
+    MM_SMS_CDMA_SERVICE_CATEGORY_EMERGENCY_BROADCAST              = 0x0001,
+    MM_SMS_CDMA_SERVICE_CATEGORY_ADMINISTRATIVE                   = 0x0002,
+    MM_SMS_CDMA_SERVICE_CATEGORY_MAINTENANCE                      = 0x0003,
+    MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_LOCAL               = 0x0004,
+    MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_REGIONAL            = 0x0005,
+    MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_NATIONAL            = 0x0006,
+    MM_SMS_CDMA_SERVICE_CATEGORY_GENERAL_NEWS_INTERNATIONAL       = 0x0007,
+    MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_LOCAL              = 0x0008,
+    MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_REGIONAL           = 0x0009,
+    MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_NATIONAL           = 0x000A,
+    MM_SMS_CDMA_SERVICE_CATEGORY_BUSINESS_NEWS_INTERNATIONAL      = 0x000B,
+    MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_LOCAL                = 0x000C,
+    MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_REGIONAL             = 0x000D,
+    MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_NATIONAL             = 0x000E,
+    MM_SMS_CDMA_SERVICE_CATEGORY_SPORTS_NEWS_INTERNATIONAL        = 0x000F,
+    MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_LOCAL         = 0x0010,
+    MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_REGIONAL      = 0x0011,
+    MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_NATIONAL      = 0x0012,
+    MM_SMS_CDMA_SERVICE_CATEGORY_ENTERTAINMENT_NEWS_INTERNATIONAL = 0x0013,
+    MM_SMS_CDMA_SERVICE_CATEGORY_LOCAL_WEATHER                    = 0x0014,
+    MM_SMS_CDMA_SERVICE_CATEGORY_TRAFFIC_REPORT                   = 0x0015,
+    MM_SMS_CDMA_SERVICE_CATEGORY_FLIGHT_SCHEDULES                 = 0x0016,
+    MM_SMS_CDMA_SERVICE_CATEGORY_RESTAURANTS                      = 0x0017,
+    MM_SMS_CDMA_SERVICE_CATEGORY_LODGINGS                         = 0x0018,
+    MM_SMS_CDMA_SERVICE_CATEGORY_RETAIL_DIRECTORY                 = 0x0019,
+    MM_SMS_CDMA_SERVICE_CATEGORY_ADVERTISEMENTS                   = 0x001A,
+    MM_SMS_CDMA_SERVICE_CATEGORY_STOCK_QUOTES                     = 0x001B,
+    MM_SMS_CDMA_SERVICE_CATEGORY_EMPLOYMENT                       = 0x001C,
+    MM_SMS_CDMA_SERVICE_CATEGORY_HOSPITALS                        = 0x001D,
+    MM_SMS_CDMA_SERVICE_CATEGORY_TECHNOLOGY_NEWS                  = 0x001E,
+    MM_SMS_CDMA_SERVICE_CATEGORY_MULTICATEGORY                    = 0x001F,
+    MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_PRESIDENTIAL_ALERT          = 0x1000,
+    MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_EXTREME_THREAT              = 0x1001,
+    MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_SEVERE_THREAT               = 0x1002,
+    MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY   = 0x1003,
+    MM_SMS_CDMA_SERVICE_CATEGORY_CMAS_TEST                        = 0x1004,
+} MMSmsCdmaServiceCategory;
+
+#endif /*  _MODEMMANAGER_ENUMS_MESSAGING_H_ */

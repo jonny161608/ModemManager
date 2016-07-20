@@ -202,8 +202,10 @@ main (gint argc, gchar **argv)
     g_option_context_add_group (context,
                                 mmcli_modem_location_get_option_group ());
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_messaging_get_option_group ());
+#endif
     g_option_context_add_group (context,
                                 mmcli_modem_voice_get_option_group ());
     g_option_context_add_group (context,
@@ -218,8 +220,10 @@ main (gint argc, gchar **argv)
                                 mmcli_sim_get_option_group ());
     g_option_context_add_group (context,
                                 mmcli_bearer_get_option_group ());
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_sms_get_option_group ());
+#endif
     g_option_context_add_group (context,
                                 mmcli_call_get_option_group ());
     g_option_context_add_main_entries (context, main_entries, NULL);
@@ -277,6 +281,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_bearer_run_synchronous (connection);
     }
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     /* Sms options? */
     else if (mmcli_sms_options_enabled ()) {
         if (async_flag)
@@ -284,6 +289,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_sms_run_synchronous (connection);
     }
+#endif
     /* Call options? */
     else if (mmcli_call_options_enabled ()) {
         if (async_flag)
@@ -321,6 +327,7 @@ main (gint argc, gchar **argv)
             mmcli_modem_location_run_synchronous (connection);
     }
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     /* Modem Messaging options? */
     else if (mmcli_modem_messaging_options_enabled ()) {
         if (async_flag)
@@ -328,6 +335,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_messaging_run_synchronous (connection);
     }
+#endif
     /* Voice options? */
     else if (mmcli_modem_voice_options_enabled ()) {
         if (async_flag)
@@ -395,8 +403,10 @@ main (gint argc, gchar **argv)
     } else if (mmcli_modem_location_options_enabled ()) {
         mmcli_modem_location_shutdown ();
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     } else if (mmcli_modem_messaging_options_enabled ()) {
         mmcli_modem_messaging_shutdown ();
+#endif
     } else if (mmcli_modem_voice_options_enabled ()) {
         mmcli_modem_voice_shutdown ();
     } else if (mmcli_modem_time_options_enabled ()) {
@@ -411,8 +421,10 @@ main (gint argc, gchar **argv)
         mmcli_sim_shutdown ();
     } else if (mmcli_bearer_options_enabled ()) {
         mmcli_bearer_shutdown ();
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     }  else if (mmcli_sms_options_enabled ()) {
         mmcli_sms_shutdown ();
+#endif
     }  else if (mmcli_call_options_enabled ()) {
         mmcli_call_shutdown ();
     } else if (mmcli_modem_options_enabled ()) {

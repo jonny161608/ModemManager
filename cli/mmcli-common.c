@@ -825,6 +825,8 @@ mmcli_get_sim_sync (GDBusConnection *connection,
     return found;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 typedef struct {
     GSimpleAsyncResult *result;
     GCancellable *cancellable;
@@ -1094,6 +1096,8 @@ mmcli_get_sms_sync (GDBusConnection *connection,
 
     return found;
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 const gchar *
 mmcli_get_state_reason_string (MMModemStateChangeReason reason)
@@ -1388,7 +1392,9 @@ mmcli_get_call_sync (GDBusConnection *connection,
 static gchar *modem_str;
 static gchar *bearer_str;
 static gchar *sim_str;
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static gchar *sms_str;
+#endif
 static gchar *call_str;
 
 static GOptionEntry entries[] = {
@@ -1404,10 +1410,12 @@ static GOptionEntry entries[] = {
       "Specify SIM card by path or index. Shows SIM card information if no action specified.",
       "[PATH|INDEX]"
     },
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     { "sms", 's', 0, G_OPTION_ARG_STRING, &sms_str,
       "Specify SMS by path or index. Shows SMS information if no action specified.",
       "[PATH|INDEX]"
     },
+#endif
     { "call", 'o', 0, G_OPTION_ARG_STRING, &call_str,
       "Specify Call by path or index. Shows Call information if no action specified.",
       "[PATH|INDEX]"
@@ -1449,11 +1457,13 @@ mmcli_get_common_sim_string (void)
     return sim_str;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 const gchar *
 mmcli_get_common_sms_string (void)
 {
     return sms_str;
 }
+#endif
 
 const gchar *
 mmcli_get_common_call_string (void)

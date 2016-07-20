@@ -1133,6 +1133,8 @@ mm_modem_cdma_activation_state_from_qmi_activation_state (QmiDmsActivationState 
     }
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 
 QmiWmsStorageType
@@ -1178,6 +1180,8 @@ mm_sms_state_from_qmi_message_tag (QmiWmsMessageTagType tag)
         return MM_SMS_STATE_UNKNOWN;
     }
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 

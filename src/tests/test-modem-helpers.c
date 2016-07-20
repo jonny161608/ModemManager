@@ -29,6 +29,7 @@
 #define trace(...)
 #endif
 
+
 #define g_assert_cmpfloat_tolerance(val1, val2, tolerance)  \
     g_assert_cmpfloat (fabs (val1 - val2), <, tolerance)
 
@@ -244,6 +245,8 @@ test_ws46_response_range_2 (void)
 
     test_ws46_response (str, expected, G_N_ELEMENTS (expected));
 }
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 /*****************************************************************************/
 /* Test CMGL responses */
@@ -474,6 +477,8 @@ test_cmgr_response_telit (void *f, gpointer d)
 
     test_cmgr_response (str, &expected);
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* Test COPS responses */
@@ -2392,7 +2397,7 @@ test_cgdcont_read_response_samsung (void *f, gpointer d)
 }
 
 /*****************************************************************************/
-/* Test CGDCONT read responses */
+/* Test CGACT read responses */
 
 static void
 test_cgact_read_results (const gchar *desc,
@@ -2477,6 +2482,8 @@ test_cgact_read_response_multiple (void)
 
     test_cgact_read_results ("multiple", reply, &expected[0], G_N_ELEMENTS (expected));
 }
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 /*****************************************************************************/
 /* Test CPMS responses */
@@ -2680,6 +2687,8 @@ test_cpms_query_response (void *f, gpointer d) {
         g_assert_cmpuint (cpms_query_test[i].mem2_want, ==, mem2);
     }
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* Test CNUM responses */
@@ -3874,6 +3883,7 @@ int main (int argc, char **argv)
         item++;
     }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     g_test_suite_add (suite, TESTCASE (test_cpms_response_cinterion,    NULL));
     g_test_suite_add (suite, TESTCASE (test_cpms_response_huawei_mu609, NULL));
     g_test_suite_add (suite, TESTCASE (test_cpms_response_nokia_c6,     NULL));
@@ -3881,6 +3891,7 @@ int main (int argc, char **argv)
     g_test_suite_add (suite, TESTCASE (test_cpms_response_mixed_spaces, NULL));
     g_test_suite_add (suite, TESTCASE (test_cpms_response_empty_fields, NULL));
     g_test_suite_add (suite, TESTCASE (test_cpms_query_response,        NULL));
+#endif
 
     g_test_suite_add (suite, TESTCASE (test_cmp_apn_name, NULL));
 
@@ -3911,6 +3922,7 @@ int main (int argc, char **argv)
 
     g_test_suite_add (suite, TESTCASE (test_cdma_parse_gsn, NULL));
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     g_test_suite_add (suite, TESTCASE (test_cmgl_response_generic, NULL));
     g_test_suite_add (suite, TESTCASE (test_cmgl_response_generic_multiple, NULL));
     g_test_suite_add (suite, TESTCASE (test_cmgl_response_pantech, NULL));
@@ -3918,6 +3930,7 @@ int main (int argc, char **argv)
 
     g_test_suite_add (suite, TESTCASE (test_cmgr_response_generic, NULL));
     g_test_suite_add (suite, TESTCASE (test_cmgr_response_telit, NULL));
+#endif
 
     g_test_suite_add (suite, TESTCASE (test_supported_mode_filter, NULL));
 

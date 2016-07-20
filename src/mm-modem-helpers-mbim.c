@@ -263,6 +263,8 @@ mm_mobile_equipment_error_from_mbim_nw_error (MbimNwError nw_error)
     }
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 
 MMSmsState
@@ -281,3 +283,5 @@ mm_sms_state_from_mbim_message_status (MbimSmsStatus status)
 
     return MM_SMS_STATE_UNKNOWN;
 }
+
+#endif

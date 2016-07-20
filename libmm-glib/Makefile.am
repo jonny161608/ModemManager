@@ -34,10 +34,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-oma.c \
 	mm-sim.h \
 	mm-sim.c \
-	mm-sms.h \
-	mm-sms.c \
-	mm-modem-messaging.h \
-	mm-modem-messaging.c \
 	mm-modem-voice.h \
 	mm-modem-voice.c \
 	mm-call.h \
@@ -52,8 +48,6 @@ libmm_glib_la_SOURCES = \
 	mm-simple-connect-properties.c \
 	mm-bearer-properties.h \
 	mm-bearer-properties.c \
-	mm-sms-properties.h \
-	mm-sms-properties.c \
 	mm-call-properties.h \
 	mm-call-properties.c \
 	mm-bearer-ip-config.h \
@@ -87,6 +81,17 @@ libmm_glib_la_SOURCES += \
 	mm-location-gps-nmea.c \
 	mm-location-cdma-bs.h \
 	mm-location-cdma-bs.c \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_MESSAGING
+libmm_glib_la_SOURCES += \
+	mm-sms.h \
+	mm-sms.c \
+	mm-modem-messaging.h \
+	mm-modem-messaging.c \
+	mm-sms-properties.h \
+	mm-sms-properties.c \
 	$(NULL)
 endif
 
@@ -127,21 +132,18 @@ include_HEADERS = \
 	mm-modem-3gpp.h \
 	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
-	mm-modem-messaging.h \
 	mm-modem-time.h \
 	mm-modem-firmware.h \
 	mm-modem-signal.h \
 	mm-modem-oma.h \
 	mm-modem-simple.h \
 	mm-sim.h \
-	mm-sms.h \
 	mm-modem-voice.h \
 	mm-call.h \
 	mm-bearer.h \
 	mm-simple-status.h \
 	mm-simple-connect-properties.h \
 	mm-bearer-properties.h \
-	mm-sms-properties.h \
 	mm-call-properties.h \
 	mm-bearer-ip-config.h \
 	mm-bearer-stats.h \
@@ -164,6 +166,14 @@ include_HEADERS += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_MESSAGING
+include_HEADERS += \
+	mm-modem-messaging.h \
+	mm-sms.h \
+	mm-sms-properties.h \
+	$(NULL)
+endif
+
 CLEANFILES =
 
 # Introspection
@@ -175,7 +185,6 @@ GENERATED_H = \
 	mm-errors-types.h \
 	mm-gdbus-manager.h \
 	mm-gdbus-sim.h \
-	mm-gdbus-sms.h \
 	mm-gdbus-bearer.h \
 	mm-gdbus-modem.h \
 	$(NULL)
@@ -186,7 +195,6 @@ GENERATED_C = \
 	mm-errors-quarks.c \
 	mm-gdbus-manager.c \
 	mm-gdbus-sim.c \
-	mm-gdbus-sms.c \
 	mm-gdbus-bearer.c \
 	mm-gdbus-modem.c \
 	$(NULL)
@@ -202,6 +210,12 @@ PUBLIC_H = \
 
 if WITH_INTERFACE_LOCATION
 PUBLIC_H += ModemManager-enums-location.h
+endif
+
+if WITH_INTERFACE_MESSAGING
+GENERATED_H += mm-gdbus-sms.h
+GENERATED_C += mm-gdbus-sms.c
+PUBLIC_H    += ModemManager-enums-messaging.h
 endif
 
 INTROSPECTION_GIRS = ModemManager-1.0.gir

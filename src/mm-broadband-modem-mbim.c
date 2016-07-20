@@ -25,7 +25,6 @@
 #include "mm-broadband-modem-mbim.h"
 #include "mm-bearer-mbim.h"
 #include "mm-sim-mbim.h"
-#include "mm-sms-mbim.h"
 
 #include "ModemManager.h"
 #include "mm-log.h"
@@ -35,25 +34,32 @@
 #include "mm-bearer-list.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-messaging.h"
 #include "mm-iface-modem-signal.h"
-#include "mm-sms-part-3gpp.h"
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
+#endif
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-sms-mbim.h"
+# include "mm-iface-modem-messaging.h"
+# include "mm-sms-part-3gpp.h"
 #endif
 
 #if defined WITH_QMI
 # include <libqmi-glib.h>
 #endif
 
-static void iface_modem_init           (MMIfaceModem          *iface);
-static void iface_modem_3gpp_init      (MMIfaceModem3gpp      *iface);
-static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+static void iface_modem_init (MMIfaceModem *iface);
+static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_signal_init    (MMIfaceModemSignal    *iface);
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init  (MMIfaceModemLocation  *iface);
+#endif
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 #endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemMbim, mm_broadband_modem_mbim, MM_TYPE_BROADBAND_MODEM, 0,
@@ -62,8 +68,11 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemMbim, mm_broadband_modem_mbim, MM_TYPE_B
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
+#if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init))
+#endif
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
+                        )
 
 typedef enum {
     PROCESS_NOTIFICATION_FLAG_NONE                 = 0,
@@ -2161,6 +2170,8 @@ basic_connect_notification_packet_service (MMBroadbandModemMbim *self,
     update_access_technologies (self);
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void add_sms_part (MMBroadbandModemMbim *self,
                           const MbimSmsPduReadRecord *pdu);
 
@@ -2190,6 +2201,8 @@ sms_notification_read_sms (MMBroadbandModemMbim *self,
 
     mbim_sms_pdu_read_record_array_free (pdu_messages);
 }
+
+#endif
 
 static void
 basic_connect_notification (MMBroadbandModemMbim *self,
@@ -2221,6 +2234,8 @@ basic_connect_notification (MMBroadbandModemMbim *self,
         break;
     }
 }
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 static void
 alert_sms_read_query_ready (MbimDevice *device,
@@ -2323,6 +2338,8 @@ sms_notification (MMBroadbandModemMbim *self,
     }
 }
 
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
+
 static void
 device_notification_cb (MbimDevice *device,
                         MbimMessage *notification,
@@ -2340,9 +2357,11 @@ device_notification_cb (MbimDevice *device,
     case MBIM_SERVICE_BASIC_CONNECT:
         basic_connect_notification (self, notification);
         break;
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     case MBIM_SERVICE_SMS:
         sms_notification (self, notification);
         break;
+#endif
     default:
         /* Ignore */
         break;
@@ -3040,6 +3059,8 @@ modem_3gpp_scan_networks (MMIfaceModem3gpp *self,
     mbim_message_unref (message);
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (Messaging interface) */
 
@@ -3287,6 +3308,8 @@ messaging_create_sms (MMIfaceModemMessaging *self)
     return mm_sms_mbim_new (MM_BASE_MODEM (self));
 }
 
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
+
 /*****************************************************************************/
 
 MMBroadbandModemMbim *
@@ -3455,6 +3478,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
 
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -3478,6 +3503,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->disable_unsolicited_events_finish = common_enable_disable_unsolicited_events_messaging_finish;
     iface->create_sms = messaging_create_sms;
 }
+
+#endif
 
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)

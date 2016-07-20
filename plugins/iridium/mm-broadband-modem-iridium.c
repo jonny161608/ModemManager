@@ -28,7 +28,9 @@
 #include "mm-base-modem-at.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #include "mm-broadband-modem-iridium.h"
 #include "mm-sim-iridium.h"
 #include "mm-bearer-iridium.h"
@@ -36,12 +38,18 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemIridium, mm_broadband_modem_iridium, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init));
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
+                        )
 
 /*****************************************************************************/
 /* Operator Code and Name loading (3GPP interface) */
@@ -80,6 +88,8 @@ load_operator_name_or_code (MMIfaceModem3gpp *self,
     g_object_unref (result);
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* Enable unsolicited events (SMS indications) (Messaging interface) */
 
@@ -110,6 +120,8 @@ messaging_enable_unsolicited_events (MMIfaceModemMessaging *self,
                               callback,
                               user_data);
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* Signal quality (Modem interface) */
@@ -426,12 +438,16 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->scan_networks_finish = NULL;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
     iface->enable_unsolicited_events = messaging_enable_unsolicited_events;
     iface->enable_unsolicited_events_finish = messaging_enable_unsolicited_events_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_iridium_class_init (MMBroadbandModemIridiumClass *klass)

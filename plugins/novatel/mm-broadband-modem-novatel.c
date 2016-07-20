@@ -29,7 +29,9 @@
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-cdma.h"
 #include "mm-iface-modem-time.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #include "mm-broadband-modem-novatel.h"
 #include "mm-errors-types.h"
 #include "mm-modem-helpers.h"
@@ -38,15 +40,20 @@
 #include "mm-log.h"
 
 static void iface_modem_init (MMIfaceModem *iface);
-static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
 static void iface_modem_time_init (MMIfaceModemTime *iface);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 
 static MMIfaceModem *iface_modem_parent;
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemNovatel, mm_broadband_modem_novatel, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
+#if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init))
 
@@ -850,6 +857,8 @@ modem_load_signal_quality (MMIfaceModem *self,
         task);
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* Enable unsolicited events (SMS indications) (Messaging interface) */
 
@@ -874,6 +883,8 @@ messaging_enable_unsolicited_events (MMIfaceModemMessaging *self,
                               callback,
                               user_data);
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* Detailed registration state (CDMA interface) */
@@ -1294,12 +1305,16 @@ iface_modem_init (MMIfaceModem *iface)
     iface->load_signal_quality_finish = modem_load_signal_quality_finish;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
     iface->enable_unsolicited_events = messaging_enable_unsolicited_events;
     iface->enable_unsolicited_events_finish = messaging_enable_unsolicited_events_finish;
 }
+
+#endif
 
 static void
 iface_modem_cdma_init (MMIfaceModemCdma *iface)

@@ -52,10 +52,15 @@ noinst_PROGRAMS = \
 	test-charsets \
 	test-qcdm-serial-port \
 	test-at-serial-port \
+	$(NULL)
+
+if WITH_INTERFACE_MESSAGING
+noinst_PROGRAMS += \
 	test-sms-part-3gpp \
 	test-sms-part-cdma \
 	test-udev-rules \
 	$(NULL)
+endif
 
 if WITH_QMI
 noinst_PROGRAMS += test-modem-helpers-qmi

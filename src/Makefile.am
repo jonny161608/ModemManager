@@ -100,6 +100,10 @@ libhelpers_la_SOURCES = \
 	mm-modem-helpers.h \
 	mm-charsets.c \
 	mm-charsets.h \
+	$(NULL)
+
+if WITH_INTERFACE_MESSAGING
+libhelpers_la_SOURCES += \
 	mm-sms-part.h \
 	mm-sms-part.c \
 	mm-sms-part-3gpp.h \
@@ -107,6 +111,7 @@ libhelpers_la_SOURCES = \
 	mm-sms-part-cdma.h \
 	mm-sms-part-cdma.c \
 	$(NULL)
+endif
 
 nodist_libhelpers_la_SOURCES = $(HELPER_ENUMS_GENERATED)
 
@@ -304,12 +309,8 @@ ModemManager_SOURCES = \
 	mm-base-modem-at.c \
 	mm-base-modem.h \
 	mm-base-modem.c \
-	mm-base-sms.h \
-	mm-base-sms.c \
 	mm-base-call.h \
 	mm-base-call.c \
-	mm-sms-list.h \
-	mm-sms-list.c \
 	mm-call-list.h \
 	mm-call-list.c \
 	mm-iface-modem.h \
@@ -322,8 +323,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-cdma.c \
 	mm-iface-modem-simple.h \
 	mm-iface-modem-simple.c \
-	mm-iface-modem-messaging.h \
-	mm-iface-modem-messaging.c \
 	mm-iface-modem-voice.h \
 	mm-iface-modem-voice.c \
 	mm-iface-modem-time.h \
@@ -351,6 +350,18 @@ ModemManager_SOURCES += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_MESSAGING
+ModemManager_SOURCES += \
+	mm-base-sms.h \
+	mm-base-sms.c \
+	mm-sms-list.h \
+	mm-sms-list.c \
+	mm-iface-modem-messaging.h \
+	mm-iface-modem-messaging.c \
+	$(NULL)
+endif
+
+
 nodist_ModemManager_SOURCES = $(DAEMON_ENUMS_GENERATED)
 
 # Additional Polkit support
@@ -366,8 +377,6 @@ endif
 # Additional QMI support in ModemManager
 if WITH_QMI
 ModemManager_SOURCES += \
-	mm-sms-qmi.h \
-	mm-sms-qmi.c \
 	mm-sim-qmi.h \
 	mm-sim-qmi.c \
 	mm-bearer-qmi.h \
@@ -375,13 +384,19 @@ ModemManager_SOURCES += \
 	mm-broadband-modem-qmi.h \
 	mm-broadband-modem-qmi.c \
 	$(NULL)
+
+if WITH_INTERFACE_MESSAGING
+ModemManager_SOURCES += \
+	mm-sms-qmi.h \
+	mm-sms-qmi.c \
+	$(NULL)
+endif
+
 endif
 
 # Additional MBIM support in ModemManager
 if WITH_MBIM
 ModemManager_SOURCES += \
-	mm-sms-mbim.h \
-	mm-sms-mbim.c \
 	mm-sim-mbim.h \
 	mm-sim-mbim.c \
 	mm-bearer-mbim.h \
@@ -389,4 +404,12 @@ ModemManager_SOURCES += \
 	mm-broadband-modem-mbim.h \
 	mm-broadband-modem-mbim.c \
 	$(NULL)
+
+if WITH_INTERFACE_MESSAGING
+ModemManager_SOURCES += \
+	mm-sms-mbim.h \
+	mm-sms-mbim.c \
+	$(NULL)
+endif
+
 endif

@@ -29,7 +29,9 @@
 #include "mm-base-modem-at.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #include "mm-broadband-modem-thuraya.h"
 #include "mm-broadband-bearer.h"
 #include "mm-modem-helpers.h"
@@ -37,12 +39,18 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemThuraya, mm_broadband_modem_thuraya, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init) );
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
+                       )
 
 /*****************************************************************************/
 /* Operator Code and Name loading (3GPP interface) */
@@ -118,6 +126,8 @@ load_supported_modes (MMIfaceModem *self,
     g_simple_async_result_complete_in_idle (result);
     g_object_unref (result);
 }
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 /*****************************************************************************/
 /* Load supported SMS storages (Messaging interface) */
@@ -224,6 +234,8 @@ modem_messaging_load_supported_storages (MMIfaceModemMessaging *self,
                               result);
 }
 
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
+
 /*****************************************************************************/
 
 MMBroadbandModemThuraya *
@@ -282,12 +294,16 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->scan_networks_finish = NULL;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
     iface->load_supported_storages = modem_messaging_load_supported_storages;
     iface->load_supported_storages_finish = modem_messaging_load_supported_storages_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_thuraya_class_init (MMBroadbandModemThurayaClass *klass)

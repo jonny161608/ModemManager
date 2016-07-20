@@ -26,6 +26,8 @@
 #include "mm-modem-helpers.h"
 #include "mm-modem-helpers-thuraya.h"
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*************************************************************************/
 
 static MMSmsStorage
@@ -153,4 +155,4 @@ mm_thuraya_3gpp_parse_cpms_test_response (const gchar *reply,
     return FALSE;
 }
 
-/*****************************************************************************/
+#endif

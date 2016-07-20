@@ -35,9 +35,6 @@ gchar *mm_common_build_bands_string (const MMModemBand *bands,
 gchar *mm_common_build_ports_string (const MMModemPortInfo *ports,
                                      guint n_ports);
 
-gchar *mm_common_build_sms_storages_string (const MMSmsStorage *storages,
-                                            guint n_storages);
-
 gchar *mm_common_build_mode_combinations_string (const MMModemModeCombination *modes,
                                                  guint n_modes);
 
@@ -57,12 +54,6 @@ MMBearerIpFamily      mm_common_get_ip_type_from_string      (const gchar *str,
                                                               GError **error);
 MMBearerAllowedAuth   mm_common_get_allowed_auth_from_string (const gchar *str,
                                                               GError **error);
-MMSmsStorage          mm_common_get_sms_storage_from_string  (const gchar *str,
-                                                              GError **error);
-MMSmsCdmaTeleserviceId   mm_common_get_sms_cdma_teleservice_id_from_string   (const gchar *str,
-                                                                              GError **error);
-MMSmsCdmaServiceCategory mm_common_get_sms_cdma_service_category_from_string (const gchar *str,
-                                                                              GError **error);
 
 MMCallDirection     mm_common_get_call_direction_from_string    (const gchar *str,
                                                                  GError **error);
@@ -82,13 +73,6 @@ MMModemPortInfo *mm_common_ports_variant_to_array  (GVariant *variant,
 GVariant        *mm_common_ports_array_to_variant  (const MMModemPortInfo *ports,
                                                     guint n_ports);
 GVariant        *mm_common_ports_garray_to_variant (GArray *array);
-
-GArray       *mm_common_sms_storages_variant_to_garray (GVariant *variant);
-MMSmsStorage *mm_common_sms_storages_variant_to_array  (GVariant *variant,
-                                                        guint *n_storages);
-GVariant     *mm_common_sms_storages_array_to_variant  (const MMSmsStorage *storages,
-                                                        guint n_storages);
-GVariant     *mm_common_sms_storages_garray_to_variant (GArray *array);
 
 GArray      *mm_common_bands_variant_to_garray (GVariant *variant);
 MMModemBand *mm_common_bands_variant_to_array  (GVariant *variant,
@@ -157,13 +141,30 @@ gboolean  mm_get_double_from_match_info          (GMatchInfo *match_info,
 gchar    *mm_get_string_unquoted_from_match_info (GMatchInfo *match_info,
                                                   guint32 match_index);
 
-const gchar *mm_sms_delivery_state_get_string_extended (guint delivery_state);
-
 gint      mm_utils_hex2byte   (const gchar *hex);
 gchar    *mm_utils_hexstr2bin (const gchar *hex, gsize *out_len);
 gchar    *mm_utils_bin2hexstr (const guint8 *bin, gsize len);
 gboolean  mm_utils_ishexstr   (const gchar *hex);
 
 gboolean  mm_utils_check_for_single_value (guint32 value);
+
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+gchar                    *mm_common_build_sms_storages_string                 (const MMSmsStorage *storages,
+                                                                               guint n_storages);
+MMSmsStorage              mm_common_get_sms_storage_from_string               (const gchar *str,
+                                                                               GError **error);
+MMSmsCdmaTeleserviceId    mm_common_get_sms_cdma_teleservice_id_from_string   (const gchar *str,
+                                                                               GError **error);
+MMSmsCdmaServiceCategory  mm_common_get_sms_cdma_service_category_from_string (const gchar *str,
+                                                                               GError **error);
+GArray                   *mm_common_sms_storages_variant_to_garray            (GVariant *variant);
+MMSmsStorage             *mm_common_sms_storages_variant_to_array             (GVariant *variant,
+                                                                               guint *n_storages);
+GVariant                 *mm_common_sms_storages_array_to_variant             (const MMSmsStorage *storages,
+                                                                               guint n_storages);
+GVariant                 *mm_common_sms_storages_garray_to_variant            (GArray *array);
+const gchar              *mm_sms_delivery_state_get_string_extended           (guint delivery_state);
+#endif
 
 #endif /* MM_COMMON_HELPERS_H */

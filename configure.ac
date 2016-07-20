@@ -376,6 +376,20 @@ fi
 AC_SUBST(MM_INTERFACE_LOCATION_SUPPORTED)
 
 dnl-----------------------------------------------------------------------------
+dnl Messaging interface
+dnl
+
+AC_ARG_WITH(interface-messaging, AS_HELP_STRING([--without-interface-messaging], [Build without messaging interface support]), [], [with_interface_messaging=yes])
+AM_CONDITIONAL(WITH_INTERFACE_MESSAGING, test "x$with_interface_messaging" = "xyes")
+if test "x$with_interface_messaging" = "xyes"; then
+    MM_INTERFACE_MESSAGING_SUPPORTED=1
+else
+    with_interface_messaging=no
+    MM_INTERFACE_MESSAGING_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_MESSAGING_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Compiler warnings
 dnl
 
@@ -470,6 +484,7 @@ echo "
 
     Optional interfaces:
       location:                ${with_interface_location}
+      messaging:               ${with_interface_messaging}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

@@ -32,7 +32,9 @@
 #include "mm-errors-types.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
 #endif
@@ -44,7 +46,10 @@
 
 static void iface_modem_init      (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
@@ -56,7 +61,9 @@ static MMIfaceModem3gpp *iface_modem_3gpp_parent;
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemCinterion, mm_broadband_modem_cinterion, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
+#if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
@@ -92,6 +99,8 @@ struct _MMBroadbandModemCinterionPrivate {
     FeatureSupport swwan_support;
     FeatureSupport sind_psinfo_support;
 };
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 /*****************************************************************************/
 /* Enable unsolicited events (SMS indications) (Messaging interface) */
@@ -306,6 +315,8 @@ messaging_check_support (MMIfaceModemMessaging *self,
                               (GAsyncReadyCallback)cnmi_format_check_ready,
                               result);
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* MODEM POWER DOWN */
@@ -1986,6 +1997,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->register_in_network_finish = register_in_network_finish;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -1994,6 +2007,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->enable_unsolicited_events = messaging_enable_unsolicited_events;
     iface->enable_unsolicited_events_finish = messaging_enable_unsolicited_events_finish;
 }
+
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 

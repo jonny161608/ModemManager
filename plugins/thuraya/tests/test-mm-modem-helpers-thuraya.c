@@ -32,6 +32,8 @@
 #define trace(...)
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* Test CPMS response */
 
@@ -89,6 +91,8 @@ test_cpms_response_thuraya (void *f, gpointer d)
     g_array_unref (mem3);
 }
 
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
+
 /*****************************************************************************/
 
 void
@@ -122,7 +126,9 @@ int main (int argc, char **argv)
 
     suite = g_test_get_root ();
 
-    g_test_suite_add (suite, TESTCASE (test_cpms_response_thuraya,      NULL));
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+    g_test_suite_add (suite, TESTCASE (test_cpms_response_thuraya, NULL));
+#endif
 
     result = g_test_run ();
 

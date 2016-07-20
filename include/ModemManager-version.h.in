@@ -82,4 +82,19 @@
  */
 #define MM_INTERFACE_LOCATION_SUPPORTED @MM_INTERFACE_LOCATION_SUPPORTED@
 
+/**
+ * MM_INTERFACE_MESSAGING_SUPPORTED:
+ *
+ * Symbol to expose whether Messaging interface is supported. The symbol is always
+ * defined and set to either or 1 or 0.
+ *
+ * E.g.:
+ * |[
+ *  #if MM_INTERFACE_MESSAGING_SUPPORTED
+ *      // do something
+ *  #endif
+ * ]|
+ */
+#define MM_INTERFACE_MESSAGING_SUPPORTED @MM_INTERFACE_MESSAGING_SUPPORTED@
+
 #endif /* _MM_VERSION_H_ */

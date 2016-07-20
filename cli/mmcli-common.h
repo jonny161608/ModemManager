@@ -71,6 +71,8 @@ MMSim *mmcli_get_sim_sync   (GDBusConnection *connection,
                              MMManager **manager,
                              MMObject **object);
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 void   mmcli_get_sms        (GDBusConnection *connection,
                              const gchar *path_or_index,
                              GCancellable *cancellable,
@@ -83,6 +85,8 @@ MMSms *mmcli_get_sms_sync   (GDBusConnection *connection,
                              const gchar *path_or_index,
                              MMManager **manager,
                              MMObject **object);
+
+#endif
 
 void    mmcli_get_call        (GDBusConnection *connection,
                                const gchar *path_or_index,
@@ -104,7 +108,9 @@ GOptionGroup *mmcli_get_common_option_group (void);
 const gchar  *mmcli_get_common_modem_string (void);
 const gchar  *mmcli_get_common_bearer_string (void);
 const gchar  *mmcli_get_common_sim_string (void);
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 const gchar  *mmcli_get_common_sms_string (void);
+#endif
 const gchar  *mmcli_get_common_call_string (void);
 
 gchar *mmcli_prefix_newlines (const gchar *prefix,

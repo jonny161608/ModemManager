@@ -82,6 +82,8 @@ MMModemCdmaRegistrationState mm_modem_cdma_registration_state_from_qmi_registrat
 
 MMModemCdmaActivationState mm_modem_cdma_activation_state_from_qmi_activation_state (QmiDmsActivationState state);
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* QMI/WMS to MM translations */
 
@@ -89,6 +91,8 @@ QmiWmsStorageType mm_sms_storage_to_qmi_storage_type (MMSmsStorage storage);
 MMSmsStorage mm_sms_storage_from_qmi_storage_type (QmiWmsStorageType qmi_storage);
 
 MMSmsState mm_sms_state_from_qmi_message_tag (QmiWmsMessageTagType tag);
+
+#endif
 
 /*****************************************************************************/
 /* QMI/WDS to MM translations */

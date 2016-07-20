@@ -191,28 +191,6 @@ gboolean mm_3gpp_parse_creg_response (GMatchInfo *info,
                                       gboolean *out_cereg,
                                       GError **error);
 
-/* AT+CMGF=? (SMS message format) response parser */
-gboolean mm_3gpp_parse_cmgf_test_response (const gchar *reply,
-                                           gboolean *sms_pdu_supported,
-                                           gboolean *sms_text_supported,
-                                           GError **error);
-
-/* AT+CPMS=? (Preferred SMS storage) response parser */
-gboolean mm_3gpp_parse_cpms_test_response (const gchar *reply,
-                                           GArray **mem1,
-                                           GArray **mem2,
-                                           GArray **mem3);
-
-/* AT+CPMS? (Current SMS storage) response parser */
-gboolean mm_3gpp_parse_cpms_query_response (const gchar *reply,
-                                            MMSmsStorage *mem1,
-                                            MMSmsStorage *mem2,
-                                            GError** error);
-gboolean mm_3gpp_get_cpms_storage_match (GMatchInfo *match_info,
-                                         const gchar *match_name,
-                                         MMSmsStorage *storage,
-                                         GError **error);
-
 /* AT+CSCS=? (Supported charsets) response parser */
 gboolean mm_3gpp_parse_cscs_test_response (const gchar *reply,
                                            MMModemCharset *out_charsets);
@@ -264,23 +242,6 @@ gint         mm_3gpp_cind_response_get_max       (MM3gppCindResponse *r);
 /* AT+CIND? (Current indicators) response parser */
 GByteArray *mm_3gpp_parse_cind_read_response (const gchar *reply,
                                               GError **error);
-
-/* AT+CMGL=4 (list sms parts) response parser */
-typedef struct {
-    gint index;
-    gint status;
-    gchar *pdu;
-} MM3gppPduInfo;
-void   mm_3gpp_pdu_info_free           (MM3gppPduInfo *info);
-void   mm_3gpp_pdu_info_list_free      (GList *info_list);
-GList *mm_3gpp_parse_pdu_cmgl_response (const gchar *str,
-                                        GError **error);
-
-/* AT+CMGR (Read message) response parser */
-MM3gppPduInfo *mm_3gpp_parse_cmgr_read_response (const gchar *reply,
-                                                 guint index,
-                                                 GError **error);
-
 
 /* AT+CRSM response parser */
 gboolean mm_3gpp_parse_crsm_response (const gchar *reply,
@@ -347,6 +308,52 @@ const gchar      *mm_3gpp_get_pdp_type_from_ip_family (MMBearerIpFamily family);
 MMBearerIpFamily  mm_3gpp_get_ip_family_from_pdp_type (const gchar *pdp_type);
 
 char *mm_3gpp_parse_iccid (const char *raw_iccid, GError **error);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
+/*****************************************************************************/
+/* Messaging specific helpers and utilities */
+/*****************************************************************************/
+
+/* AT+CMGF=? (SMS message format) response parser */
+gboolean mm_3gpp_parse_cmgf_test_response (const gchar *reply,
+                                           gboolean *sms_pdu_supported,
+                                           gboolean *sms_text_supported,
+                                           GError **error);
+
+/* AT+CPMS=? (Preferred SMS storage) response parser */
+gboolean mm_3gpp_parse_cpms_test_response (const gchar *reply,
+                                           GArray **mem1,
+                                           GArray **mem2,
+                                           GArray **mem3);
+
+/* AT+CPMS? (Current SMS storage) response parser */
+gboolean mm_3gpp_parse_cpms_query_response (const gchar *reply,
+                                            MMSmsStorage *mem1,
+                                            MMSmsStorage *mem2,
+                                            GError** error);
+gboolean mm_3gpp_get_cpms_storage_match (GMatchInfo *match_info,
+                                         const gchar *match_name,
+                                         MMSmsStorage *storage,
+                                         GError **error);
+
+/* AT+CMGL=4 (list sms parts) response parser */
+typedef struct {
+    gint index;
+    gint status;
+    gchar *pdu;
+} MM3gppPduInfo;
+void   mm_3gpp_pdu_info_free           (MM3gppPduInfo *info);
+void   mm_3gpp_pdu_info_list_free      (GList *info_list);
+GList *mm_3gpp_parse_pdu_cmgl_response (const gchar *str,
+                                        GError **error);
+
+/* AT+CMGR (Read message) response parser */
+MM3gppPduInfo *mm_3gpp_parse_cmgr_read_response (const gchar *reply,
+                                                 guint index,
+                                                 GError **error);
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* CDMA specific helpers and utilities */

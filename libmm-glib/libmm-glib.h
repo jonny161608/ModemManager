@@ -42,7 +42,9 @@
 # if MM_INTERFACE_LOCATION_SUPPORTED
 #  include <mm-modem-location.h>
 # endif
-# include <mm-modem-messaging.h>
+# if MM_INTERFACE_MESSAGING_SUPPORTED
+#  include <mm-modem-messaging.h>
+# endif
 # include <mm-modem-voice.h>
 # include <mm-modem-time.h>
 # include <mm-modem-firmware.h>
@@ -60,7 +62,9 @@
 #include <mm-helper-types.h>
 #include <mm-simple-status.h>
 #include <mm-simple-connect-properties.h>
-#include <mm-sms-properties.h>
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include <mm-sms-properties.h>
+#endif
 #include <mm-call-properties.h>
 #include <mm-bearer-properties.h>
 #include <mm-bearer-ip-config.h>
@@ -85,7 +89,9 @@
 #include <mm-gdbus-modem.h>
 #include <mm-gdbus-bearer.h>
 #include <mm-gdbus-sim.h>
-#include <mm-gdbus-sms.h>
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include <mm-gdbus-sms.h>
+#endif
 #include <mm-gdbus-call.h>
 
 #endif /* _LIBMM_GLIB_H_ */

@@ -30,7 +30,6 @@
 #include "mm-errors-types.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-messaging.h"
 #include "mm-log.h"
 #include "mm-modem-helpers.h"
 #include "mm-serial-parsers.h"

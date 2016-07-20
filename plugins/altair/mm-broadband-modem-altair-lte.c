@@ -34,7 +34,9 @@
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-3gpp-ussd.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #include "mm-log.h"
 #include "mm-modem-helpers.h"
 #include "mm-modem-helpers-altair-lte.h"
@@ -44,13 +46,19 @@
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemAltairLte, mm_broadband_modem_altair_lte, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init));
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
+                       )
 
 struct _MMBroadbandModemAltairLtePrivate {
     /* Regex for SIM refresh notifications */
@@ -1403,6 +1411,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->load_subscription_state_finish = modem_3gpp_load_subscription_state_finish;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -1410,6 +1420,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->check_support = NULL;
     iface->check_support_finish = NULL;
 }
+
+#endif
 
 static void
 mm_broadband_modem_altair_lte_class_init (MMBroadbandModemAltairLteClass *klass)

@@ -23,20 +23,29 @@
 
 #include "ModemManager.h"
 #include "mm-iface-modem.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+#endif
 #include "mm-log.h"
 #include "mm-errors-types.h"
 #include "mm-broadband-modem-pantech.h"
 #include "mm-sim-pantech.h"
 
 static void iface_modem_init (MMIfaceModem *iface);
-static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 static MMIfaceModemMessaging *iface_modem_messaging_parent;
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemPantech, mm_broadband_modem_pantech, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init))
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
+                        )
+
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 
 /*****************************************************************************/
 /* Load supported SMS storages (Messaging interface) */
@@ -82,6 +91,8 @@ load_supported_storages (MMIfaceModemMessaging *self,
     /* Chain up parent's loading */
     iface_modem_messaging_parent->load_supported_storages (self, callback, user_data);
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 /*****************************************************************************/
 /* Create SIM (Modem interface) */
@@ -175,6 +186,8 @@ iface_modem_init (MMIfaceModem *iface)
     iface->modem_after_sim_unlock_finish = modem_after_sim_unlock_finish;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -183,6 +196,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->load_supported_storages = load_supported_storages;
     iface->load_supported_storages_finish = load_supported_storages_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_pantech_class_init (MMBroadbandModemPantechClass *klass)

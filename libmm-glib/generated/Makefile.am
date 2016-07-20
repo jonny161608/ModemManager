@@ -11,7 +11,6 @@ GENERATED_H = \
 	mm-errors-types.h \
 	mm-gdbus-manager.h \
 	mm-gdbus-sim.h \
-	mm-gdbus-sms.h \
 	mm-gdbus-call.h \
 	mm-gdbus-bearer.h \
 	mm-gdbus-modem.h \
@@ -23,7 +22,6 @@ GENERATED_C = \
 	mm-errors-quarks.c \
 	mm-gdbus-manager.c \
 	mm-gdbus-sim.c \
-	mm-gdbus-sms.c \
 	mm-gdbus-call.c \
 	mm-gdbus-bearer.c \
 	mm-gdbus-modem.c   \
@@ -32,11 +30,9 @@ GENERATED_C = \
 GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Sim.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Sms.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Call.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Bearer.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
@@ -52,6 +48,15 @@ if WITH_INTERFACE_LOCATION
 GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml
 endif
 
+if WITH_INTERFACE_MESSAGING
+GENERATED_H   += mm-gdbus-sms.h
+GENERATED_C   += mm-gdbus-sms.c
+GENERATED_DOC += \
+	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml \
+	mm-gdbus-doc-org.freedesktop.ModemManager1.Sms.xml \
+	$(NULL)
+endif
+
 BUILT_SOURCES = $(GENERATED_H) $(GENERATED_C) $(GENERATED_DOC)
 
 # Enum types
@@ -61,6 +66,10 @@ ENUM_FILES = \
 
 if WITH_INTERFACE_LOCATION
 ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-location.h
+endif
+
+if WITH_INTERFACE_MESSAGING
+ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-messaging.h
 endif
 
 mm-enums-types.h: Makefile.am $(ENUM_FILES) $(top_srcdir)/build-aux/mm-enums-template.h
@@ -121,7 +130,6 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-modem.h \
 	mm-gdbus-modem.c \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
@@ -137,9 +145,12 @@ if WITH_INTERFACE_LOCATION
 mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml
 endif
 
+if WITH_INTERFACE_MESSAGING
+mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml
+endif
+
 mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.xml \
-	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Voice.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Time.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Firmware.xml \
@@ -153,6 +164,10 @@ mm_gdbus_modem_deps = \
 
 if WITH_INTERFACE_LOCATION
 mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Location.xml
+endif
+
+if WITH_INTERFACE_MESSAGING
+mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Messaging.xml
 endif
 
 mm-gdbus-modem.c: $(mm_gdbus_modem_deps)
@@ -210,6 +225,8 @@ mm-gdbus-bearer.c: $(mm_gdbus_bearer_deps)
 $(filter-out mm-gdbus-bearer.c, $(mm_gdbus_bearer_generated)): $(mm_gdbus_bearer_deps) mm-gdbus-bearer.c
 	@: # nothing to do, generated as a side-effect of the .c
 
+if WITH_INTERFACE_MESSAGING
+
 # SMS interface
 mm_gdbus_sms_generated = \
 	mm-gdbus-sms.h \
@@ -230,6 +247,8 @@ mm-gdbus-sms.c: $(mm_gdbus_sms_deps)
 		$(NULL)
 $(filter-out mm-gdbus-sms.c, $(mm_gdbus_sms_generated)): $(mm_gdbus_sms_deps) mm-gdbus-sms.c
 	@: # nothing to do, generated as a side-effect of the .c
+
+endif
 
 # Call interface
 mm_gdbus_call_generated = \

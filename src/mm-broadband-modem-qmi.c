@@ -34,7 +34,12 @@
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-3gpp-ussd.h"
 #include "mm-iface-modem-cdma.h"
-#include "mm-iface-modem-messaging.h"
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+# include "mm-iface-modem-messaging.h"
+# include "mm-sms-qmi.h"
+# include "mm-sms-part-3gpp.h"
+# include "mm-sms-part-cdma.h"
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
 #endif
@@ -43,20 +48,19 @@
 #include "mm-iface-modem-oma.h"
 #include "mm-sim-qmi.h"
 #include "mm-bearer-qmi.h"
-#include "mm-sms-qmi.h"
-#include "mm-sms-part-3gpp.h"
-#include "mm-sms-part-cdma.h"
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
-static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 static void iface_modem_oma_init (MMIfaceModemOma *iface);
 static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 static MMIfaceModemMessaging *iface_modem_messaging_parent;
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
@@ -68,7 +72,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BRO
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
+#if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
@@ -115,11 +121,13 @@ struct _MMBroadbandModemQmiPrivate {
     guint activation_event_report_indication_id;
     gpointer activation_ctx;
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
     /* Messaging helpers */
     gboolean messaging_fallback_at;
     gboolean messaging_unsolicited_events_enabled;
     gboolean messaging_unsolicited_events_setup;
     guint messaging_event_report_indication_id;
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
     /* Location helpers */
@@ -7322,6 +7330,8 @@ modem_cdma_setup_unsolicited_events (MMIfaceModemCdma *self,
                                              user_data);
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (Messaging interface) */
 
@@ -8413,6 +8423,8 @@ messaging_create_sms (MMIfaceModemMessaging *_self)
 
     return mm_sms_qmi_new (MM_BASE_MODEM (self));
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 
@@ -11431,9 +11443,11 @@ initialization_started (MMBroadbandModem *self,
     i = 0;
     ctx->services[i++] = QMI_SERVICE_DMS;
     ctx->services[i++] = QMI_SERVICE_NAS;
-    ctx->services[i++] = QMI_SERVICE_WMS;
     ctx->services[i++] = QMI_SERVICE_OMA;
     ctx->services[i++] = QMI_SERVICE_UIM;
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+    ctx->services[i++] = QMI_SERVICE_WMS;
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
     ctx->services[i++] = QMI_SERVICE_PDS;
 #endif
@@ -11673,6 +11687,8 @@ iface_modem_cdma_init (MMIfaceModemCdma *iface)
     iface->activate_manual_finish = modem_cdma_activate_manual_finish;
 }
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
+
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 {
@@ -11698,6 +11714,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->disable_unsolicited_events_finish = messaging_disable_unsolicited_events_finish;
     iface->create_sms = messaging_create_sms;
 }
+
+#endif /* MM_INTERFACE_MESSAGING_SUPPORTED */
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 

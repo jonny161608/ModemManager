@@ -79,6 +79,7 @@ void          mmcli_modem_location_run_synchronous    (GDBusConnection *connecti
 void          mmcli_modem_location_shutdown           (void);
 #endif
 
+#if MM_INTERFACE_MESSAGING_SUPPORTED
 /* Messaging group */
 GOptionGroup *mmcli_modem_messaging_get_option_group   (void);
 gboolean      mmcli_modem_messaging_options_enabled    (void);
@@ -86,6 +87,7 @@ void          mmcli_modem_messaging_run_asynchronous   (GDBusConnection *connect
                                                         GCancellable    *cancellable);
 void          mmcli_modem_messaging_run_synchronous    (GDBusConnection *connection);
 void          mmcli_modem_messaging_shutdown           (void);
+#endif
 
 /* Voice group */
 GOptionGroup *mmcli_modem_voice_get_option_group   (void);
