@@ -3756,6 +3756,8 @@ mm_parse_gsn (const char *gsn,
     return success;
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* +CCLK response parser */
 
@@ -3855,6 +3857,8 @@ mm_parse_cclk_response (const char *response,
 
     return ret;
 }
+
+#endif /*  MM_INTERFACE_TIME_SUPPORTED */
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 

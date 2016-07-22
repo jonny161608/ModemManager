@@ -24,8 +24,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-cdma.c \
 	mm-modem-simple.h \
 	mm-modem-simple.c \
-	mm-modem-time.h \
-	mm-modem-time.c \
 	mm-modem-firmware.h \
 	mm-modem-firmware.c \
 	mm-modem-signal.h \
@@ -56,8 +54,6 @@ libmm_glib_la_SOURCES = \
 	mm-bearer-stats.c \
 	mm-unlock-retries.h \
 	mm-unlock-retries.c \
-	mm-network-timezone.h \
-	mm-network-timezone.c \
 	mm-firmware-properties.h \
 	mm-firmware-properties.c \
 	mm-cdma-manual-activation-properties.h \
@@ -92,6 +88,15 @@ libmm_glib_la_SOURCES += \
 	mm-modem-messaging.c \
 	mm-sms-properties.h \
 	mm-sms-properties.c \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_TIME
+libmm_glib_la_SOURCES += \
+	mm-modem-time.h \
+	mm-modem-time.c \
+	mm-network-timezone.h \
+	mm-network-timezone.c \
 	$(NULL)
 endif
 
@@ -132,7 +137,6 @@ include_HEADERS = \
 	mm-modem-3gpp.h \
 	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
-	mm-modem-time.h \
 	mm-modem-firmware.h \
 	mm-modem-signal.h \
 	mm-modem-oma.h \
@@ -148,7 +152,6 @@ include_HEADERS = \
 	mm-bearer-ip-config.h \
 	mm-bearer-stats.h \
 	mm-unlock-retries.h \
-	mm-network-timezone.h \
 	mm-firmware-properties.h \
 	mm-cdma-manual-activation-properties.h \
 	mm-signal.h \
@@ -171,6 +174,13 @@ include_HEADERS += \
 	mm-modem-messaging.h \
 	mm-sms.h \
 	mm-sms-properties.h \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_TIME
+include_HEADERS += \
+	mm-modem-time.h \
+	mm-network-timezone.h \
 	$(NULL)
 endif
 

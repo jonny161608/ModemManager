@@ -325,8 +325,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-simple.c \
 	mm-iface-modem-voice.h \
 	mm-iface-modem-voice.c \
-	mm-iface-modem-time.h \
-	mm-iface-modem-time.c \
 	mm-iface-modem-firmware.h \
 	mm-iface-modem-firmware.c \
 	mm-iface-modem-signal.h \
@@ -361,6 +359,12 @@ ModemManager_SOURCES += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_TIME
+ModemManager_SOURCES += \
+	mm-iface-modem-time.h \
+	mm-iface-modem-time.c \
+	$(NULL)
+endif
 
 nodist_ModemManager_SOURCES = $(DAEMON_ENUMS_GENERATED)
 

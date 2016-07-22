@@ -21,7 +21,6 @@ mmcli_SOURCES = \
 	mmcli-modem-cdma.c \
 	mmcli-modem-simple.c \
 	mmcli-modem-voice.c \
-	mmcli-modem-time.c \
 	mmcli-modem-firmware.c \
 	mmcli-modem-signal.c \
 	mmcli-modem-oma.c \
@@ -39,6 +38,10 @@ mmcli_SOURCES += \
 	mmcli-modem-messaging.c \
 	mmcli-sms.c \
 	$(NULL)
+endif
+
+if WITH_INTERFACE_TIME
+mmcli_SOURCES += mmcli-modem-time.c
 endif
 
 mmcli_LDADD = \

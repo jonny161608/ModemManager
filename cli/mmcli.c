@@ -208,8 +208,10 @@ main (gint argc, gchar **argv)
 #endif
     g_option_context_add_group (context,
                                 mmcli_modem_voice_get_option_group ());
+#if MM_INTERFACE_TIME_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_time_get_option_group ());
+#endif
     g_option_context_add_group (context,
                                 mmcli_modem_firmware_get_option_group ());
     g_option_context_add_group (context,
@@ -343,6 +345,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_voice_run_synchronous (connection);
     }
+#if MM_INTERFACE_TIME_SUPPORTED
     /* Modem Time options? */
     else if (mmcli_modem_time_options_enabled ()) {
         if (async_flag)
@@ -350,6 +353,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_time_run_synchronous (connection);
     }
+#endif
     /* Modem Firmware options? */
     else if (mmcli_modem_firmware_options_enabled ()) {
         if (async_flag)
@@ -409,8 +413,10 @@ main (gint argc, gchar **argv)
 #endif
     } else if (mmcli_modem_voice_options_enabled ()) {
         mmcli_modem_voice_shutdown ();
+#if MM_INTERFACE_TIME_SUPPORTED
     } else if (mmcli_modem_time_options_enabled ()) {
         mmcli_modem_time_shutdown ();
+#endif
     } else if (mmcli_modem_firmware_options_enabled ()) {
         mmcli_modem_firmware_shutdown ();
     } else if (mmcli_modem_signal_options_enabled ()) {

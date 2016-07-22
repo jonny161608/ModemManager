@@ -381,6 +381,8 @@ mm_object_peek_modem_voice (MMObject *self)
     return (MMModemVoice *)mm_gdbus_object_peek_modem_voice (MM_GDBUS_OBJECT (self));
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 
 /**
@@ -416,6 +418,8 @@ mm_object_peek_modem_time (MMObject *self)
 
     return (MMModemTime *)mm_gdbus_object_peek_modem_time (MM_GDBUS_OBJECT (self));
 }
+
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 /*****************************************************************************/
 

@@ -390,6 +390,20 @@ fi
 AC_SUBST(MM_INTERFACE_MESSAGING_SUPPORTED)
 
 dnl-----------------------------------------------------------------------------
+dnl Time interface
+dnl
+
+AC_ARG_WITH(interface-time, AS_HELP_STRING([--without-interface-time], [Build without time interface support]), [], [with_interface_time=yes])
+AM_CONDITIONAL(WITH_INTERFACE_TIME, test "x$with_interface_time" = "xyes")
+if test "x$with_interface_time" = "xyes"; then
+    MM_INTERFACE_TIME_SUPPORTED=1
+else
+    with_interface_time=no
+    MM_INTERFACE_TIME_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_TIME_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Compiler warnings
 dnl
 
@@ -485,6 +499,7 @@ echo "
     Optional interfaces:
       location:                ${with_interface_location}
       messaging:               ${with_interface_messaging}
+      time:                    ${with_interface_time}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

@@ -3178,6 +3178,8 @@ test_supported_capability_filter (void *f, gpointer d)
     g_array_unref (combinations);
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Test +CCLK responses */
 
@@ -3277,6 +3279,7 @@ test_cclk_response (void)
     }
 }
 
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 /*****************************************************************************/
 /* Test +CRSM responses */
@@ -3936,7 +3939,9 @@ int main (int argc, char **argv)
 
     g_test_suite_add (suite, TESTCASE (test_supported_capability_filter, NULL));
 
+#if MM_INTERFACE_TIME_SUPPORTED
     g_test_suite_add (suite, TESTCASE (test_cclk_response, NULL));
+#endif
 
     g_test_suite_add (suite, TESTCASE (test_crsm_response, NULL));
 

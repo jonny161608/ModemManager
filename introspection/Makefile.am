@@ -16,7 +16,6 @@ xml_DATA = \
 	org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	org.freedesktop.ModemManager1.Modem.Oma.xml \
 	org.freedesktop.ModemManager1.Modem.Signal.xml \
-	org.freedesktop.ModemManager1.Modem.Time.xml \
 	org.freedesktop.ModemManager1.Modem.Voice.xml \
 	org.freedesktop.ModemManager1.Call.xml \
 	$(NULL)
@@ -27,6 +26,10 @@ endif
 
 if WITH_INTERFACE_MESSAGING
 xml_DATA += org.freedesktop.ModemManager1.Modem.Messaging.xml
+endif
+
+if WITH_INTERFACE_TIME
+xml_DATA += org.freedesktop.ModemManager1.Modem.Time.xml
 endif
 
 all.xml: $(xml_DATA) Makefile

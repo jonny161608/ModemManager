@@ -28,7 +28,9 @@
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-cdma.h"
-#include "mm-iface-modem-time.h"
+#if MM_INTERFACE_TIME_SUPPORTED
+# include "mm-iface-modem-time.h"
+#endif
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 # include "mm-iface-modem-messaging.h"
 #endif
@@ -41,7 +43,10 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
+
+#if MM_INTERFACE_TIME_SUPPORTED
 static void iface_modem_time_init (MMIfaceModemTime *iface);
+#endif
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
@@ -55,7 +60,10 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemNovatel, mm_broadband_modem_novatel, MM_
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
 #endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init))
+#if MM_INTERFACE_TIME_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
+#endif
+                        )
 
 /*****************************************************************************/
 /* Load supported modes (Modem interface) */
@@ -1113,6 +1121,8 @@ modem_cdma_get_detailed_registration_state (MMIfaceModemCdma *self,
     g_byte_array_unref (nweri);
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Load network time (Time interface) */
 
@@ -1265,6 +1275,8 @@ modem_time_check_support (MMIfaceModemTime *self,
                               user_data);
 }
 
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
+
 /*****************************************************************************/
 
 MMBroadbandModemNovatel *
@@ -1323,6 +1335,8 @@ iface_modem_cdma_init (MMIfaceModemCdma *iface)
     iface->get_detailed_registration_state_finish = modem_cdma_get_detailed_registration_state_finish;
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 static void
 iface_modem_time_init (MMIfaceModemTime *iface)
 {
@@ -1333,6 +1347,8 @@ iface_modem_time_init (MMIfaceModemTime *iface)
     iface->load_network_timezone = modem_time_load_network_timezone;
     iface->load_network_timezone_finish = modem_time_load_network_timezone_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_novatel_class_init (MMBroadbandModemNovatelClass *klass)

@@ -30,7 +30,9 @@
 #include "mm-errors-types.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-time.h"
+#if MM_INTERFACE_TIME_SUPPORTED
+# include "mm-iface-modem-time.h"
+#endif
 #include "mm-base-modem-at.h"
 #include "mm-bearer-list.h"
 #include "mm-broadband-bearer-icera.h"
@@ -38,7 +40,10 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
+
+#if MM_INTERFACE_TIME_SUPPORTED
 static void iface_modem_time_init (MMIfaceModemTime *iface);
+#endif
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
@@ -46,7 +51,10 @@ static MMIfaceModem3gpp *iface_modem_3gpp_parent;
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemIcera, mm_broadband_modem_icera, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init))
+#if MM_INTERFACE_TIME_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
+#endif
+                        )
 
 enum {
     PROP_0,
@@ -1547,6 +1555,8 @@ modem_set_current_bands (MMIfaceModem *self,
                               task);
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Load network timezone (Time interface) */
 
@@ -1736,6 +1746,8 @@ modem_time_check_support (MMIfaceModemTime *self,
     g_object_unref (task);
 }
 
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
+
 /*****************************************************************************/
 /* Setup ports (Broadband modem class) */
 
@@ -1882,6 +1894,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->disable_unsolicited_events_finish = modem_3gpp_enable_disable_unsolicited_events_finish;
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 static void
 iface_modem_time_init (MMIfaceModemTime *iface)
 {
@@ -1892,6 +1906,8 @@ iface_modem_time_init (MMIfaceModemTime *iface)
     iface->load_network_timezone = modem_time_load_network_timezone;
     iface->load_network_timezone_finish = modem_time_load_network_timezone_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_icera_class_init (MMBroadbandModemIceraClass *klass)

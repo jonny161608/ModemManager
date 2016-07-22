@@ -123,6 +123,8 @@ const MMHuaweiSyscfgexCombination *mm_huawei_parse_syscfgex_response (const gcha
                                                                       const GArray *supported_mode_combinations,
                                                                       GError **error);
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* ^NWTIME response parser */
 
@@ -138,6 +140,8 @@ gboolean mm_huawei_parse_time_response (const gchar *response,
                                         gchar **iso8601p,
                                         MMNetworkTimezone **tzp,
                                         GError **error);
+
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 /*****************************************************************************/
 /* ^HCSQ response parser */

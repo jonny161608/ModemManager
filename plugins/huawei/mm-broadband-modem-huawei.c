@@ -42,7 +42,9 @@
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
 #endif
-#include "mm-iface-modem-time.h"
+#if MM_INTERFACE_TIME_SUPPORTED
+# include "mm-iface-modem-time.h"
+#endif
 #include "mm-iface-modem-cdma.h"
 #include "mm-iface-modem-signal.h"
 #include "mm-iface-modem-voice.h"
@@ -57,7 +59,6 @@ static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
-static void iface_modem_time_init (MMIfaceModemTime *iface);
 static void iface_modem_voice_init (MMIfaceModemVoice *iface);
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
@@ -71,6 +72,10 @@ static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static MMIfaceModemLocation *iface_modem_location_parent;
 #endif
 
+#if MM_INTERFACE_TIME_SUPPORTED
+static void iface_modem_time_init (MMIfaceModemTime *iface);
+#endif
+
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
@@ -79,9 +84,12 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TY
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
+#if MM_INTERFACE_TIME_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
+#endif
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_VOICE, iface_modem_voice_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init))
+                        )
 
 typedef enum {
     FEATURE_SUPPORT_UNKNOWN,
@@ -144,8 +152,11 @@ struct _MMBroadbandModemHuaweiPrivate {
     FeatureSupport syscfg_support;
     FeatureSupport syscfgex_support;
     FeatureSupport prefmode_support;
+
+#if MM_INTERFACE_TIME_SUPPORTED
     FeatureSupport time_support;
     FeatureSupport nwtime_support;
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
     MMModemLocationSource enabled_sources;
@@ -3235,6 +3246,8 @@ create_call (MMIfaceModemVoice *self)
     return mm_call_huawei_new (MM_BASE_MODEM (self));
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Load network time (Time interface) */
 
@@ -3307,6 +3320,8 @@ modem_time_load_network_time_or_zone (MMIfaceModemTime *_self,
                               callback,
                               user_data);
 }
+
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 /*****************************************************************************/
 /* Power state loading (Modem interface) */
@@ -3877,6 +3892,8 @@ enable_location_gathering (MMIfaceModemLocation *self,
 
 #endif /* MM_INTERFACE_LOCATION_SUPPORTED */
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (Time interface) */
 
@@ -3953,6 +3970,8 @@ modem_time_check_support (MMIfaceModemTime *self,
                                (GAsyncReadyCallback)modem_time_check_ready,
                                task);
 }
+
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 /*****************************************************************************/
 /* Check support (Signal interface) */
@@ -4336,8 +4355,11 @@ mm_broadband_modem_huawei_init (MMBroadbandModemHuawei *self)
     self->priv->syscfg_support = FEATURE_SUPPORT_UNKNOWN;
     self->priv->syscfgex_support = FEATURE_SUPPORT_UNKNOWN;
     self->priv->prefmode_support = FEATURE_SUPPORT_UNKNOWN;
+
+#if MM_INTERFACE_TIME_SUPPORTED
     self->priv->nwtime_support = FEATURE_SUPPORT_UNKNOWN;
     self->priv->time_support = FEATURE_SUPPORT_UNKNOWN;
+#endif
 }
 
 static void
@@ -4487,6 +4509,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
 
 #endif
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 static void
 iface_modem_time_init (MMIfaceModemTime *iface)
 {
@@ -4497,6 +4521,8 @@ iface_modem_time_init (MMIfaceModemTime *iface)
     iface->load_network_timezone = modem_time_load_network_time_or_zone;
     iface->load_network_timezone_finish = modem_time_load_network_timezone_finish;
 }
+
+#endif
 
 static void
 iface_modem_voice_init (MMIfaceModemVoice *iface)

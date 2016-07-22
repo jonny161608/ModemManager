@@ -1072,6 +1072,8 @@ test_syscfgex_response (void)
     }
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Test ^NWTIME responses */
 
@@ -1205,6 +1207,8 @@ test_time (void)
     }
 }
 
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
+
 /*****************************************************************************/
 /* Test ^HCSQ responses */
 
@@ -1303,8 +1307,12 @@ int main (int argc, char **argv)
     g_test_add_func ("/MM/huawei/syscfg/response", test_syscfg_response);
     g_test_add_func ("/MM/huawei/syscfgex", test_syscfgex);
     g_test_add_func ("/MM/huawei/syscfgex/response", test_syscfgex_response);
+
+#if MM_INTERFACE_TIME_SUPPORTED
     g_test_add_func ("/MM/huawei/nwtime", test_nwtime);
     g_test_add_func ("/MM/huawei/time", test_time);
+#endif
+
     g_test_add_func ("/MM/huawei/hcsq", test_hcsq);
 
     return g_test_run ();

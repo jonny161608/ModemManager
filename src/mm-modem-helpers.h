@@ -395,10 +395,18 @@ gboolean mm_parse_gsn (const char *gsn,
                        gchar **out_meid,
                        gchar **out_esn);
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
+/*****************************************************************************/
+/* Time specific helpers and utilities */
+/*****************************************************************************/
+
 /* +CCLK response parser */
 gboolean mm_parse_cclk_response (const gchar *response,
                                  gchar **iso8601p,
                                  MMNetworkTimezone **tzp,
                                  GError **error);
+
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 #endif  /* MM_MODEM_HELPERS_H */

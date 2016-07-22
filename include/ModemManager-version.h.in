@@ -97,4 +97,19 @@
  */
 #define MM_INTERFACE_MESSAGING_SUPPORTED @MM_INTERFACE_MESSAGING_SUPPORTED@
 
+/**
+ * MM_INTERFACE_TIME_SUPPORTED:
+ *
+ * Symbol to expose whether Time interface is supported. The symbol is always
+ * defined and set to either or 1 or 0.
+ *
+ * E.g.:
+ * |[
+ *  #if MM_INTERFACE_TIME_SUPPORTED
+ *      // do something
+ *  #endif
+ * ]|
+ */
+#define MM_INTERFACE_TIME_SUPPORTED @MM_INTERFACE_TIME_SUPPORTED@
+
 #endif /* _MM_VERSION_H_ */

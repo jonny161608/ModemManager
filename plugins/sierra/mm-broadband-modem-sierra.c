@@ -32,13 +32,18 @@
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-cdma.h"
-#include "mm-iface-modem-time.h"
+#if MM_INTERFACE_TIME_SUPPORTED
+# include "mm-iface-modem-time.h"
+#endif
 #include "mm-common-sierra.h"
 #include "mm-broadband-bearer-sierra.h"
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
+
+#if MM_INTERFACE_TIME_SUPPORTED
 static void iface_modem_time_init (MMIfaceModemTime *iface);
+#endif
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModemCdma *iface_modem_cdma_parent;
@@ -46,16 +51,23 @@ static MMIfaceModemCdma *iface_modem_cdma_parent;
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemSierra, mm_broadband_modem_sierra, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init));
+#if MM_INTERFACE_TIME_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
+#endif
+                        )
 
+#if MM_INTERFACE_TIME_SUPPORTED
 typedef enum {
     TIME_METHOD_UNKNOWN = 0,
     TIME_METHOD_TIME = 1,
     TIME_METHOD_SYSTIME = 2,
 } TimeMethod;
+#endif
 
 struct _MMBroadbandModemSierraPrivate {
+#if MM_INTERFACE_TIME_SUPPORTED
     TimeMethod time_method;
+#endif
 };
 
 /*****************************************************************************/
@@ -1338,6 +1350,8 @@ get_detailed_registration_state (MMIfaceModemCdma *self,
                               task);
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* Load network time (Time interface) */
 
@@ -1540,6 +1554,8 @@ modem_time_check_support (MMIfaceModemTime *self,
         g_task_new (self, NULL, callback, user_data));
 }
 
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
+
 /*****************************************************************************/
 /* Setup ports (Broadband modem class) */
 
@@ -1573,10 +1589,12 @@ mm_broadband_modem_sierra_new (const gchar *device,
 static void
 mm_broadband_modem_sierra_init (MMBroadbandModemSierra *self)
 {
+#if MM_INTERFACE_TIME_SUPPORTED
     /* Initialize private data */
     self->priv = G_TYPE_INSTANCE_GET_PRIVATE ((self),
                                               MM_TYPE_BROADBAND_MODEM_SIERRA,
                                               MMBroadbandModemSierraPrivate);
+#endif
 }
 
 static void
@@ -1625,6 +1643,8 @@ iface_modem_cdma_init (MMIfaceModemCdma *iface)
     iface->get_detailed_registration_state_finish = get_detailed_registration_state_finish;
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 static void
 iface_modem_time_init (MMIfaceModemTime *iface)
 {
@@ -1633,6 +1653,8 @@ iface_modem_time_init (MMIfaceModemTime *iface)
     iface->load_network_time = modem_time_load_network_time;
     iface->load_network_time_finish = modem_time_load_network_time_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_sierra_class_init (MMBroadbandModemSierraClass *klass)

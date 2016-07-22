@@ -34,7 +34,6 @@ GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Bearer.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
@@ -55,6 +54,10 @@ GENERATED_DOC += \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Sms.xml \
 	$(NULL)
+endif
+
+if WITH_INTERFACE_TIME
+GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml
 endif
 
 BUILT_SOURCES = $(GENERATED_H) $(GENERATED_C) $(GENERATED_DOC)
@@ -131,7 +134,6 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-modem.c \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
@@ -149,10 +151,13 @@ if WITH_INTERFACE_MESSAGING
 mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml
 endif
 
+if WITH_INTERFACE_TIME
+mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml
+endif
+
 mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Voice.xml \
-	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Time.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Oma.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
@@ -168,6 +173,10 @@ endif
 
 if WITH_INTERFACE_MESSAGING
 mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Messaging.xml
+endif
+
+if WITH_INTERFACE_TIME
+mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Time.xml
 endif
 
 mm-gdbus-modem.c: $(mm_gdbus_modem_deps)

@@ -1186,6 +1186,8 @@ mm_huawei_parse_syscfgex_response (const gchar *response,
     return NULL;
 }
 
+#if MM_INTERFACE_TIME_SUPPORTED
+
 /*****************************************************************************/
 /* ^NWTIME response parser */
 
@@ -1335,6 +1337,8 @@ gboolean mm_huawei_parse_time_response (const gchar *response,
 
     return ret;
 }
+
+#endif /* MM_INTERFACE_TIME_SUPPORTED */
 
 /*****************************************************************************/
 /* ^HCSQ response parser */
