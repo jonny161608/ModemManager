@@ -39,33 +39,36 @@
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-3gpp-ussd.h"
-#if MM_INTERFACE_LOCATION_SUPPORTED
-# include "mm-iface-modem-location.h"
-#endif
-#if MM_INTERFACE_TIME_SUPPORTED
-# include "mm-iface-modem-time.h"
-#endif
 #include "mm-iface-modem-cdma.h"
 #include "mm-iface-modem-signal.h"
-#include "mm-iface-modem-voice.h"
 #include "mm-broadband-modem-huawei.h"
 #include "mm-broadband-bearer-huawei.h"
 #include "mm-broadband-bearer.h"
 #include "mm-bearer-list.h"
 #include "mm-sim-huawei.h"
-#include "mm-call-huawei.h"
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
+
+#if MM_INTERFACE_TIME_SUPPORTED
+# include "mm-iface-modem-time.h"
+#endif
+
+#if MM_INTERFACE_VOICE_SUPPORTED
+# include "mm-iface-modem-voice.h"
+# include "mm-call-huawei.h"
+#endif
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
-static void iface_modem_voice_init (MMIfaceModemVoice *iface);
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
 static MMIfaceModemCdma *iface_modem_cdma_parent;
-static MMIfaceModemVoice *iface_modem_voice_parent;
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
@@ -74,6 +77,11 @@ static MMIfaceModemLocation *iface_modem_location_parent;
 
 #if MM_INTERFACE_TIME_SUPPORTED
 static void iface_modem_time_init (MMIfaceModemTime *iface);
+#endif
+
+#if MM_INTERFACE_VOICE_SUPPORTED
+static void iface_modem_voice_init (MMIfaceModemVoice *iface);
+static MMIfaceModemVoice *iface_modem_voice_parent;
 #endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TYPE_BROADBAND_MODEM, 0,
@@ -87,8 +95,10 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TY
 #if MM_INTERFACE_TIME_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
 #endif
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
+#if MM_INTERFACE_VOICE_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_VOICE, iface_modem_voice_init)
+#endif
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
                         )
 
 typedef enum {
@@ -118,6 +128,7 @@ struct _MMBroadbandModemHuaweiPrivate {
     GRegex *dsflowrpt_regex;
     GRegex *ndisstat_regex;
 
+#if MM_INTERFACE_VOICE_SUPPORTED
     /* Regex for voice call related notifications */
     GRegex *orig_regex;
     GRegex *conf_regex;
@@ -126,6 +137,7 @@ struct _MMBroadbandModemHuaweiPrivate {
     GRegex *ddtmf_regex;
     GRegex *cschannelinfo_regex;
     GRegex *eons_regex;
+#endif
 
     /* Regex to ignore */
     GRegex *boot_regex;
@@ -2877,6 +2889,8 @@ get_detailed_registration_state (MMIfaceModemCdma *self,
              task);
 }
 
+#if MM_INTERFACE_VOICE_SUPPORTED
+
 /*****************************************************************************/
 /* Setup/Cleanup unsolicited events (Voice interface) */
 
@@ -3245,6 +3259,8 @@ create_call (MMIfaceModemVoice *self)
     /* New Huawei Call */
     return mm_call_huawei_new (MM_BASE_MODEM (self));
 }
+
+#endif /* MM_INTERFACE_VOICE_SUPPORTED */
 
 #if MM_INTERFACE_TIME_SUPPORTED
 
@@ -4214,7 +4230,10 @@ setup_ports (MMBroadbandModem *self)
     /* Now reset the unsolicited messages we'll handle when enabled */
     set_3gpp_unsolicited_events_handlers (MM_BROADBAND_MODEM_HUAWEI (self), FALSE);
     set_cdma_unsolicited_events_handlers (MM_BROADBAND_MODEM_HUAWEI (self), FALSE);
-    set_voice_unsolicited_events_handlers(MM_BROADBAND_MODEM_HUAWEI (self), FALSE);
+
+#if MM_INTERFACE_VOICE_SUPPORTED
+    set_voice_unsolicited_events_handlers (MM_BROADBAND_MODEM_HUAWEI (self), FALSE);
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
     {
@@ -4314,6 +4333,7 @@ mm_broadband_modem_huawei_init (MMBroadbandModemHuawei *self)
     self->priv->ltersrp_regex = g_regex_new ("\\r\\n\\^LTERSRP:.+\\r\\n",
                                              G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
 
+#if MM_INTERFACE_VOICE_SUPPORTED
     /* Voice related regex
      * <CR><LF>^ORIG: <call_x>,<call_type><CR><LF>
      * <CR><LF>^CONF: <call_x><CR><LF>
@@ -4348,6 +4368,7 @@ mm_broadband_modem_huawei_init (MMBroadbandModemHuawei *self)
      */
     self->priv->eons_regex = g_regex_new ("\\r\\n\\^EONS:\\s*(\\d+)\\r\\n",
                                           G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
+#endif
 
     self->priv->ndisdup_support = FEATURE_SUPPORT_UNKNOWN;
     self->priv->rfswitch_support = FEATURE_SUPPORT_UNKNOWN;
@@ -4400,6 +4421,8 @@ finalize (GObject *object)
     g_regex_unref (self->priv->posend_regex);
     g_regex_unref (self->priv->ecclist_regex);
     g_regex_unref (self->priv->ltersrp_regex);
+
+#if MM_INTERFACE_VOICE_SUPPORTED
     g_regex_unref (self->priv->orig_regex);
     g_regex_unref (self->priv->conf_regex);
     g_regex_unref (self->priv->conn_regex);
@@ -4407,6 +4430,7 @@ finalize (GObject *object)
     g_regex_unref (self->priv->ddtmf_regex);
     g_regex_unref (self->priv->cschannelinfo_regex);
     g_regex_unref (self->priv->eons_regex);
+#endif
 
     if (self->priv->syscfg_supported_modes)
         g_array_unref (self->priv->syscfg_supported_modes);
@@ -4524,6 +4548,8 @@ iface_modem_time_init (MMIfaceModemTime *iface)
 
 #endif
 
+#if MM_INTERFACE_VOICE_SUPPORTED
+
 static void
 iface_modem_voice_init (MMIfaceModemVoice *iface)
 {
@@ -4540,6 +4566,8 @@ iface_modem_voice_init (MMIfaceModemVoice *iface)
 
     iface->create_call = create_call;
 }
+
+#endif
 
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)

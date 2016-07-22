@@ -20,13 +20,11 @@ mmcli_SOURCES = \
 	mmcli-modem-3gpp.c \
 	mmcli-modem-cdma.c \
 	mmcli-modem-simple.c \
-	mmcli-modem-voice.c \
 	mmcli-modem-firmware.c \
 	mmcli-modem-signal.c \
 	mmcli-modem-oma.c \
 	mmcli-bearer.c \
 	mmcli-sim.c \
-	mmcli-call.c \
 	$(NULL)
 
 if WITH_INTERFACE_LOCATION
@@ -42,6 +40,13 @@ endif
 
 if WITH_INTERFACE_TIME
 mmcli_SOURCES += mmcli-modem-time.c
+endif
+
+if WITH_INTERFACE_VOICE
+mmcli_SOURCES += \
+	mmcli-modem-voice.c \
+	mmcli-call.c \
+	$(NULL)
 endif
 
 mmcli_LDADD = \

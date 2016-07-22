@@ -206,8 +206,10 @@ main (gint argc, gchar **argv)
     g_option_context_add_group (context,
                                 mmcli_modem_messaging_get_option_group ());
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_voice_get_option_group ());
+#endif
 #if MM_INTERFACE_TIME_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_time_get_option_group ());
@@ -226,8 +228,10 @@ main (gint argc, gchar **argv)
     g_option_context_add_group (context,
                                 mmcli_sms_get_option_group ());
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_call_get_option_group ());
+#endif
     g_option_context_add_main_entries (context, main_entries, NULL);
     g_option_context_parse (context, &argc, &argv, NULL);
     g_option_context_free (context);
@@ -292,6 +296,7 @@ main (gint argc, gchar **argv)
             mmcli_sms_run_synchronous (connection);
     }
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     /* Call options? */
     else if (mmcli_call_options_enabled ()) {
         if (async_flag)
@@ -299,6 +304,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_call_run_synchronous (connection);
     }
+#endif
     /* Modem 3GPP options? */
     else if (mmcli_modem_3gpp_options_enabled ()) {
         if (async_flag)
@@ -338,6 +344,7 @@ main (gint argc, gchar **argv)
             mmcli_modem_messaging_run_synchronous (connection);
     }
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     /* Voice options? */
     else if (mmcli_modem_voice_options_enabled ()) {
         if (async_flag)
@@ -345,6 +352,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_voice_run_synchronous (connection);
     }
+#endif
 #if MM_INTERFACE_TIME_SUPPORTED
     /* Modem Time options? */
     else if (mmcli_modem_time_options_enabled ()) {
@@ -411,8 +419,10 @@ main (gint argc, gchar **argv)
     } else if (mmcli_modem_messaging_options_enabled ()) {
         mmcli_modem_messaging_shutdown ();
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     } else if (mmcli_modem_voice_options_enabled ()) {
         mmcli_modem_voice_shutdown ();
+#endif
 #if MM_INTERFACE_TIME_SUPPORTED
     } else if (mmcli_modem_time_options_enabled ()) {
         mmcli_modem_time_shutdown ();
@@ -431,8 +441,10 @@ main (gint argc, gchar **argv)
     }  else if (mmcli_sms_options_enabled ()) {
         mmcli_sms_shutdown ();
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     }  else if (mmcli_call_options_enabled ()) {
         mmcli_call_shutdown ();
+#endif
     } else if (mmcli_modem_options_enabled ()) {
         mmcli_modem_shutdown ();
     }

@@ -309,10 +309,6 @@ ModemManager_SOURCES = \
 	mm-base-modem-at.c \
 	mm-base-modem.h \
 	mm-base-modem.c \
-	mm-base-call.h \
-	mm-base-call.c \
-	mm-call-list.h \
-	mm-call-list.c \
 	mm-iface-modem.h \
 	mm-iface-modem.c \
 	mm-iface-modem-3gpp.h \
@@ -323,8 +319,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-cdma.c \
 	mm-iface-modem-simple.h \
 	mm-iface-modem-simple.c \
-	mm-iface-modem-voice.h \
-	mm-iface-modem-voice.c \
 	mm-iface-modem-firmware.h \
 	mm-iface-modem-firmware.c \
 	mm-iface-modem-signal.h \
@@ -363,6 +357,17 @@ if WITH_INTERFACE_TIME
 ModemManager_SOURCES += \
 	mm-iface-modem-time.h \
 	mm-iface-modem-time.c \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_VOICE
+ModemManager_SOURCES += \
+	mm-base-call.h \
+	mm-base-call.c \
+	mm-call-list.h \
+	mm-call-list.c \
+	mm-iface-modem-voice.h \
+	mm-iface-modem-voice.c \
 	$(NULL)
 endif
 

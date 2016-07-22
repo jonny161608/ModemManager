@@ -89,6 +89,7 @@ void          mmcli_modem_messaging_run_synchronous    (GDBusConnection *connect
 void          mmcli_modem_messaging_shutdown           (void);
 #endif
 
+#if MM_INTERFACE_VOICE_SUPPORTED
 /* Voice group */
 GOptionGroup *mmcli_modem_voice_get_option_group   (void);
 gboolean      mmcli_modem_voice_options_enabled    (void);
@@ -96,6 +97,7 @@ void          mmcli_modem_voice_run_asynchronous   (GDBusConnection *connection,
                                                         GCancellable    *cancellable);
 void          mmcli_modem_voice_run_synchronous    (GDBusConnection *connection);
 void          mmcli_modem_voice_shutdown           (void);
+#endif
 
 #if MM_INTERFACE_TIME_SUPPORTED
 /* Time group */

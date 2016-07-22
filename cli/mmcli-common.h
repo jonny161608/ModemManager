@@ -88,6 +88,8 @@ MMSms *mmcli_get_sms_sync   (GDBusConnection *connection,
 
 #endif
 
+#if MM_INTERFACE_VOICE_SUPPORTED
+
 void    mmcli_get_call        (GDBusConnection *connection,
                                const gchar *path_or_index,
                                GCancellable *cancellable,
@@ -101,6 +103,7 @@ MMCall *mmcli_get_call_sync   (GDBusConnection *connection,
                                MMManager **manager,
                                MMObject **object);
 
+#endif
 
 const gchar *mmcli_get_state_reason_string (MMModemStateChangeReason reason);
 
@@ -111,7 +114,9 @@ const gchar  *mmcli_get_common_sim_string (void);
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 const gchar  *mmcli_get_common_sms_string (void);
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
 const gchar  *mmcli_get_common_call_string (void);
+#endif
 
 gchar *mmcli_prefix_newlines (const gchar *prefix,
                               const gchar *str);

@@ -404,6 +404,20 @@ fi
 AC_SUBST(MM_INTERFACE_TIME_SUPPORTED)
 
 dnl-----------------------------------------------------------------------------
+dnl Voice interface
+dnl
+
+AC_ARG_WITH(interface-voice, AS_HELP_STRING([--without-interface-voice], [Build without voice interface support]), [], [with_interface_voice=yes])
+AM_CONDITIONAL(WITH_INTERFACE_VOICE, test "x$with_interface_voice" = "xyes")
+if test "x$with_interface_voice" = "xyes"; then
+    MM_INTERFACE_VOICE_SUPPORTED=1
+else
+    with_interface_voice=no
+    MM_INTERFACE_VOICE_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_VOICE_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Compiler warnings
 dnl
 
@@ -500,6 +514,7 @@ echo "
       location:                ${with_interface_location}
       messaging:               ${with_interface_messaging}
       time:                    ${with_interface_time}
+      voice:                   ${with_interface_voice}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

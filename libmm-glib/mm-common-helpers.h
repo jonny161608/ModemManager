@@ -55,13 +55,6 @@ MMBearerIpFamily      mm_common_get_ip_type_from_string      (const gchar *str,
 MMBearerAllowedAuth   mm_common_get_allowed_auth_from_string (const gchar *str,
                                                               GError **error);
 
-MMCallDirection     mm_common_get_call_direction_from_string    (const gchar *str,
-                                                                 GError **error);
-MMCallState         mm_common_get_call_state_from_string        (const gchar *str,
-                                                                 GError **error);
-MMCallStateReason   mm_common_get_call_state_reason_from_string (const gchar *str,
-                                                                 GError **error);
-
 MMOmaFeature          mm_common_get_oma_features_from_string (const gchar *str,
                                                               GError **error);
 MMOmaSessionType      mm_common_get_oma_session_type_from_string (const gchar *str,
@@ -165,6 +158,15 @@ GVariant                 *mm_common_sms_storages_array_to_variant             (c
                                                                                guint n_storages);
 GVariant                 *mm_common_sms_storages_garray_to_variant            (GArray *array);
 const gchar              *mm_sms_delivery_state_get_string_extended           (guint delivery_state);
+#endif
+
+#if MM_INTERFACE_VOICE_SUPPORTED
+MMCallDirection     mm_common_get_call_direction_from_string    (const gchar *str,
+                                                                 GError **error);
+MMCallState         mm_common_get_call_state_from_string        (const gchar *str,
+                                                                 GError **error);
+MMCallStateReason   mm_common_get_call_state_reason_from_string (const gchar *str,
+                                                                 GError **error);
 #endif
 
 #endif /* MM_COMMON_HELPERS_H */

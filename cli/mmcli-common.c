@@ -1117,6 +1117,8 @@ mmcli_get_state_reason_string (MMModemStateChangeReason reason)
     return NULL;
 }
 
+#if MM_INTERFACE_VOICE_SUPPORTED
+
 typedef struct {
     GSimpleAsyncResult *result;
     GCancellable *cancellable;
@@ -1388,6 +1390,8 @@ mmcli_get_call_sync (GDBusConnection *connection,
     return found;
 }
 
+#endif /* MM_INTERFACE_VOICE_SUPPORTED */
+
 /* Common options */
 static gchar *modem_str;
 static gchar *bearer_str;
@@ -1395,7 +1399,9 @@ static gchar *sim_str;
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 static gchar *sms_str;
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
 static gchar *call_str;
+#endif
 
 static GOptionEntry entries[] = {
     { "modem", 'm', 0, G_OPTION_ARG_STRING, &modem_str,
@@ -1416,10 +1422,12 @@ static GOptionEntry entries[] = {
       "[PATH|INDEX]"
     },
 #endif
+#if MM_INTERFACE_VOICE_SUPPORTED
     { "call", 'o', 0, G_OPTION_ARG_STRING, &call_str,
       "Specify Call by path or index. Shows Call information if no action specified.",
       "[PATH|INDEX]"
     },
+#endif
     { NULL }
 };
 
@@ -1465,11 +1473,13 @@ mmcli_get_common_sms_string (void)
 }
 #endif
 
+#if MM_INTERFACE_VOICE_SUPPORTED
 const gchar *
 mmcli_get_common_call_string (void)
 {
     return call_str;
 }
+#endif
 
 gchar *
 mmcli_prefix_newlines (const gchar *prefix,

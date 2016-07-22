@@ -345,6 +345,8 @@ mm_object_peek_modem_messaging (MMObject *self)
 
 #endif /*  MM_INTERFACE_MESSAGING_SUPPORTED */
 
+#if MM_INTERFACE_VOICE_SUPPORTED
+
 /*****************************************************************************/
 
 /**
@@ -380,6 +382,8 @@ mm_object_peek_modem_voice (MMObject *self)
 
     return (MMModemVoice *)mm_gdbus_object_peek_modem_voice (MM_GDBUS_OBJECT (self));
 }
+
+#endif /*  MM_INTERFACE_VOICE_SUPPORTED */
 
 #if MM_INTERFACE_TIME_SUPPORTED
 

@@ -284,13 +284,19 @@ libmm_plugin_huawei_la_SOURCES = \
 	huawei/mm-plugin-huawei.h \
 	huawei/mm-sim-huawei.c \
 	huawei/mm-sim-huawei.h \
-	huawei/mm-call-huawei.c \
-	huawei/mm-call-huawei.h \
 	huawei/mm-broadband-modem-huawei.c \
 	huawei/mm-broadband-modem-huawei.h \
 	huawei/mm-broadband-bearer-huawei.c \
 	huawei/mm-broadband-bearer-huawei.h \
 	$(NULL)
+
+if WITH_INTERFACE_VOICE
+libmm_plugin_huawei_la_SOURCES += \
+	huawei/mm-call-huawei.c \
+	huawei/mm-call-huawei.h \
+	$(NULL)
+endif
+
 libmm_plugin_huawei_la_CPPFLAGS = $(PLUGIN_COMMON_COMPILER_FLAGS)
 libmm_plugin_huawei_la_LDFLAGS  = $(PLUGIN_COMMON_LINKER_FLAGS)
 libmm_plugin_huawei_la_LIBADD   = $(builddir)/libhelpers-huawei.la

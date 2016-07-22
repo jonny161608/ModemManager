@@ -32,10 +32,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-oma.c \
 	mm-sim.h \
 	mm-sim.c \
-	mm-modem-voice.h \
-	mm-modem-voice.c \
-	mm-call.h \
-	mm-call.c \
 	mm-bearer.h \
 	mm-bearer.c \
 	mm-common-helpers.h \
@@ -46,8 +42,6 @@ libmm_glib_la_SOURCES = \
 	mm-simple-connect-properties.c \
 	mm-bearer-properties.h \
 	mm-bearer-properties.c \
-	mm-call-properties.h \
-	mm-call-properties.c \
 	mm-bearer-ip-config.h \
 	mm-bearer-ip-config.c \
 	mm-bearer-stats.h \
@@ -100,6 +94,17 @@ libmm_glib_la_SOURCES += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_VOICE
+libmm_glib_la_SOURCES += \
+	mm-call.h \
+	mm-call.c \
+	mm-modem-voice.h \
+	mm-modem-voice.c \
+	mm-call-properties.h \
+	mm-call-properties.c \
+	$(NULL)
+endif
+
 libmm_glib_la_CPPFLAGS = \
 	-I$(srcdir) \
 	-I$(top_srcdir) \
@@ -142,13 +147,10 @@ include_HEADERS = \
 	mm-modem-oma.h \
 	mm-modem-simple.h \
 	mm-sim.h \
-	mm-modem-voice.h \
-	mm-call.h \
 	mm-bearer.h \
 	mm-simple-status.h \
 	mm-simple-connect-properties.h \
 	mm-bearer-properties.h \
-	mm-call-properties.h \
 	mm-bearer-ip-config.h \
 	mm-bearer-stats.h \
 	mm-unlock-retries.h \
@@ -181,6 +183,14 @@ if WITH_INTERFACE_TIME
 include_HEADERS += \
 	mm-modem-time.h \
 	mm-network-timezone.h \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_VOICE
+include_HEADERS += \
+	mm-modem-voice.h \
+	mm-call.h \
+	mm-call-properties.h \
 	$(NULL)
 endif
 
@@ -226,6 +236,12 @@ if WITH_INTERFACE_MESSAGING
 GENERATED_H += mm-gdbus-sms.h
 GENERATED_C += mm-gdbus-sms.c
 PUBLIC_H    += ModemManager-enums-messaging.h
+endif
+
+if WITH_INTERFACE_VOICE
+GENERATED_H += mm-gdbus-call.h
+GENERATED_C += mm-gdbus-call.c
+PUBLIC_H    += ModemManager-enums-voice.h
 endif
 
 INTROSPECTION_GIRS = ModemManager-1.0.gir
