@@ -48,7 +48,9 @@
 #if MM_INTERFACE_VOICE_SUPPORTED
 # include "mm-modem-voice.h"
 #endif
-#include "mm-modem-firmware.h"
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+# include "mm-modem-firmware.h"
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 # include "mm-modem-signal.h"
 #endif
@@ -95,14 +97,12 @@ MMModem3gpp      *mm_object_get_modem_3gpp       (MMObject *self);
 MMModem3gppUssd  *mm_object_get_modem_3gpp_ussd  (MMObject *self);
 MMModemCdma      *mm_object_get_modem_cdma       (MMObject *self);
 MMModemSimple    *mm_object_get_modem_simple     (MMObject *self);
-MMModemFirmware  *mm_object_get_modem_firmware   (MMObject *self);
 
 MMModem          *mm_object_peek_modem           (MMObject *self);
 MMModem3gpp      *mm_object_peek_modem_3gpp      (MMObject *self);
 MMModem3gppUssd  *mm_object_peek_modem_3gpp_ussd (MMObject *self);
 MMModemCdma      *mm_object_peek_modem_cdma      (MMObject *self);
 MMModemSimple    *mm_object_peek_modem_simple    (MMObject *self);
-MMModemFirmware  *mm_object_peek_modem_firmware  (MMObject *self);
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 MMModemLocation  *mm_object_get_modem_location   (MMObject *self);
@@ -132,6 +132,11 @@ MMModemSignal    *mm_object_peek_modem_signal    (MMObject *self);
 #if MM_INTERFACE_OMA_SUPPORTED
 MMModemOma       *mm_object_get_modem_oma        (MMObject *self);
 MMModemOma       *mm_object_peek_modem_oma       (MMObject *self);
+#endif
+
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+MMModemFirmware  *mm_object_get_modem_firmware   (MMObject *self);
+MMModemFirmware  *mm_object_peek_modem_firmware  (MMObject *self);
 #endif
 
 G_END_DECLS

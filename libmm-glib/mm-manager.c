@@ -82,7 +82,9 @@ get_proxy_type (GDBusObjectManagerClient *manager,
 #if MM_INTERFACE_SIGNAL_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Signal",         GSIZE_TO_POINTER (MM_TYPE_MODEM_SIGNAL));
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Firmware",       GSIZE_TO_POINTER (MM_TYPE_MODEM_FIRMWARE));
+#endif
 #if MM_INTERFACE_OMA_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Oma",            GSIZE_TO_POINTER (MM_TYPE_MODEM_OMA));
 #endif

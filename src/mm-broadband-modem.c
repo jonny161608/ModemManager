@@ -49,7 +49,9 @@
 #if MM_INTERFACE_TIME_SUPPORTED
 # include "mm-iface-modem-time.h"
 #endif
-#include "mm-iface-modem-firmware.h"
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+# include "mm-iface-modem-firmware.h"
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 # include "mm-iface-modem-signal.h"
 #endif
@@ -92,7 +94,9 @@ static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 #if MM_INTERFACE_OMA_SUPPORTED
 static void iface_modem_oma_init (MMIfaceModemOma *iface);
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
 static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModem, mm_broadband_modem, MM_TYPE_BASE_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
@@ -118,7 +122,10 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModem, mm_broadband_modem, MM_TYPE_BASE_MODEM
 #if MM_INTERFACE_OMA_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_OMA, iface_modem_oma_init)
 #endif
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init))
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init)
+#endif
+                        )
 
 enum {
     PROP_0,
@@ -145,7 +152,9 @@ enum {
 #if MM_INTERFACE_OMA_SUPPORTED
     PROP_MODEM_OMA_DBUS_SKELETON,
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     PROP_MODEM_FIRMWARE_DBUS_SKELETON,
+#endif
     PROP_MODEM_SIM,
     PROP_MODEM_BEARER_LIST,
     PROP_MODEM_STATE,
@@ -292,9 +301,11 @@ struct _MMBroadbandModemPrivate {
     GObject *modem_oma_dbus_skeleton;
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     /*<--- Modem Firmware interface --->*/
     /* Properties */
     GObject *modem_firmware_dbus_skeleton;
+#endif
 };
 
 /*****************************************************************************/
@@ -9033,7 +9044,9 @@ typedef enum {
     DISABLING_STEP_WAIT_FOR_FINAL_STATE,
     DISABLING_STEP_DISCONNECT_BEARERS,
     DISABLING_STEP_IFACE_SIMPLE,
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     DISABLING_STEP_IFACE_FIRMWARE,
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
     DISABLING_STEP_IFACE_SIGNAL,
 #endif
@@ -9259,9 +9272,11 @@ disabling_step (GTask *task)
         /* Fall down to next step */
         ctx->step++;
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     case DISABLING_STEP_IFACE_FIRMWARE:
         /* Fall down to next step */
         ctx->step++;
+#endif
 
 #if MM_INTERFACE_SIGNAL_SUPPORTED
     case DISABLING_STEP_IFACE_SIGNAL:
@@ -9459,7 +9474,9 @@ typedef enum {
 #if MM_INTERFACE_OMA_SUPPORTED
     ENABLING_STEP_IFACE_OMA,
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     ENABLING_STEP_IFACE_FIRMWARE,
+#endif
     ENABLING_STEP_IFACE_SIMPLE,
     ENABLING_STEP_LAST,
 } EnablingStep;
@@ -9782,9 +9799,11 @@ enabling_step (GTask *task)
         ctx->step++;
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     case ENABLING_STEP_IFACE_FIRMWARE:
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case ENABLING_STEP_IFACE_SIMPLE:
         /* Fall down to next step */
@@ -9917,7 +9936,9 @@ typedef enum {
 #if MM_INTERFACE_OMA_SUPPORTED
     INITIALIZE_STEP_IFACE_OMA,
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     INITIALIZE_STEP_IFACE_FIRMWARE,
+#endif
     INITIALIZE_STEP_SIM_HOT_SWAP,
     INITIALIZE_STEP_IFACE_SIMPLE,
     INITIALIZE_STEP_LAST,
@@ -10023,9 +10044,13 @@ iface_modem_initialize_ready (MMBroadbandModem *self,
 
         mm_iface_modem_update_failed_state (MM_IFACE_MODEM (self), failed_reason);
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
         /* Jump to the firmware step. We allow firmware switching even in failed
          * state */
         ctx->step = INITIALIZE_STEP_IFACE_FIRMWARE;
+#else
+        ctx->step = INITIALIZE_STEP_LAST;
+#endif
         initialize_step (task);
         return;
     }
@@ -10040,7 +10065,11 @@ iface_modem_initialize_ready (MMBroadbandModem *self,
     if (ctx->self->priv->modem_state == MM_MODEM_STATE_LOCKED) {
         /* Jump to the Firmware interface. We do allow modems to export
          * both the Firmware and Simple interfaces when locked. */
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
         ctx->step = INITIALIZE_STEP_IFACE_FIRMWARE;
+#else
+        ctx->step = INITIALIZE_STEP_IFACE_SIMPLE;
+#endif
         initialize_step (task);
         return;
     }
@@ -10114,7 +10143,9 @@ INTERFACE_INIT_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
 #if MM_INTERFACE_OMA_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_oma,       MM_IFACE_MODEM_OMA,       FALSE)
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_firmware,  MM_IFACE_MODEM_FIRMWARE,  FALSE)
+#endif
 
 static void
 initialize_step (GTask *task)
@@ -10268,6 +10299,7 @@ initialize_step (GTask *task)
         return;
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     case INITIALIZE_STEP_IFACE_FIRMWARE:
         /* Initialize the Firmware interface */
         mm_iface_modem_firmware_initialize (MM_IFACE_MODEM_FIRMWARE (ctx->self),
@@ -10275,6 +10307,7 @@ initialize_step (GTask *task)
                                             (GAsyncReadyCallback)iface_modem_firmware_initialize_ready,
                                             task);
         return;
+#endif
 
     case INITIALIZE_STEP_SIM_HOT_SWAP:
         /* Create the SIM hot swap ports context only if not already done before
@@ -10656,10 +10689,12 @@ set_property (GObject *object,
         self->priv->modem_oma_dbus_skeleton = g_value_dup_object (value);
         break;
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     case PROP_MODEM_FIRMWARE_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_firmware_dbus_skeleton);
         self->priv->modem_firmware_dbus_skeleton = g_value_dup_object (value);
         break;
+#endif
     case PROP_MODEM_SIM:
         g_clear_object (&self->priv->modem_sim);
         self->priv->modem_sim = g_value_dup_object (value);
@@ -10786,9 +10821,11 @@ get_property (GObject *object,
         g_value_set_object (value, self->priv->modem_oma_dbus_skeleton);
         break;
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     case PROP_MODEM_FIRMWARE_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_firmware_dbus_skeleton);
         break;
+#endif
     case PROP_MODEM_SIM:
         g_value_set_object (value, self->priv->modem_sim);
         break;
@@ -11232,10 +11269,14 @@ iface_modem_oma_init (MMIfaceModemOma *iface)
 
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+
 static void
 iface_modem_firmware_init (MMIfaceModemFirmware *iface)
 {
 }
+
+#endif
 
 static void
 mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
@@ -11324,9 +11365,11 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
                                       MM_IFACE_MODEM_OMA_DBUS_SKELETON);
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     g_object_class_override_property (object_class,
                                       PROP_MODEM_FIRMWARE_DBUS_SKELETON,
                                       MM_IFACE_MODEM_FIRMWARE_DBUS_SKELETON);
+#endif
 
     g_object_class_override_property (object_class,
                                       PROP_MODEM_SIM,

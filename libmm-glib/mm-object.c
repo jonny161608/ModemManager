@@ -425,6 +425,8 @@ mm_object_peek_modem_time (MMObject *self)
 
 #endif /* MM_INTERFACE_TIME_SUPPORTED */
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+
 /*****************************************************************************/
 
 /**
@@ -460,6 +462,8 @@ mm_object_peek_modem_firmware (MMObject *self)
 
     return (MMModemFirmware *)mm_gdbus_object_peek_modem_firmware (MM_GDBUS_OBJECT (self));
 }
+
+#endif /* MM_INTERFACE_FIRMWARE_SUPPORTED */
 
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 

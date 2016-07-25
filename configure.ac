@@ -446,6 +446,20 @@ fi
 AC_SUBST(MM_INTERFACE_OMA_SUPPORTED)
 
 dnl-----------------------------------------------------------------------------
+dnl Firmware interface
+dnl
+
+AC_ARG_WITH(interface-firmware, AS_HELP_STRING([--without-interface-firmware], [Build without Firmware interface support]), [], [with_interface_firmware=yes])
+AM_CONDITIONAL(WITH_INTERFACE_FIRMWARE, test "x$with_interface_firmware" = "xyes")
+if test "x$with_interface_firmware" = "xyes"; then
+    MM_INTERFACE_FIRMWARE_SUPPORTED=1
+else
+    with_interface_firmware=no
+    MM_INTERFACE_FIRMWARE_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_FIRMWARE_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Compiler warnings
 dnl
 
@@ -545,6 +559,7 @@ echo "
       voice:                   ${with_interface_voice}
       signal:                  ${with_interface_signal}
       oma:                     ${with_interface_oma}
+      firmware:                ${with_interface_firmware}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

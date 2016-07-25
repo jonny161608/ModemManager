@@ -43,7 +43,9 @@
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
 #endif
-#include "mm-iface-modem-firmware.h"
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+# include "mm-iface-modem-firmware.h"
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 # include "mm-iface-modem-signal.h"
 #endif
@@ -57,7 +59,6 @@ static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
-static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
@@ -77,6 +78,10 @@ static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 static void iface_modem_oma_init (MMIfaceModemOma *iface);
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
+#endif
+
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
@@ -94,7 +99,10 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BRO
 #if MM_INTERFACE_OMA_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_OMA, iface_modem_oma_init)
 #endif
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init))
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init)
+#endif
+                        )
 
 struct _MMBroadbandModemQmiPrivate {
     /* Cached device IDs, retrieved by the modem interface when loading device
@@ -156,9 +164,11 @@ struct _MMBroadbandModemQmiPrivate {
     guint oma_event_report_indication_id;
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     /* Firmware helpers */
     GList *firmware_list;
     MMFirmwareProperties *current_firmware;
+#endif
 };
 
 /*****************************************************************************/
@@ -10102,6 +10112,8 @@ oma_enable_unsolicited_events (MMIfaceModemOma *self,
 
 #endif /* MM_INTERFACE_OMA_SUPPORTED */
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+
 /*****************************************************************************/
 /* Check firmware support (Firmware interface) */
 
@@ -10751,6 +10763,8 @@ firmware_change_current (MMIfaceModemFirmware *self,
     g_array_unref (pri_image_id.unique_id);
     qmi_message_dms_set_firmware_preference_input_unref (input);
 }
+
+#endif /* MM_INTERFACE_FIRMWARE_SUPPORTED */
 
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 
@@ -11540,12 +11554,13 @@ finalize (GObject *object)
 static void
 dispose (GObject *object)
 {
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     MMBroadbandModemQmi *self = MM_BROADBAND_MODEM_QMI (object);
 
     g_list_free_full (self->priv->firmware_list, g_object_unref);
     self->priv->firmware_list = NULL;
-
     g_clear_object (&self->priv->current_firmware);
+#endif
 
     G_OBJECT_CLASS (mm_broadband_modem_qmi_parent_class)->dispose (object);
 }
@@ -11804,6 +11819,8 @@ iface_modem_oma_init (MMIfaceModemOma *iface)
 
 #endif /* MM_INTERFACE_OMA_SUPPORTED */
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+
 static void
 iface_modem_firmware_init (MMIfaceModemFirmware *iface)
 {
@@ -11816,6 +11833,8 @@ iface_modem_firmware_init (MMIfaceModemFirmware *iface)
     iface->change_current = firmware_change_current;
     iface->change_current_finish = firmware_change_current_finish;
 }
+
+#endif /* MM_INTERFACE_FIRMWARE_SUPPORTED */
 
 static void
 mm_broadband_modem_qmi_class_init (MMBroadbandModemQmiClass *klass)

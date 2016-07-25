@@ -214,8 +214,10 @@ main (gint argc, gchar **argv)
     g_option_context_add_group (context,
                                 mmcli_modem_time_get_option_group ());
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_firmware_get_option_group ());
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_signal_get_option_group ());
@@ -366,6 +368,7 @@ main (gint argc, gchar **argv)
             mmcli_modem_time_run_synchronous (connection);
     }
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     /* Modem Firmware options? */
     else if (mmcli_modem_firmware_options_enabled ()) {
         if (async_flag)
@@ -373,6 +376,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_firmware_run_synchronous (connection);
     }
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
     /* Modem Signal options? */
     else if (mmcli_modem_signal_options_enabled ()) {
@@ -435,8 +439,10 @@ main (gint argc, gchar **argv)
     } else if (mmcli_modem_time_options_enabled ()) {
         mmcli_modem_time_shutdown ();
 #endif
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
     } else if (mmcli_modem_firmware_options_enabled ()) {
         mmcli_modem_firmware_shutdown ();
+#endif
 #if MM_INTERFACE_SIGNAL_SUPPORTED
     } else if (mmcli_modem_signal_options_enabled ()) {
         mmcli_modem_signal_shutdown ();

@@ -13,7 +13,6 @@ xml_DATA = \
 	org.freedesktop.ModemManager1.Bearer.xml \
 	org.freedesktop.ModemManager1.Sms.xml \
 	org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
-	org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	$(NULL)
 
 if WITH_INTERFACE_LOCATION
@@ -41,6 +40,10 @@ endif
 
 if WITH_INTERFACE_OMA
 xml_DATA += org.freedesktop.ModemManager1.Modem.Oma.xml
+endif
+
+if WITH_INTERFACE_FIRMWARE
+xml_DATA += org.freedesktop.ModemManager1.Modem.Firmware.xml
 endif
 
 all.xml: $(xml_DATA) Makefile

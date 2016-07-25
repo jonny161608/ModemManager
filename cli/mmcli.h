@@ -109,6 +109,7 @@ void          mmcli_modem_time_run_synchronous    (GDBusConnection *connection);
 void          mmcli_modem_time_shutdown           (void);
 #endif
 
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
 /* Firmware group */
 GOptionGroup *mmcli_modem_firmware_get_option_group   (void);
 gboolean      mmcli_modem_firmware_options_enabled    (void);
@@ -116,6 +117,7 @@ void          mmcli_modem_firmware_run_asynchronous   (GDBusConnection *connecti
                                                        GCancellable    *cancellable);
 void          mmcli_modem_firmware_run_synchronous    (GDBusConnection *connection);
 void          mmcli_modem_firmware_shutdown           (void);
+#endif
 
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 /* Signal group */

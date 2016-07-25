@@ -24,8 +24,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-cdma.c \
 	mm-modem-simple.h \
 	mm-modem-simple.c \
-	mm-modem-firmware.h \
-	mm-modem-firmware.c \
 	mm-sim.h \
 	mm-sim.c \
 	mm-bearer.h \
@@ -44,8 +42,6 @@ libmm_glib_la_SOURCES = \
 	mm-bearer-stats.c \
 	mm-unlock-retries.h \
 	mm-unlock-retries.c \
-	mm-firmware-properties.h \
-	mm-firmware-properties.c \
 	mm-cdma-manual-activation-properties.h \
 	mm-cdma-manual-activation-properties.c \
 	mm-kernel-event-properties.h \
@@ -115,6 +111,15 @@ libmm_glib_la_SOURCES += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_FIRMWARE
+libmm_glib_la_SOURCES += \
+	mm-modem-firmware.h \
+	mm-modem-firmware.c \
+	mm-firmware-properties.h \
+	mm-firmware-properties.c \
+	$(NULL)
+endif
+
 libmm_glib_la_CPPFLAGS = \
 	-I$(srcdir) \
 	-I$(top_srcdir) \
@@ -152,7 +157,6 @@ include_HEADERS = \
 	mm-modem-3gpp.h \
 	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
-	mm-modem-firmware.h \
 	mm-modem-simple.h \
 	mm-sim.h \
 	mm-bearer.h \
@@ -162,7 +166,6 @@ include_HEADERS = \
 	mm-bearer-ip-config.h \
 	mm-bearer-stats.h \
 	mm-unlock-retries.h \
-	mm-firmware-properties.h \
 	mm-cdma-manual-activation-properties.h \
 	mm-kernel-event-properties.h \
 	$(NULL)
@@ -211,6 +214,13 @@ endif
 if WITH_INTERFACE_OMA
 include_HEADERS += \
 	mm-modem-oma.h \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_FIRMWARE
+include_HEADERS += \
+	mm-modem-firmware.h \
+	mm-firmware-properties.h \
 	$(NULL)
 endif
 

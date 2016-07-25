@@ -51,7 +51,9 @@
 # if MM_INTERFACE_TIME_SUPPORTED
 #  include <mm-modem-time.h>
 # endif
-# include <mm-modem-firmware.h>
+# if MM_INTERFACE_FIRMWARE_SUPPORTED
+#  include <mm-modem-firmware.h>
+# endif
 # if MM_INTERFACE_SIGNAL_SUPPORTED
 #  include <mm-modem-signal.h>
 # endif
@@ -89,7 +91,9 @@
 #if MM_INTERFACE_TIME_SUPPORTED
 # include <mm-network-timezone.h>
 #endif
-#include <mm-firmware-properties.h>
+#if MM_INTERFACE_FIRMWARE_SUPPORTED
+# include <mm-firmware-properties.h>
+#endif
 #include <mm-cdma-manual-activation-properties.h>
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 # include <mm-signal.h>
