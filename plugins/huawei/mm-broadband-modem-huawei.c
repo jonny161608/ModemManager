@@ -38,13 +38,16 @@
 #include "mm-base-modem-at.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-3gpp-ussd.h"
 #include "mm-iface-modem-cdma.h"
 #include "mm-broadband-modem-huawei.h"
 #include "mm-broadband-bearer-huawei.h"
 #include "mm-broadband-bearer.h"
 #include "mm-bearer-list.h"
 #include "mm-sim-huawei.h"
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+# include "mm-iface-modem-3gpp-ussd.h"
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
@@ -65,12 +68,15 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
-static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
 static MMIfaceModemCdma *iface_modem_cdma_parent;
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
@@ -93,8 +99,10 @@ static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
@@ -2349,6 +2357,8 @@ huawei_modem_create_bearer (MMIfaceModem *self,
                              task);
 }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+
 /*****************************************************************************/
 /* USSD encode/decode (3GPP-USSD interface) */
 
@@ -2403,6 +2413,8 @@ decode (MMIfaceModem3gppUssd *self,
     g_free (unpacked);
     return utf8;
 }
+
+#endif /* MM_INTERFACE_3GPP_USSD_SUPPORTED */
 
 /*****************************************************************************/
 
@@ -4519,12 +4531,16 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->disable_unsolicited_events_finish = modem_3gpp_disable_unsolicited_events_finish;
 }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+
 static void
 iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface)
 {
     iface->encode = encode;
     iface->decode = decode;
 }
+
+#endif
 
 static void
 iface_modem_cdma_init (MMIfaceModemCdma *iface)

@@ -36,7 +36,9 @@
 # include <mm-object.h>
 # include <mm-modem.h>
 # include <mm-modem-3gpp.h>
-# include <mm-modem-3gpp-ussd.h>
+# if MM_INTERFACE_3GPP_USSD_SUPPORTED
+#  include <mm-modem-3gpp-ussd.h>
+# endif
 # include <mm-modem-cdma.h>
 # include <mm-modem-simple.h>
 # if MM_INTERFACE_LOCATION_SUPPORTED

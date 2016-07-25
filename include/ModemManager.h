@@ -37,6 +37,9 @@
 
 /* Public headers with enumerations and flags */
 #include <ModemManager-enums.h>
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+# include <ModemManager-enums-3gpp-ussd.h>
+#endif
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include <ModemManager-enums-location.h>
 #endif

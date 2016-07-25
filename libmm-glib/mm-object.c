@@ -158,6 +158,8 @@ mm_object_peek_modem_3gpp (MMObject *self)
     return (MMModem3gpp *)mm_gdbus_object_peek_modem3gpp (MM_GDBUS_OBJECT (self));
 }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+
 /*****************************************************************************/
 
 /**
@@ -193,6 +195,8 @@ mm_object_peek_modem_3gpp_ussd (MMObject *self)
 
     return (MMModem3gppUssd *)mm_gdbus_object_peek_modem3gpp_ussd (MM_GDBUS_OBJECT (self));
 }
+
+#endif /* MM_INTERFACE_3GPP_USSD_SUPPORTED */
 
 /*****************************************************************************/
 

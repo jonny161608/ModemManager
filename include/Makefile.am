@@ -12,6 +12,10 @@ include_HEADERS = \
 	ModemManager-version.h \
 	ModemManager.h
 
+if WITH_INTERFACE_3GPP_USSD
+include_HEADERS += ModemManager-enums-3gpp-ussd.h
+endif
+
 if WITH_INTERFACE_LOCATION
 include_HEADERS += ModemManager-enums-location.h
 endif

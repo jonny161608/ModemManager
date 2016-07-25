@@ -313,8 +313,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem.c \
 	mm-iface-modem-3gpp.h \
 	mm-iface-modem-3gpp.c \
-	mm-iface-modem-3gpp-ussd.h \
-	mm-iface-modem-3gpp-ussd.c \
 	mm-iface-modem-cdma.h \
 	mm-iface-modem-cdma.c \
 	mm-iface-modem-simple.h \
@@ -328,6 +326,13 @@ ModemManager_SOURCES = \
 	mm-plugin.c \
 	mm-plugin.h \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+ModemManager_SOURCES += \
+	mm-iface-modem-3gpp-ussd.h \
+	mm-iface-modem-3gpp-ussd.c \
+	$(NULL)
+endif
 
 if WITH_INTERFACE_LOCATION
 ModemManager_SOURCES += \

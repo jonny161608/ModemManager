@@ -724,20 +724,4 @@ typedef enum { /*< underscore_name=mm_modem_3gpp_subscription_state >*/
     MM_MODEM_3GPP_SUBSCRIPTION_STATE_OUT_OF_DATA   = 3,
 } MMModem3gppSubscriptionState;
 
-/**
- * MMModem3gppUssdSessionState:
- * @MM_MODEM_3GPP_USSD_SESSION_STATE_UNKNOWN: Unknown state.
- * @MM_MODEM_3GPP_USSD_SESSION_STATE_IDLE: No active session.
- * @MM_MODEM_3GPP_USSD_SESSION_STATE_ACTIVE: A session is active and the mobile is waiting for a response.
- * @MM_MODEM_3GPP_USSD_SESSION_STATE_USER_RESPONSE: The network is waiting for the client's response.
- *
- * State of a USSD session.
- */
-typedef enum { /*< underscore_name=mm_modem_3gpp_ussd_session_state >*/
-    MM_MODEM_3GPP_USSD_SESSION_STATE_UNKNOWN       = 0,
-    MM_MODEM_3GPP_USSD_SESSION_STATE_IDLE          = 1,
-    MM_MODEM_3GPP_USSD_SESSION_STATE_ACTIVE        = 2,
-    MM_MODEM_3GPP_USSD_SESSION_STATE_USER_RESPONSE = 3,
-} MMModem3gppUssdSessionState;
-
 #endif /*  _MODEMMANAGER_ENUMS_H_ */

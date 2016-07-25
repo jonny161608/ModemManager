@@ -32,7 +32,9 @@
 #include "mm-modem-helpers-qmi.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-3gpp-ussd.h"
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+# include "mm-iface-modem-3gpp-ussd.h"
+#endif
 #include "mm-iface-modem-cdma.h"
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 # include "mm-iface-modem-messaging.h"
@@ -57,8 +59,11 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
-static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
+#endif
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
@@ -85,7 +90,9 @@ static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
 #if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
@@ -11689,6 +11696,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->load_operator_name_finish = modem_3gpp_load_operator_name_finish;
 }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+
 static void
 iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface)
 {
@@ -11696,6 +11705,8 @@ iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface)
     iface->check_support = NULL;
     iface->check_support_finish = NULL;
 }
+
+#endif
 
 static void
 iface_modem_cdma_init (MMIfaceModemCdma *iface)

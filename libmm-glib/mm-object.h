@@ -33,7 +33,9 @@
 #include "mm-gdbus-modem.h"
 #include "mm-modem.h"
 #include "mm-modem-3gpp.h"
-#include "mm-modem-3gpp-ussd.h"
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+# include "mm-modem-3gpp-ussd.h"
+#endif
 #include "mm-modem-cdma.h"
 #include "mm-modem-simple.h"
 #if MM_INTERFACE_LOCATION_SUPPORTED
@@ -94,15 +96,18 @@ gchar       *mm_object_dup_path (MMObject *self);
 
 MMModem          *mm_object_get_modem            (MMObject *self);
 MMModem3gpp      *mm_object_get_modem_3gpp       (MMObject *self);
-MMModem3gppUssd  *mm_object_get_modem_3gpp_ussd  (MMObject *self);
 MMModemCdma      *mm_object_get_modem_cdma       (MMObject *self);
 MMModemSimple    *mm_object_get_modem_simple     (MMObject *self);
 
 MMModem          *mm_object_peek_modem           (MMObject *self);
 MMModem3gpp      *mm_object_peek_modem_3gpp      (MMObject *self);
-MMModem3gppUssd  *mm_object_peek_modem_3gpp_ussd (MMObject *self);
 MMModemCdma      *mm_object_peek_modem_cdma      (MMObject *self);
 MMModemSimple    *mm_object_peek_modem_simple    (MMObject *self);
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+MMModem3gppUssd  *mm_object_get_modem_3gpp_ussd  (MMObject *self);
+MMModem3gppUssd  *mm_object_peek_modem_3gpp_ussd (MMObject *self);
+#endif
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 MMModemLocation  *mm_object_get_modem_location   (MMObject *self);

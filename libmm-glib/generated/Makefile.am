@@ -32,9 +32,12 @@ GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Simple.xml \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml
+endif
 
 if WITH_INTERFACE_LOCATION
 GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml
@@ -80,6 +83,10 @@ BUILT_SOURCES = $(GENERATED_H) $(GENERATED_C) $(GENERATED_DOC)
 ENUM_FILES = \
 	$(top_srcdir)/include/ModemManager-enums.h \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-3gpp-ussd.h
+endif
 
 if WITH_INTERFACE_LOCATION
 ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-location.h
@@ -161,9 +168,12 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Simple.xml \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml
+endif
 
 if WITH_INTERFACE_LOCATION
 mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml
@@ -197,9 +207,15 @@ mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
-	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Simple.xml \
 	$(NULL)
+
+mm_gdbus_modem_extra_annotations = $(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml
+mm_gdbus_modem_extra_annotations += --annotate "org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd" org.gtk.GDBus.C.Name Modem3gppUssd
+endif
 
 if WITH_INTERFACE_LOCATION
 mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Location.xml
@@ -238,7 +254,7 @@ mm-gdbus-modem.c: $(mm_gdbus_modem_deps)
 		--c-generate-object-manager \
 		--annotate "org.freedesktop.ModemManager1.Modem.ModemCdma" org.gtk.GDBus.C.Name ModemCdma \
 		--annotate "org.freedesktop.ModemManager1.Modem.Modem3gpp" org.gtk.GDBus.C.Name Modem3gpp \
-		--annotate "org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd" org.gtk.GDBus.C.Name Modem3gppUssd \
+		$(mm_gdbus_modem_extra_annotations) \
 		$^ \
 		$(NULL)
 $(filter-out mm-gdbus-modem.c, $(mm_gdbus_modem_generated)): $(mm_gdbus_modem_deps) mm-gdbus-modem.c

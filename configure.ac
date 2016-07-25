@@ -362,6 +362,20 @@ case $with_qmi in
 esac
 
 dnl-----------------------------------------------------------------------------
+dnl 3GPP USSD interface
+dnl
+
+AC_ARG_WITH(interface-3gpp-ussd, AS_HELP_STRING([--without-interface-3gpp-ussd], [Build without 3GPP USSD interface support]), [], [with_interface_3gpp_ussd=yes])
+AM_CONDITIONAL(WITH_INTERFACE_3GPP_USSD, test "x$with_interface_3gpp_ussd" = "xyes")
+if test "x$with_interface_3gpp_ussd" = "xyes"; then
+    MM_INTERFACE_3GPP_USSD_SUPPORTED=1
+else
+    with_interface_3gpp_ussd=no
+    MM_INTERFACE_3GPP_USSD_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_3GPP_USSD_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Location interface
 dnl
 
@@ -553,6 +567,7 @@ echo "
       systemd journal:         ${with_systemd_journal}
 
     Optional interfaces:
+      3GPP ussd:               ${with_interface_3gpp_ussd}
       location:                ${with_interface_location}
       messaging:               ${with_interface_messaging}
       time:                    ${with_interface_time}

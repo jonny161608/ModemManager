@@ -18,8 +18,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem.c \
 	mm-modem-3gpp.h \
 	mm-modem-3gpp.c \
-	mm-modem-3gpp-ussd.h \
-	mm-modem-3gpp-ussd.c \
 	mm-modem-cdma.h \
 	mm-modem-cdma.c \
 	mm-modem-simple.h \
@@ -47,6 +45,13 @@ libmm_glib_la_SOURCES = \
 	mm-kernel-event-properties.h \
 	mm-kernel-event-properties.c \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+libmm_glib_la_SOURCES += \
+	mm-modem-3gpp-ussd.h \
+	mm-modem-3gpp-ussd.c \
+	$(NULL)
+endif
 
 if WITH_INTERFACE_LOCATION
 libmm_glib_la_SOURCES += \
@@ -155,7 +160,6 @@ include_HEADERS = \
 	mm-object.h \
 	mm-modem.h \
 	mm-modem-3gpp.h \
-	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
 	mm-modem-simple.h \
 	mm-sim.h \
@@ -169,6 +173,12 @@ include_HEADERS = \
 	mm-cdma-manual-activation-properties.h \
 	mm-kernel-event-properties.h \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+include_HEADERS += \
+	mm-modem-3gpp-ussd.h \
+	$(NULL)
+endif
 
 if WITH_INTERFACE_LOCATION
 include_HEADERS += \
@@ -257,6 +267,10 @@ PUBLIC_H = \
 	ModemManager-compat.h \
 	ModemManager.h \
 	$(NULL)
+
+if WITH_INTERFACE_3GPP_USSD
+PUBLIC_H += ModemManager-enums-3gpp-ussd.h
+endif
 
 if WITH_INTERFACE_LOCATION
 PUBLIC_H += ModemManager-enums-location.h

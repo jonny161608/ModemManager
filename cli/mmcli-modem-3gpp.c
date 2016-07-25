@@ -41,7 +41,9 @@ typedef struct {
     GCancellable *cancellable;
     MMObject *object;
     MMModem3gpp *modem_3gpp;
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     MMModem3gppUssd *modem_3gpp_ussd;
+#endif
 } Context;
 static Context *ctx;
 
@@ -49,10 +51,13 @@ static Context *ctx;
 static gboolean scan_flag;
 static gboolean register_home_flag;
 static gchar *register_in_operator_str;
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
 static gboolean ussd_status_flag;
 static gchar *ussd_initiate_str;
 static gchar *ussd_respond_str;
 static gboolean ussd_cancel_flag;
+#endif
 
 static GOptionEntry entries[] = {
     { "3gpp-scan", 0, 0, G_OPTION_ARG_NONE, &scan_flag,
@@ -67,6 +72,7 @@ static GOptionEntry entries[] = {
       "Request a given modem to register in the network of the given operator",
       "[MCCMNC]"
     },
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     { "3gpp-ussd-status", 0, 0, G_OPTION_ARG_NONE, &ussd_status_flag,
       "Show status of any ongoing USSD session",
       NULL
@@ -83,6 +89,7 @@ static GOptionEntry entries[] = {
       "Request to cancel any ongoing USSD session",
       NULL
     },
+#endif
     { NULL }
 };
 
@@ -113,10 +120,13 @@ mmcli_modem_3gpp_options_enabled (void)
     n_actions = (scan_flag +
                  register_home_flag +
                  !!register_in_operator_str +
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
                  ussd_status_flag +
                  !!ussd_initiate_str +
                  !!ussd_respond_str +
-                 ussd_cancel_flag);
+                 ussd_cancel_flag +
+#endif
+                 0);
 
     if (n_actions > 1) {
         g_printerr ("error: too many 3GPP actions requested\n");
@@ -128,6 +138,7 @@ mmcli_modem_3gpp_options_enabled (void)
     if (scan_flag)
         mmcli_force_async_operation ();
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     /* USSD initiate and respond will wait for URCs to get finished, so
      * these are truly async. */
     if (ussd_initiate_str || ussd_respond_str)
@@ -135,6 +146,7 @@ mmcli_modem_3gpp_options_enabled (void)
 
     if (ussd_status_flag)
         mmcli_force_sync_operation ();
+#endif
 
     checked = TRUE;
     return !!n_actions;
@@ -150,8 +162,10 @@ context_free (Context *ctx)
         g_object_unref (ctx->cancellable);
     if (ctx->modem_3gpp)
         g_object_unref (ctx->modem_3gpp);
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     if (ctx->modem_3gpp_ussd)
         g_object_unref (ctx->modem_3gpp_ussd);
+#endif
     if (ctx->object)
         g_object_unref (ctx->object);
     if (ctx->manager)
@@ -175,6 +189,8 @@ ensure_modem_3gpp (void)
     /* Success */
 }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+
 static void
 ensure_modem_3gpp_ussd (void)
 {
@@ -190,6 +206,8 @@ ensure_modem_3gpp_ussd (void)
 
     /* Success */
 }
+
+#endif
 
 void
 mmcli_modem_3gpp_shutdown (void)
@@ -290,6 +308,8 @@ register_ready (MMModem3gpp  *modem_3gpp,
 
     mmcli_async_operation_done ();
 }
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
 
 static void
 print_ussd_status (void)
@@ -397,6 +417,8 @@ ussd_cancel_ready (MMModem3gppUssd *modem_3gpp_ussd,
     mmcli_async_operation_done ();
 }
 
+#endif /* MM_INTERFACE_3GPP_USSD_SUPPORTED */
+
 static void
 get_modem_ready (GObject      *source,
                  GAsyncResult *result,
@@ -404,18 +426,21 @@ get_modem_ready (GObject      *source,
 {
     ctx->object = mmcli_get_modem_finish (result, &ctx->manager);
     ctx->modem_3gpp = mm_object_get_modem_3gpp (ctx->object);
-    ctx->modem_3gpp_ussd = mm_object_get_modem_3gpp_ussd (ctx->object);
-
-    /* Setup operation timeout */
     if (ctx->modem_3gpp)
         mmcli_force_operation_timeout (G_DBUS_PROXY (ctx->modem_3gpp));
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+    ctx->modem_3gpp_ussd = mm_object_get_modem_3gpp_ussd (ctx->object);
     if (ctx->modem_3gpp_ussd)
         mmcli_force_operation_timeout (G_DBUS_PROXY (ctx->modem_3gpp_ussd));
+#endif
 
     ensure_modem_3gpp ();
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     if (ussd_status_flag)
         g_assert_not_reached ();
+#endif
 
     /* Request to scan networks? */
     if (scan_flag) {
@@ -438,6 +463,7 @@ get_modem_ready (GObject      *source,
         return;
     }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     /* Request to initiate USSD session? */
     if (ussd_initiate_str) {
         ensure_modem_3gpp_ussd ();
@@ -475,6 +501,7 @@ get_modem_ready (GObject      *source,
                                    NULL);
         return;
     }
+#endif /* MM_INTERFACE_3GPP_USSD_SUPPORTED */
 
     g_warn_if_reached ();
 }
@@ -507,22 +534,26 @@ mmcli_modem_3gpp_run_synchronous (GDBusConnection *connection)
                                         mmcli_get_common_modem_string (),
                                         &ctx->manager);
     ctx->modem_3gpp = mm_object_get_modem_3gpp (ctx->object);
-    ctx->modem_3gpp_ussd = mm_object_get_modem_3gpp_ussd (ctx->object);
-
-    /* Setup operation timeout */
     if (ctx->modem_3gpp)
         mmcli_force_operation_timeout (G_DBUS_PROXY (ctx->modem_3gpp));
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
+    ctx->modem_3gpp_ussd = mm_object_get_modem_3gpp_ussd (ctx->object);
     if (ctx->modem_3gpp_ussd)
         mmcli_force_operation_timeout (G_DBUS_PROXY (ctx->modem_3gpp_ussd));
+#endif
 
     ensure_modem_3gpp ();
 
     if (scan_flag)
         g_assert_not_reached ();
+
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     if (ussd_initiate_str)
         g_assert_not_reached ();
     if (ussd_respond_str)
         g_assert_not_reached ();
+#endif
 
     /* Request to register the modem? */
     if (register_in_operator_str || register_home_flag) {
@@ -538,6 +569,7 @@ mmcli_modem_3gpp_run_synchronous (GDBusConnection *connection)
         return;
     }
 
+#if MM_INTERFACE_3GPP_USSD_SUPPORTED
     /* Request to show USSD status? */
     if (ussd_status_flag) {
         ensure_modem_3gpp_ussd ();
@@ -560,6 +592,7 @@ mmcli_modem_3gpp_run_synchronous (GDBusConnection *connection)
         ussd_cancel_process_reply (result, error);
         return;
     }
+#endif
 
     g_warn_if_reached ();
 }

@@ -68,6 +68,21 @@
      (MM_MAJOR_VERSION == (major) && MM_MINOR_VERSION == (minor) && MM_MICRO_VERSION >= (micro)))
 
 /**
+ * MM_INTERFACE_3GPP_USSD_SUPPORTED:
+ *
+ * Symbol to expose whether 3GPP USSD interface is supported. The symbol is always
+ * defined and set to either or 1 or 0.
+ *
+ * E.g.:
+ * |[
+ *  #if MM_INTERFACE_3GPP_USSD_SUPPORTED
+ *      // do something
+ *  #endif
+ * ]|
+ */
+#define MM_INTERFACE_3GPP_USSD_SUPPORTED @MM_INTERFACE_3GPP_USSD_SUPPORTED@
+
+/**
  * MM_INTERFACE_LOCATION_SUPPORTED:
  *
  * Symbol to expose whether Location interface is supported. The symbol is always
