@@ -34,7 +34,6 @@
 #include "mm-bearer-list.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-signal.h"
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 # include "mm-iface-modem-location.h"
@@ -46,13 +45,16 @@
 # include "mm-sms-part-3gpp.h"
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+# include "mm-iface-modem-signal.h"
+#endif
+
 #if defined WITH_QMI
 # include <libqmi-glib.h>
 #endif
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
-static void iface_modem_signal_init    (MMIfaceModemSignal    *iface);
 
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init  (MMIfaceModemLocation  *iface);
@@ -60,6 +62,10 @@ static void iface_modem_location_init  (MMIfaceModemLocation  *iface);
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+#endif
+
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 #endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemMbim, mm_broadband_modem_mbim, MM_TYPE_BROADBAND_MODEM, 0,
@@ -71,7 +77,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemMbim, mm_broadband_modem_mbim, MM_TYPE_B
 #if MM_INTERFACE_MESSAGING_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
+#endif
                         )
 
 typedef enum {
@@ -3506,6 +3514,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)
 {
@@ -3514,6 +3524,8 @@ iface_modem_signal_init (MMIfaceModemSignal *iface)
     iface->load_values = NULL;
     iface->load_values_finish = NULL;
 }
+
+#endif
 
 static void
 mm_broadband_modem_mbim_class_init (MMBroadbandModemMbimClass *klass)

@@ -127,4 +127,19 @@
  */
 #define MM_INTERFACE_VOICE_SUPPORTED @MM_INTERFACE_VOICE_SUPPORTED@
 
+/**
+ * MM_INTERFACE_SIGNAL_SUPPORTED:
+ *
+ * Symbol to expose whether Signal interface is supported. The symbol is always
+ * defined and set to either or 1 or 0.
+ *
+ * E.g.:
+ * |[
+ *  #if MM_INTERFACE_SIGNAL_SUPPORTED
+ *      // do something
+ *  #endif
+ * ]|
+ */
+#define MM_INTERFACE_SIGNAL_SUPPORTED @MM_INTERFACE_SIGNAL_SUPPORTED@
+
 #endif /* _MM_VERSION_H_ */

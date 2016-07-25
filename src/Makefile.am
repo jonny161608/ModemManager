@@ -321,8 +321,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-simple.c \
 	mm-iface-modem-firmware.h \
 	mm-iface-modem-firmware.c \
-	mm-iface-modem-signal.h \
-	mm-iface-modem-signal.c \
 	mm-iface-modem-oma.h \
 	mm-iface-modem-oma.c \
 	mm-broadband-modem.h \
@@ -368,6 +366,13 @@ ModemManager_SOURCES += \
 	mm-call-list.c \
 	mm-iface-modem-voice.h \
 	mm-iface-modem-voice.c \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_SIGNAL
+ModemManager_SOURCES += \
+	mm-iface-modem-signal.h \
+	mm-iface-modem-signal.c \
 	$(NULL)
 endif
 

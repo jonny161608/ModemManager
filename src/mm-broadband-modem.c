@@ -50,7 +50,9 @@
 # include "mm-iface-modem-time.h"
 #endif
 #include "mm-iface-modem-firmware.h"
-#include "mm-iface-modem-signal.h"
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+# include "mm-iface-modem-signal.h"
+#endif
 #include "mm-iface-modem-oma.h"
 #include "mm-broadband-bearer.h"
 #include "mm-bearer-list.h"
@@ -82,7 +84,9 @@ static void iface_modem_voice_init (MMIfaceModemVoice *iface);
 #if MM_INTERFACE_TIME_SUPPORTED
 static void iface_modem_time_init (MMIfaceModemTime *iface);
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
+#endif
 static void iface_modem_oma_init (MMIfaceModemOma *iface);
 static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
 
@@ -104,7 +108,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModem, mm_broadband_modem, MM_TYPE_BASE_MODEM
 #if MM_INTERFACE_TIME_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_OMA, iface_modem_oma_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init))
 
@@ -127,7 +133,9 @@ enum {
 #if MM_INTERFACE_TIME_SUPPORTED
     PROP_MODEM_TIME_DBUS_SKELETON,
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     PROP_MODEM_SIGNAL_DBUS_SKELETON,
+#endif
     PROP_MODEM_OMA_DBUS_SKELETON,
     PROP_MODEM_FIRMWARE_DBUS_SKELETON,
     PROP_MODEM_SIM,
@@ -264,9 +272,11 @@ struct _MMBroadbandModemPrivate {
     GObject *modem_time_dbus_skeleton;
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     /*<--- Modem Signal interface --->*/
     /* Properties */
     GObject *modem_signal_dbus_skeleton;
+#endif
 
     /*<--- Modem OMA interface --->*/
     /* Properties */
@@ -8394,6 +8404,8 @@ modem_time_check_support (MMIfaceModemTime *self,
 
 #endif /* MM_INTERFACE_TIME_SUPPORTED */
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (Signal interface) */
 
@@ -8458,6 +8470,8 @@ modem_signal_load_values (MMIfaceModemSignal  *self,
                               callback,
                               user_data);
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 /*****************************************************************************/
 
@@ -9010,7 +9024,9 @@ typedef enum {
     DISABLING_STEP_DISCONNECT_BEARERS,
     DISABLING_STEP_IFACE_SIMPLE,
     DISABLING_STEP_IFACE_FIRMWARE,
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     DISABLING_STEP_IFACE_SIGNAL,
+#endif
     DISABLING_STEP_IFACE_OMA,
 #if MM_INTERFACE_TIME_SUPPORTED
     DISABLING_STEP_IFACE_TIME,
@@ -9119,7 +9135,9 @@ INTERFACE_DISABLE_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FAL
 #if MM_INTERFACE_VOICE_SUPPORTED
 INTERFACE_DISABLE_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
 INTERFACE_DISABLE_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
+#endif
 #if MM_INTERFACE_TIME_SUPPORTED
 INTERFACE_DISABLE_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
 #endif
@@ -9231,6 +9249,7 @@ disabling_step (GTask *task)
         /* Fall down to next step */
         ctx->step++;
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     case DISABLING_STEP_IFACE_SIGNAL:
         if (ctx->self->priv->modem_signal_dbus_skeleton) {
             mm_dbg ("Modem has extended signal reporting capabilities, disabling the Signal interface...");
@@ -9242,6 +9261,7 @@ disabling_step (GTask *task)
         }
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case DISABLING_STEP_IFACE_OMA:
         if (ctx->self->priv->modem_oma_dbus_skeleton) {
@@ -9417,7 +9437,9 @@ typedef enum {
 #if MM_INTERFACE_TIME_SUPPORTED
     ENABLING_STEP_IFACE_TIME,
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     ENABLING_STEP_IFACE_SIGNAL,
+#endif
     ENABLING_STEP_IFACE_OMA,
     ENABLING_STEP_IFACE_FIRMWARE,
     ENABLING_STEP_IFACE_SIMPLE,
@@ -9502,7 +9524,9 @@ INTERFACE_ENABLE_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALS
 #if MM_INTERFACE_VOICE_SUPPORTED
 INTERFACE_ENABLE_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
 INTERFACE_ENABLE_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
+#endif
 #if MM_INTERFACE_TIME_SUPPORTED
 INTERFACE_ENABLE_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
 #endif
@@ -9708,6 +9732,7 @@ enabling_step (GTask *task)
         ctx->step++;
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     case ENABLING_STEP_IFACE_SIGNAL:
         if (ctx->self->priv->modem_signal_dbus_skeleton) {
             mm_dbg ("Modem has extended signal reporting capabilities, enabling the Signal interface...");
@@ -9720,6 +9745,7 @@ enabling_step (GTask *task)
         }
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case ENABLING_STEP_IFACE_OMA:
         if (ctx->self->priv->modem_oma_dbus_skeleton) {
@@ -9863,7 +9889,9 @@ typedef enum {
 #if MM_INTERFACE_TIME_SUPPORTED
     INITIALIZE_STEP_IFACE_TIME,
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     INITIALIZE_STEP_IFACE_SIGNAL,
+#endif
     INITIALIZE_STEP_IFACE_OMA,
     INITIALIZE_STEP_IFACE_FIRMWARE,
     INITIALIZE_STEP_SIM_HOT_SWAP,
@@ -10056,7 +10084,9 @@ INTERFACE_INIT_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 #if MM_INTERFACE_TIME_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
+#endif
 INTERFACE_INIT_READY_FN (iface_modem_oma,       MM_IFACE_MODEM_OMA,       FALSE)
 INTERFACE_INIT_READY_FN (iface_modem_firmware,  MM_IFACE_MODEM_FIRMWARE,  FALSE)
 
@@ -10192,6 +10222,7 @@ initialize_step (GTask *task)
         return;
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     case INITIALIZE_STEP_IFACE_SIGNAL:
         /* Initialize the Signal interface */
         mm_iface_modem_signal_initialize (MM_IFACE_MODEM_SIGNAL (ctx->self),
@@ -10199,6 +10230,7 @@ initialize_step (GTask *task)
                                           (GAsyncReadyCallback)iface_modem_signal_initialize_ready,
                                           task);
         return;
+#endif
 
     case INITIALIZE_STEP_IFACE_OMA:
         /* Initialize the Oma interface */
@@ -10328,6 +10360,9 @@ sim_hot_swap_enabled:
 #endif
 #if MM_INTERFACE_TIME_SUPPORTED
                 mm_iface_modem_time_shutdown (MM_IFACE_MODEM_TIME (ctx->self));
+#endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+                mm_iface_modem_signal_shutdown (MM_IFACE_MODEM_SIGNAL (ctx->self));
 #endif
                 mm_iface_modem_simple_shutdown (MM_IFACE_MODEM_SIMPLE (ctx->self));
             }
@@ -10581,10 +10616,12 @@ set_property (GObject *object,
         self->priv->modem_time_dbus_skeleton = g_value_dup_object (value);
         break;
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     case PROP_MODEM_SIGNAL_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_signal_dbus_skeleton);
         self->priv->modem_signal_dbus_skeleton = g_value_dup_object (value);
         break;
+#endif
     case PROP_MODEM_OMA_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_oma_dbus_skeleton);
         self->priv->modem_oma_dbus_skeleton = g_value_dup_object (value);
@@ -10709,9 +10746,11 @@ get_property (GObject *object,
         g_value_set_object (value, self->priv->modem_time_dbus_skeleton);
         break;
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     case PROP_MODEM_SIGNAL_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_signal_dbus_skeleton);
         break;
+#endif
     case PROP_MODEM_OMA_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_oma_dbus_skeleton);
         break;
@@ -11139,6 +11178,8 @@ iface_modem_time_init (MMIfaceModemTime *iface)
 
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)
 {
@@ -11147,6 +11188,8 @@ iface_modem_signal_init (MMIfaceModemSignal *iface)
     iface->load_values          = modem_signal_load_values;
     iface->load_values_finish   = modem_signal_load_values_finish;
 }
+
+#endif
 
 static void
 iface_modem_oma_init (MMIfaceModemOma *iface)
@@ -11233,9 +11276,11 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
                                       MM_IFACE_MODEM_TIME_DBUS_SKELETON);
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     g_object_class_override_property (object_class,
                                       PROP_MODEM_SIGNAL_DBUS_SKELETON,
                                       MM_IFACE_MODEM_SIGNAL_DBUS_SKELETON);
+#endif
 
     g_object_class_override_property (object_class,
                                       PROP_MODEM_OMA_DBUS_SKELETON,

@@ -40,7 +40,6 @@
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-3gpp-ussd.h"
 #include "mm-iface-modem-cdma.h"
-#include "mm-iface-modem-signal.h"
 #include "mm-broadband-modem-huawei.h"
 #include "mm-broadband-bearer-huawei.h"
 #include "mm-broadband-bearer.h"
@@ -60,11 +59,14 @@
 # include "mm-call-huawei.h"
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+# include "mm-iface-modem-signal.h"
+#endif
+
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
-static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
@@ -84,6 +86,10 @@ static void iface_modem_voice_init (MMIfaceModemVoice *iface);
 static MMIfaceModemVoice *iface_modem_voice_parent;
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+static void iface_modem_signal_init (MMIfaceModemSignal *iface);
+#endif
+
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
@@ -98,7 +104,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TY
 #if MM_INTERFACE_VOICE_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_VOICE, iface_modem_voice_init)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
+#endif
                         )
 
 typedef enum {
@@ -107,6 +115,8 @@ typedef enum {
     FEATURE_SUPPORTED
 } FeatureSupport;
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 typedef struct {
     MMSignal *cdma;
     MMSignal *evdo;
@@ -114,6 +124,8 @@ typedef struct {
     MMSignal *umts;
     MMSignal *lte;
 } DetailedSignal;
+
+#endif
 
 struct _MMBroadbandModemHuaweiPrivate {
     /* Regex for signal quality related notifications */
@@ -178,7 +190,9 @@ struct _MMBroadbandModemHuaweiPrivate {
     GArray *syscfgex_supported_modes;
     GArray *prefmode_supported_modes;
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     DetailedSignal detailed_signal;
+#endif
 };
 
 /*****************************************************************************/
@@ -1749,6 +1763,8 @@ huawei_ndisstat_changed (MMPortSerialAt *port,
     g_object_unref (list);
 }
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 static void
 detailed_signal_clear (DetailedSignal *signal)
 {
@@ -1879,6 +1895,8 @@ huawei_hcsq_changed (MMPortSerialAt *port,
     }
 }
 
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
+
 static void
 set_3gpp_unsolicited_events_handlers (MMBroadbandModemHuawei *self,
                                       gboolean enable)
@@ -1922,12 +1940,14 @@ set_3gpp_unsolicited_events_handlers (MMBroadbandModemHuawei *self,
             enable ? self : NULL,
             NULL);
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
         mm_port_serial_at_add_unsolicited_msg_handler (
             port,
             self->priv->hcsq_regex,
             enable ? (MMPortSerialAtUnsolicitedMsgFn)huawei_hcsq_changed : NULL,
             enable ? self : NULL,
             NULL);
+#endif
     }
 
     g_list_free_full (ports, g_object_unref);
@@ -3989,6 +4009,8 @@ modem_time_check_support (MMIfaceModemTime *self,
 
 #endif /* MM_INTERFACE_TIME_SUPPORTED */
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (Signal interface) */
 
@@ -4124,6 +4146,8 @@ signal_load_values (MMIfaceModemSignal *_self,
                               (GAsyncReadyCallback)hcsq_get_ready,
                               task);
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 /*****************************************************************************/
 /* Setup ports (Broadband modem class) */
@@ -4386,10 +4410,11 @@ mm_broadband_modem_huawei_init (MMBroadbandModemHuawei *self)
 static void
 dispose (GObject *object)
 {
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     MMBroadbandModemHuawei *self = MM_BROADBAND_MODEM_HUAWEI (object);
 
     detailed_signal_clear (&self->priv->detailed_signal);
-
+#endif
     G_OBJECT_CLASS (mm_broadband_modem_huawei_parent_class)->dispose (object);
 }
 
@@ -4569,6 +4594,8 @@ iface_modem_voice_init (MMIfaceModemVoice *iface)
 
 #endif
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)
 {
@@ -4577,6 +4604,8 @@ iface_modem_signal_init (MMIfaceModemSignal *iface)
     iface->load_values = signal_load_values;
     iface->load_values_finish = signal_load_values_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_huawei_class_init (MMBroadbandModemHuaweiClass *klass)

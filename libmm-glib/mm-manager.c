@@ -79,7 +79,9 @@ get_proxy_type (GDBusObjectManagerClient *manager,
 #if MM_INTERFACE_TIME_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Time",           GSIZE_TO_POINTER (MM_TYPE_MODEM_TIME));
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Signal",         GSIZE_TO_POINTER (MM_TYPE_MODEM_SIGNAL));
+#endif
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Firmware",       GSIZE_TO_POINTER (MM_TYPE_MODEM_FIRMWARE));
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.Oma",            GSIZE_TO_POINTER (MM_TYPE_MODEM_OMA));
         g_hash_table_insert (lookup_hash, "org.freedesktop.ModemManager1.Modem.ModemCdma",      GSIZE_TO_POINTER (MM_TYPE_MODEM_CDMA));

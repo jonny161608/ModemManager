@@ -44,7 +44,9 @@
 # include "mm-iface-modem-location.h"
 #endif
 #include "mm-iface-modem-firmware.h"
-#include "mm-iface-modem-signal.h"
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+# include "mm-iface-modem-signal.h"
+#endif
 #include "mm-iface-modem-oma.h"
 #include "mm-sim-qmi.h"
 #include "mm-bearer-qmi.h"
@@ -55,7 +57,6 @@ static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
 static void iface_modem_oma_init (MMIfaceModemOma *iface);
 static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
-static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
@@ -65,6 +66,10 @@ static MMIfaceModemMessaging *iface_modem_messaging_parent;
 #if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static MMIfaceModemLocation *iface_modem_location_parent;
+#endif
+
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 #endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BROADBAND_MODEM, 0,
@@ -78,7 +83,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BRO
 #if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
 #endif
+#if MM_INTERFACE_SIGNAL_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_OMA, iface_modem_oma_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init))
 
@@ -10732,6 +10739,8 @@ firmware_change_current (MMIfaceModemFirmware *self,
     qmi_message_dms_set_firmware_preference_input_unref (input);
 }
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (Signal interface) */
 
@@ -11206,6 +11215,8 @@ signal_load_values (MMIfaceModemSignal *self,
 
     signal_load_values_context_step (ctx);
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 /*****************************************************************************/
 /* First enabling step */
@@ -11738,6 +11749,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
 
 #endif /* MM_INTERFACE_LOCATION_SUPPORTED */
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)
 {
@@ -11746,6 +11759,8 @@ iface_modem_signal_init (MMIfaceModemSignal *iface)
     iface->load_values = signal_load_values;
     iface->load_values_finish = signal_load_values_finish;
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 static void
 iface_modem_oma_init (MMIfaceModemOma *iface)

@@ -2091,6 +2091,8 @@ out:
     return TRUE;
 }
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 /*****************************************************************************/
 /* +CESQ response parser */
 
@@ -2331,6 +2333,8 @@ mm_3gpp_cesq_response_to_signal_info (const gchar  *response,
 
     return TRUE;
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 gboolean
 mm_3gpp_parse_cfun_query_generic_response (const gchar        *response,

@@ -26,8 +26,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-simple.c \
 	mm-modem-firmware.h \
 	mm-modem-firmware.c \
-	mm-modem-signal.h \
-	mm-modem-signal.c \
 	mm-modem-oma.h \
 	mm-modem-oma.c \
 	mm-sim.h \
@@ -52,8 +50,6 @@ libmm_glib_la_SOURCES = \
 	mm-firmware-properties.c \
 	mm-cdma-manual-activation-properties.h \
 	mm-cdma-manual-activation-properties.c \
-	mm-signal.h \
-	mm-signal.c \
 	mm-kernel-event-properties.h \
 	mm-kernel-event-properties.c \
 	$(NULL)
@@ -105,6 +101,15 @@ libmm_glib_la_SOURCES += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_SIGNAL
+libmm_glib_la_SOURCES += \
+	mm-modem-signal.h \
+	mm-modem-signal.c \
+	mm-signal.h \
+	mm-signal.c \
+	$(NULL)
+endif
+
 libmm_glib_la_CPPFLAGS = \
 	-I$(srcdir) \
 	-I$(top_srcdir) \
@@ -143,7 +148,6 @@ include_HEADERS = \
 	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
 	mm-modem-firmware.h \
-	mm-modem-signal.h \
 	mm-modem-oma.h \
 	mm-modem-simple.h \
 	mm-sim.h \
@@ -156,7 +160,6 @@ include_HEADERS = \
 	mm-unlock-retries.h \
 	mm-firmware-properties.h \
 	mm-cdma-manual-activation-properties.h \
-	mm-signal.h \
 	mm-kernel-event-properties.h \
 	$(NULL)
 
@@ -191,6 +194,13 @@ include_HEADERS += \
 	mm-modem-voice.h \
 	mm-call.h \
 	mm-call-properties.h \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_SIGNAL
+include_HEADERS += \
+	mm-modem-signal.h \
+	mm-signal.h \
 	$(NULL)
 endif
 

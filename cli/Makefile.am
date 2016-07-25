@@ -21,7 +21,6 @@ mmcli_SOURCES = \
 	mmcli-modem-cdma.c \
 	mmcli-modem-simple.c \
 	mmcli-modem-firmware.c \
-	mmcli-modem-signal.c \
 	mmcli-modem-oma.c \
 	mmcli-bearer.c \
 	mmcli-sim.c \
@@ -47,6 +46,10 @@ mmcli_SOURCES += \
 	mmcli-modem-voice.c \
 	mmcli-call.c \
 	$(NULL)
+endif
+
+if WITH_INTERFACE_SIGNAL
+mmcli_SOURCES += mmcli-modem-signal.c
 endif
 
 mmcli_LDADD = \

@@ -418,6 +418,20 @@ fi
 AC_SUBST(MM_INTERFACE_VOICE_SUPPORTED)
 
 dnl-----------------------------------------------------------------------------
+dnl Signal interface
+dnl
+
+AC_ARG_WITH(interface-signal, AS_HELP_STRING([--without-interface-signal], [Build without signal interface support]), [], [with_interface_signal=yes])
+AM_CONDITIONAL(WITH_INTERFACE_SIGNAL, test "x$with_interface_signal" = "xyes")
+if test "x$with_interface_signal" = "xyes"; then
+    MM_INTERFACE_SIGNAL_SUPPORTED=1
+else
+    with_interface_signal=no
+    MM_INTERFACE_SIGNAL_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_SIGNAL_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Compiler warnings
 dnl
 
@@ -515,6 +529,7 @@ echo "
       messaging:               ${with_interface_messaging}
       time:                    ${with_interface_time}
       voice:                   ${with_interface_voice}
+      signal:                  ${with_interface_signal}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

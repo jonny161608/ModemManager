@@ -117,6 +117,7 @@ void          mmcli_modem_firmware_run_asynchronous   (GDBusConnection *connecti
 void          mmcli_modem_firmware_run_synchronous    (GDBusConnection *connection);
 void          mmcli_modem_firmware_shutdown           (void);
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
 /* Signal group */
 GOptionGroup *mmcli_modem_signal_get_option_group   (void);
 gboolean      mmcli_modem_signal_options_enabled    (void);
@@ -124,6 +125,7 @@ void          mmcli_modem_signal_run_asynchronous   (GDBusConnection *connection
                                                      GCancellable    *cancellable);
 void          mmcli_modem_signal_run_synchronous    (GDBusConnection *connection);
 void          mmcli_modem_signal_shutdown           (void);
+#endif
 
 /* Oma group */
 GOptionGroup *mmcli_modem_oma_get_option_group   (void);

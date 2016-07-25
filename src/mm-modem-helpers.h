@@ -273,22 +273,6 @@ gboolean mm_3gpp_parse_cfun_query_generic_response (const gchar        *response
                                                     MMModemPowerState  *out_state,
                                                     GError            **error);
 
-/* +CESQ response parser */
-gboolean mm_3gpp_parse_cesq_response (const gchar  *response,
-                                      guint        *out_rxlev,
-                                      guint        *out_ber,
-                                      guint        *out_rscp,
-                                      guint        *out_ecn0,
-                                      guint        *out_rsrq,
-                                      guint        *out_rsrp,
-                                      GError      **error);
-
-gboolean mm_3gpp_cesq_response_to_signal_info (const gchar  *response,
-                                               MMSignal    **out_gsm,
-                                               MMSignal    **out_umts,
-                                               MMSignal    **out_lte,
-                                               GError      **error);
-
 /* Additional 3GPP-specific helpers */
 
 MMModem3gppFacility mm_3gpp_acronym_to_facility (const gchar *str);
@@ -308,6 +292,30 @@ const gchar      *mm_3gpp_get_pdp_type_from_ip_family (MMBearerIpFamily family);
 MMBearerIpFamily  mm_3gpp_get_ip_family_from_pdp_type (const gchar *pdp_type);
 
 char *mm_3gpp_parse_iccid (const char *raw_iccid, GError **error);
+
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
+/*****************************************************************************/
+/* Signal specific helpers and utilities */
+/*****************************************************************************/
+
+/* +CESQ response parser */
+gboolean mm_3gpp_parse_cesq_response (const gchar  *response,
+                                      guint        *out_rxlev,
+                                      guint        *out_ber,
+                                      guint        *out_rscp,
+                                      guint        *out_ecn0,
+                                      guint        *out_rsrq,
+                                      guint        *out_rsrp,
+                                      GError      **error);
+
+gboolean mm_3gpp_cesq_response_to_signal_info (const gchar  *response,
+                                               MMSignal    **out_gsm,
+                                               MMSignal    **out_umts,
+                                               MMSignal    **out_lte,
+                                               GError      **error);
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
 

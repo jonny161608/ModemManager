@@ -3528,6 +3528,8 @@ test_cfun_response (void)
     }
 }
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 /*****************************************************************************/
 /* Test +CESQ responses */
 
@@ -3647,6 +3649,8 @@ test_cesq_response_to_signal (void)
             g_assert (!lte);
     }
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 typedef struct {
     const gchar       *str;
@@ -3950,8 +3954,10 @@ int main (int argc, char **argv)
     g_test_suite_add (suite, TESTCASE (test_cfun_response, NULL));
     g_test_suite_add (suite, TESTCASE (test_cfun_generic_response, NULL));
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
     g_test_suite_add (suite, TESTCASE (test_cesq_response, NULL));
     g_test_suite_add (suite, TESTCASE (test_cesq_response_to_signal, NULL));
+#endif
 
     g_test_suite_add (suite, TESTCASE (test_parse_uint_list, NULL));
 

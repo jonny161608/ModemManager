@@ -36,7 +36,6 @@ GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Simple.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml \
 	$(NULL)
 
 if WITH_INTERFACE_LOCATION
@@ -63,6 +62,10 @@ GENERATED_DOC += \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Call.xml \
 	$(NULL)
+endif
+
+if WITH_INTERFACE_SIGNAL
+GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml
 endif
 
 BUILT_SOURCES = $(GENERATED_H) $(GENERATED_C) $(GENERATED_DOC)
@@ -148,7 +151,6 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Simple.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml \
 	$(NULL)
 
 if WITH_INTERFACE_LOCATION
@@ -167,6 +169,10 @@ if WITH_INTERFACE_VOICE
 mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml
 endif
 
+if WITH_INTERFACE_SIGNAL
+mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml
+endif
+
 mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Firmware.xml \
@@ -175,7 +181,6 @@ mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Simple.xml \
-	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Signal.xml \
 	$(NULL)
 
 if WITH_INTERFACE_LOCATION
@@ -192,6 +197,10 @@ endif
 
 if WITH_INTERFACE_VOICE
 mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Voice.xml
+endif
+
+if WITH_INTERFACE_SIGNAL
+mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Signal.xml
 endif
 
 mm-gdbus-modem.c: $(mm_gdbus_modem_deps)

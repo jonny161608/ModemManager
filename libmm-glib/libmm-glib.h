@@ -52,7 +52,9 @@
 #  include <mm-modem-time.h>
 # endif
 # include <mm-modem-firmware.h>
-# include <mm-modem-signal.h>
+# if MM_INTERFACE_SIGNAL_SUPPORTED
+#  include <mm-modem-signal.h>
+# endif
 # include <mm-modem-oma.h>
 #endif
 
@@ -87,7 +89,9 @@
 #endif
 #include <mm-firmware-properties.h>
 #include <mm-cdma-manual-activation-properties.h>
-#include <mm-signal.h>
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+# include <mm-signal.h>
+#endif
 #include <mm-kernel-event-properties.h>
 
 /* generated */

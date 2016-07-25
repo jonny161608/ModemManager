@@ -461,6 +461,8 @@ mm_object_peek_modem_firmware (MMObject *self)
     return (MMModemFirmware *)mm_gdbus_object_peek_modem_firmware (MM_GDBUS_OBJECT (self));
 }
 
+#if MM_INTERFACE_SIGNAL_SUPPORTED
+
 /*****************************************************************************/
 
 /**
@@ -496,6 +498,8 @@ mm_object_peek_modem_signal (MMObject *self)
 
     return (MMModemSignal *)mm_gdbus_object_peek_modem_signal (MM_GDBUS_OBJECT (self));
 }
+
+#endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
 /*****************************************************************************/
 
