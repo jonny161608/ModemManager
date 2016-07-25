@@ -5,12 +5,16 @@ XMLS = $(wildcard $(top_srcdir)/introspection/*.xml)
 includedir = @includedir@/ModemManager
 
 include_HEADERS = \
-	ModemManager-names.h \
 	ModemManager-enums.h \
 	ModemManager-errors.h \
 	ModemManager-compat.h \
+	ModemManager.h \
+	$(NULL)
+
+nodist_include_HEADERS = \
+	ModemManager-names.h \
 	ModemManager-version.h \
-	ModemManager.h
+	$(NULL)
 
 if WITH_INTERFACE_3GPP_USSD
 include_HEADERS += ModemManager-enums-3gpp-ussd.h
@@ -37,7 +41,7 @@ include_HEADERS += ModemManager-enums-firmware.h
 endif
 
 ModemManager-names.h: $(XMLS) $(top_srcdir)/build-aux/header-generator.xsl
-	$(AM_V_GEN) $(XSLTPROC) $(top_srcdir)/build-aux/header-generator.xsl $(top_builddir)/introspection/all.xml > $@
+	$(AM_V_GEN) $(XSLTPROC) --path $(top_srcdir)/introspection $(top_srcdir)/build-aux/header-generator.xsl $(top_builddir)/introspection/all.xml > $@
 
 CLEANFILES = \
 	ModemManager-names.h

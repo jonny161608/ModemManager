@@ -93,6 +93,9 @@ dnl-----------------------------------------------------------------------------
 dnl Build dependencies
 dnl
 
+AC_PATH_PROG(XSLTPROC, xsltproc, AC_MSG_ERROR([xsltproc not found]))
+AC_SUBST(XSLTPROC)
+
 GLIB_MIN_VERSION=2.36.0
 GLIB_BUILD_SYMBOLS="-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_36 -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_36 -DGLIB_DISABLE_DEPRECATION_WARNINGS"
 
