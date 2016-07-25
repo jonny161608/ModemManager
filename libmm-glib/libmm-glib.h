@@ -55,7 +55,9 @@
 # if MM_INTERFACE_SIGNAL_SUPPORTED
 #  include <mm-modem-signal.h>
 # endif
-# include <mm-modem-oma.h>
+# if MM_INTERFACE_OMA_SUPPORTED
+#  include <mm-modem-oma.h>
+# endif
 #endif
 
 #if defined (_LIBMM_INSIDE_MM) ||    \

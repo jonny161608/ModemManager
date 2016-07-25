@@ -24,6 +24,10 @@ if WITH_INTERFACE_VOICE
 include_HEADERS += ModemManager-enums-voice.h
 endif
 
+if WITH_INTERFACE_OMA
+include_HEADERS += ModemManager-enums-oma.h
+endif
+
 ModemManager-names.h: $(XMLS) $(top_srcdir)/build-aux/header-generator.xsl
 	$(AM_V_GEN) $(XSLTPROC) $(top_srcdir)/build-aux/header-generator.xsl $(top_builddir)/introspection/all.xml > $@
 

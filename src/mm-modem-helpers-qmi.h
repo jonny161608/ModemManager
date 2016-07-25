@@ -99,6 +99,8 @@ MMSmsState mm_sms_state_from_qmi_message_tag (QmiWmsMessageTagType tag);
 
 QmiWdsAuthentication mm_bearer_allowed_auth_to_qmi_authentication (MMBearerAllowedAuth auth);
 
+#if MM_INTERFACE_OMA_SUPPORTED
+
 /*****************************************************************************/
 /* QMI/OMA to MM translations */
 
@@ -108,6 +110,8 @@ QmiOmaSessionType mm_oma_session_type_to_qmi_oma_session_type (MMOmaSessionType 
 MMOmaSessionState mm_oma_session_state_from_qmi_oma_session_state (QmiOmaSessionState qmi_session_state);
 
 MMOmaSessionStateFailedReason mm_oma_session_state_failed_reason_from_qmi_oma_session_failed_reason (QmiOmaSessionFailedReason qmi_session_failed_reason);
+
+#endif
 
 /*****************************************************************************/
 /* Utility to gather current capabilities from various sources */

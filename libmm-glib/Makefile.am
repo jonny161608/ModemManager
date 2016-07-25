@@ -26,8 +26,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-simple.c \
 	mm-modem-firmware.h \
 	mm-modem-firmware.c \
-	mm-modem-oma.h \
-	mm-modem-oma.c \
 	mm-sim.h \
 	mm-sim.c \
 	mm-bearer.h \
@@ -110,6 +108,13 @@ libmm_glib_la_SOURCES += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_OMA
+libmm_glib_la_SOURCES += \
+	mm-modem-oma.h \
+	mm-modem-oma.c \
+	$(NULL)
+endif
+
 libmm_glib_la_CPPFLAGS = \
 	-I$(srcdir) \
 	-I$(top_srcdir) \
@@ -148,7 +153,6 @@ include_HEADERS = \
 	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
 	mm-modem-firmware.h \
-	mm-modem-oma.h \
 	mm-modem-simple.h \
 	mm-sim.h \
 	mm-bearer.h \
@@ -204,6 +208,12 @@ include_HEADERS += \
 	$(NULL)
 endif
 
+if WITH_INTERFACE_OMA
+include_HEADERS += \
+	mm-modem-oma.h \
+	$(NULL)
+endif
+
 CLEANFILES =
 
 # Introspection
@@ -252,6 +262,10 @@ if WITH_INTERFACE_VOICE
 GENERATED_H += mm-gdbus-call.h
 GENERATED_C += mm-gdbus-call.c
 PUBLIC_H    += ModemManager-enums-voice.h
+endif
+
+if WITH_INTERFACE_OMA
+PUBLIC_H += ModemManager-enums-oma.h
 endif
 
 INTROSPECTION_GIRS = ModemManager-1.0.gir

@@ -31,7 +31,6 @@ GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Bearer.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
@@ -68,6 +67,10 @@ if WITH_INTERFACE_SIGNAL
 GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml
 endif
 
+if WITH_INTERFACE_OMA
+GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml
+endif
+
 BUILT_SOURCES = $(GENERATED_H) $(GENERATED_C) $(GENERATED_DOC)
 
 # Enum types
@@ -85,6 +88,10 @@ endif
 
 if WITH_INTERFACE_VOICE
 ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-voice.h
+endif
+
+if WITH_INTERFACE_OMA
+ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-oma.h
 endif
 
 mm-enums-types.h: Makefile.am $(ENUM_FILES) $(top_srcdir)/build-aux/mm-enums-template.h
@@ -146,7 +153,6 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-modem.c \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
@@ -173,10 +179,13 @@ if WITH_INTERFACE_SIGNAL
 mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml
 endif
 
+if WITH_INTERFACE_OMA
+mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml
+endif
+
 mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Firmware.xml \
-	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Oma.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.ModemCdma.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
@@ -201,6 +210,10 @@ endif
 
 if WITH_INTERFACE_SIGNAL
 mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Signal.xml
+endif
+
+if WITH_INTERFACE_OMA
+mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Oma.xml
 endif
 
 mm-gdbus-modem.c: $(mm_gdbus_modem_deps)

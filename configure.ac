@@ -432,6 +432,20 @@ fi
 AC_SUBST(MM_INTERFACE_SIGNAL_SUPPORTED)
 
 dnl-----------------------------------------------------------------------------
+dnl OMA interface
+dnl
+
+AC_ARG_WITH(interface-oma, AS_HELP_STRING([--without-interface-oma], [Build without OMA interface support]), [], [with_interface_oma=yes])
+AM_CONDITIONAL(WITH_INTERFACE_OMA, test "x$with_interface_oma" = "xyes")
+if test "x$with_interface_oma" = "xyes"; then
+    MM_INTERFACE_OMA_SUPPORTED=1
+else
+    with_interface_oma=no
+    MM_INTERFACE_OMA_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_OMA_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
 dnl Compiler warnings
 dnl
 
@@ -530,6 +544,7 @@ echo "
       time:                    ${with_interface_time}
       voice:                   ${with_interface_voice}
       signal:                  ${with_interface_signal}
+      oma:                     ${with_interface_oma}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

@@ -55,11 +55,6 @@ MMBearerIpFamily      mm_common_get_ip_type_from_string      (const gchar *str,
 MMBearerAllowedAuth   mm_common_get_allowed_auth_from_string (const gchar *str,
                                                               GError **error);
 
-MMOmaFeature          mm_common_get_oma_features_from_string (const gchar *str,
-                                                              GError **error);
-MMOmaSessionType      mm_common_get_oma_session_type_from_string (const gchar *str,
-                                                                  GError **error);
-
 GArray          *mm_common_ports_variant_to_garray (GVariant *variant);
 MMModemPortInfo *mm_common_ports_variant_to_array  (GVariant *variant,
                                                  guint *n_ports);
@@ -96,14 +91,6 @@ GVariant          *mm_common_capability_combinations_array_to_variant  (const MM
 GVariant          *mm_common_capability_combinations_garray_to_variant (GArray *array);
 GVariant          *mm_common_build_capability_combinations_any         (void);
 GVariant          *mm_common_build_capability_combinations_none        (void);
-
-GArray                              *mm_common_oma_pending_network_initiated_sessions_variant_to_garray (GVariant *variant);
-MMOmaPendingNetworkInitiatedSession *mm_common_oma_pending_network_initiated_sessions_variant_to_array  (GVariant *variant,
-                                                                                                         guint *n_modes);
-GVariant                            *mm_common_oma_pending_network_initiated_sessions_array_to_variant  (const MMOmaPendingNetworkInitiatedSession *modes,
-                                                                                                         guint n_modes);
-GVariant                            *mm_common_oma_pending_network_initiated_sessions_garray_to_variant (GArray *array);
-GVariant                            *mm_common_build_oma_pending_network_initiated_sessions_default     (void);
 
 typedef gboolean (*MMParseKeyValueForeachFn) (const gchar *key,
                                               const gchar *value,
@@ -167,6 +154,20 @@ MMCallState         mm_common_get_call_state_from_string        (const gchar *st
                                                                  GError **error);
 MMCallStateReason   mm_common_get_call_state_reason_from_string (const gchar *str,
                                                                  GError **error);
+#endif
+
+#if MM_INTERFACE_OMA_SUPPORTED
+MMOmaFeature                         mm_common_get_oma_features_from_string                             (const gchar *str,
+                                                                                                         GError **error);
+MMOmaSessionType                     mm_common_get_oma_session_type_from_string                         (const gchar *str,
+                                                                                                         GError **error);
+GArray                              *mm_common_oma_pending_network_initiated_sessions_variant_to_garray (GVariant *variant);
+MMOmaPendingNetworkInitiatedSession *mm_common_oma_pending_network_initiated_sessions_variant_to_array  (GVariant *variant,
+                                                                                                         guint *n_modes);
+GVariant                            *mm_common_oma_pending_network_initiated_sessions_array_to_variant  (const MMOmaPendingNetworkInitiatedSession *modes,
+                                                                                                         guint n_modes);
+GVariant                            *mm_common_oma_pending_network_initiated_sessions_garray_to_variant (GArray *array);
+GVariant                            *mm_common_build_oma_pending_network_initiated_sessions_default     (void);
 #endif
 
 #endif /* MM_COMMON_HELPERS_H */

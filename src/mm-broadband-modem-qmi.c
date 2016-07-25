@@ -47,7 +47,9 @@
 #if MM_INTERFACE_SIGNAL_SUPPORTED
 # include "mm-iface-modem-signal.h"
 #endif
-#include "mm-iface-modem-oma.h"
+#if MM_INTERFACE_OMA_SUPPORTED
+# include "mm-iface-modem-oma.h"
+#endif
 #include "mm-sim-qmi.h"
 #include "mm-bearer-qmi.h"
 
@@ -55,7 +57,6 @@ static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
-static void iface_modem_oma_init (MMIfaceModemOma *iface);
 static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
 
 #if MM_INTERFACE_MESSAGING_SUPPORTED
@@ -72,6 +73,10 @@ static MMIfaceModemLocation *iface_modem_location_parent;
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 #endif
 
+#if MM_INTERFACE_OMA_SUPPORTED
+static void iface_modem_oma_init (MMIfaceModemOma *iface);
+#endif
+
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
@@ -86,7 +91,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BRO
 #if MM_INTERFACE_SIGNAL_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
 #endif
+#if MM_INTERFACE_OMA_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_OMA, iface_modem_oma_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init))
 
 struct _MMBroadbandModemQmiPrivate {
@@ -142,10 +149,12 @@ struct _MMBroadbandModemQmiPrivate {
     guint location_event_report_indication_id;
 #endif
 
+#if MM_INTERFACE_OMA_SUPPORTED
     /* Oma helpers */
     gboolean oma_unsolicited_events_enabled;
     gboolean oma_unsolicited_events_setup;
     guint oma_event_report_indication_id;
+#endif
 
     /* Firmware helpers */
     GList *firmware_list;
@@ -9436,6 +9445,8 @@ enable_location_gathering (MMIfaceModemLocation *self,
 
 #endif /* MM_INTERFACE_LOCATION_SUPPORTED */
 
+#if MM_INTERFACE_OMA_SUPPORTED
+
 /*****************************************************************************/
 /* Check support (OMA interface) */
 
@@ -10088,6 +10099,8 @@ oma_enable_unsolicited_events (MMIfaceModemOma *self,
                                                   callback,
                                                   user_data);
 }
+
+#endif /* MM_INTERFACE_OMA_SUPPORTED */
 
 /*****************************************************************************/
 /* Check firmware support (Firmware interface) */
@@ -11762,6 +11775,8 @@ iface_modem_signal_init (MMIfaceModemSignal *iface)
 
 #endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
+#if MM_INTERFACE_OMA_SUPPORTED
+
 static void
 iface_modem_oma_init (MMIfaceModemOma *iface)
 {
@@ -11786,6 +11801,8 @@ iface_modem_oma_init (MMIfaceModemOma *iface)
     iface->disable_unsolicited_events = oma_disable_unsolicited_events;
     iface->disable_unsolicited_events_finish = common_oma_enable_disable_unsolicited_events_finish;
 }
+
+#endif /* MM_INTERFACE_OMA_SUPPORTED */
 
 static void
 iface_modem_firmware_init (MMIfaceModemFirmware *iface)

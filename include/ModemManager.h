@@ -46,6 +46,9 @@
 #if MM_INTERFACE_VOICE_SUPPORTED
 # include <ModemManager-enums-voice.h>
 #endif
+#if MM_INTERFACE_OMA_SUPPORTED
+# include <ModemManager-enums-oma.h>
+#endif
 
 /* Public header with errors */
 #include <ModemManager-errors.h>

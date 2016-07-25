@@ -1253,6 +1253,8 @@ mm_modem_capability_from_qmi_capabilities_context (MMQmiCapabilitiesContext *ctx
     return tmp;
 }
 
+#if MM_INTERFACE_OMA_SUPPORTED
+
 /*****************************************************************************/
 
 MMOmaSessionType
@@ -1355,3 +1357,5 @@ mm_oma_session_state_failed_reason_from_qmi_oma_session_failed_reason (QmiOmaSes
         return MM_OMA_SESSION_STATE_FAILED_REASON_UNKNOWN;
     }
 }
+
+#endif /* MM_INTERFACE_OMA_SUPPORTED */

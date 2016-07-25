@@ -59,6 +59,8 @@ struct _MMModemPortInfo {
 void mm_modem_port_info_array_free (MMModemPortInfo *array,
                                     guint array_size);
 
+#if MM_INTERFACE_OMA_SUPPORTED
+
 /**
  * MMOmaPendingNetworkInitiatedSession:
  * @session_type: A #MMOmaSessionType.
@@ -72,5 +74,7 @@ struct _MMOmaPendingNetworkInitiatedSession {
     MMOmaSessionType session_type;
     guint session_id;
 };
+
+#endif /* MM_INTERFACE_OMA_SUPPORTED */
 
 #endif /* _MM_HELPER_TYPES_H_ */

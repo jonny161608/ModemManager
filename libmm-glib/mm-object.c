@@ -501,6 +501,8 @@ mm_object_peek_modem_signal (MMObject *self)
 
 #endif /* MM_INTERFACE_SIGNAL_SUPPORTED */
 
+#if MM_INTERFACE_OMA_SUPPORTED
+
 /*****************************************************************************/
 
 /**
@@ -536,6 +538,8 @@ mm_object_peek_modem_oma (MMObject *self)
 
     return (MMModemOma *)mm_gdbus_object_peek_modem_oma (MM_GDBUS_OBJECT (self));
 }
+
+#endif /* MM_INTERFACE_OMA_SUPPORTED */
 
 /*****************************************************************************/
 

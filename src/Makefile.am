@@ -321,8 +321,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-simple.c \
 	mm-iface-modem-firmware.h \
 	mm-iface-modem-firmware.c \
-	mm-iface-modem-oma.h \
-	mm-iface-modem-oma.c \
 	mm-broadband-modem.h \
 	mm-broadband-modem.c \
 	mm-port-probe.h \
@@ -373,6 +371,13 @@ if WITH_INTERFACE_SIGNAL
 ModemManager_SOURCES += \
 	mm-iface-modem-signal.h \
 	mm-iface-modem-signal.c \
+	$(NULL)
+endif
+
+if WITH_INTERFACE_OMA
+ModemManager_SOURCES += \
+	mm-iface-modem-oma.h \
+	mm-iface-modem-oma.c \
 	$(NULL)
 endif
 
