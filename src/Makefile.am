@@ -198,6 +198,8 @@ libport_la_SOURCES = \
 	mm-port-serial-qcdm.h \
 	mm-port-serial-gps.c \
 	mm-port-serial-gps.h \
+	mm-hdlc.c \
+	mm-hdlc.h \
 	mm-serial-parsers.c \
 	mm-serial-parsers.h \
 	$(NULL)

@@ -52,6 +52,7 @@ noinst_PROGRAMS = \
 	test-charsets \
 	test-qcdm-serial-port \
 	test-at-serial-port \
+	test-hdlc \
 	test-sms-part-3gpp \
 	test-sms-part-cdma \
 	test-udev-rules \
