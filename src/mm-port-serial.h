@@ -39,6 +39,7 @@
 #define MM_PORT_SERIAL_FD           "fd" /* Construct-only */
 #define MM_PORT_SERIAL_SPEW_CONTROL "spew-control" /* Construct-only */
 #define MM_PORT_SERIAL_FLASH_OK     "flash-ok" /* Construct-only */
+#define MM_PORT_SERIAL_HDLC         "hdlc"
 
 typedef enum {
     MM_PORT_SERIAL_RESPONSE_NONE,
@@ -95,6 +96,7 @@ struct _MMPortSerialClass {
     void     (*config)            (MMPortSerial *self);
 
     void (*debug_log)             (MMPortSerial *self,
+                                   gboolean binary,
                                    const char *prefix,
                                    const char *buf,
                                    gsize len);
@@ -153,5 +155,22 @@ GByteArray *mm_port_serial_command_finish (MMPortSerial *self,
 gboolean mm_port_serial_set_flow_control (MMPortSerial   *self,
                                           MMFlowControl   flow_control,
                                           GError        **error);
+
+void        mm_port_serial_debug_log      (MMPortSerial *port,
+                                           gboolean binary,
+                                           const char *prefix,
+                                           const char *buf,
+                                           gsize len);
+
+void        mm_port_serial_hdlc_command   (MMPortSerial *self,
+                                           GByteArray *command,
+                                           guint32 timeout_seconds,
+                                           GCancellable *cancellable,
+                                           GAsyncReadyCallback callback,
+                                           gpointer user_data);
+
+GByteArray *mm_port_serial_hdlc_command_finish (MMPortSerial *self,
+                                                GAsyncResult *res,
+                                                GError **error);
 
 #endif /* MM_PORT_SERIAL_H */

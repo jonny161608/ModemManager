@@ -35,6 +35,7 @@
 
 #include "mm-port-serial.h"
 #include "mm-log.h"
+#include "mm-hdlc.h"
 
 static gboolean port_serial_queue_process          (gpointer data);
 static void     port_serial_schedule_queue_process (MMPortSerial *self,
@@ -57,6 +58,7 @@ enum {
     PROP_FD,
     PROP_SPEW_CONTROL,
     PROP_FLASH_OK,
+    PROP_HDLC,
 
     LAST_PROP
 };
@@ -97,6 +99,7 @@ struct _MMPortSerialPrivate {
     guint64 send_delay;
     gboolean spew_control;
     gboolean flash_ok;
+    gboolean hdlc;
 
     guint queue_id;
     guint timeout_id;
@@ -120,6 +123,7 @@ typedef struct {
     GSimpleAsyncResult *result;
     GCancellable *cancellable;
     GByteArray *command;
+    gboolean hdlc;
     guint32 timeout;
     gboolean allow_cached;
     guint32 eagain_count;
@@ -142,6 +146,37 @@ command_context_complete_and_free (CommandContext *ctx, gboolean idle)
         g_object_unref (ctx->cancellable);
     g_object_unref (ctx->self);
     g_slice_free (CommandContext, ctx);
+}
+
+static void
+_serial_command (MMPortSerial *self, CommandContext *ctx)
+{
+    g_return_if_fail (MM_IS_PORT_SERIAL (self));
+    g_return_if_fail (ctx != NULL);
+
+    /* Only accept about 3 seconds of EAGAIN for this command */
+    if (self->priv->send_delay && mm_port_get_subsys (MM_PORT (self)) == MM_PORT_SUBSYS_TTY)
+        ctx->eagain_count = 3000000 / self->priv->send_delay;
+    else
+        ctx->eagain_count = 1000;
+
+    if (self->priv->open_count == 0) {
+        g_simple_async_result_set_error (ctx->result,
+                                         MM_SERIAL_ERROR,
+                                         MM_SERIAL_ERROR_SEND_FAILED,
+                                         "Sending command failed: device is not open");
+        command_context_complete_and_free (ctx, TRUE);
+        return;
+    }
+
+    /* Clear the cached value for this command if not asking for cached value */
+    if (!ctx->allow_cached)
+        port_serial_set_cached_reply (self, ctx->command, NULL);
+
+    g_queue_push_tail (self->priv->queue, ctx);
+
+    if (g_queue_get_length (self->priv->queue) == 1)
+        port_serial_schedule_queue_process (self, 0);
 }
 
 GByteArray *
@@ -181,29 +216,54 @@ mm_port_serial_command (MMPortSerial *self,
     ctx->timeout = timeout_seconds;
     ctx->cancellable = (cancellable ? g_object_ref (cancellable) : NULL);
 
-    /* Only accept about 3 seconds of EAGAIN for this command */
-    if (self->priv->send_delay && mm_port_get_subsys (MM_PORT (self)) == MM_PORT_SUBSYS_TTY)
-        ctx->eagain_count = 3000000 / self->priv->send_delay;
-    else
-        ctx->eagain_count = 1000;
+    _serial_command (self, ctx);
+}
 
-    if (self->priv->open_count == 0) {
-        g_simple_async_result_set_error (ctx->result,
-                                         MM_SERIAL_ERROR,
-                                         MM_SERIAL_ERROR_SEND_FAILED,
-                                         "Sending command failed: device is not open");
+GByteArray *
+mm_port_serial_hdlc_command_finish (MMPortSerial *self,
+                                    GAsyncResult *res,
+                                    GError **error)
+{
+    if (g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (res), error))
+        return NULL;
+
+    return g_byte_array_ref (g_simple_async_result_get_op_res_gpointer (G_SIMPLE_ASYNC_RESULT (res)));
+}
+
+void
+mm_port_serial_hdlc_command (MMPortSerial *self,
+                             GByteArray *command,
+                             guint32 timeout_seconds,
+                             GCancellable *cancellable,
+                             GAsyncReadyCallback callback,
+                             gpointer user_data)
+{
+    CommandContext *ctx;
+    GError *error = NULL;
+
+    g_return_if_fail (MM_IS_PORT_SERIAL (self));
+    g_return_if_fail (command != NULL);
+
+    /* Setup command context */
+    ctx = g_slice_new0 (CommandContext);
+    ctx->self = g_object_ref (self);
+    ctx->result = g_simple_async_result_new (G_OBJECT (self),
+                                             callback,
+                                             user_data,
+                                             mm_port_serial_hdlc_command);
+    ctx->hdlc = TRUE;
+    ctx->allow_cached = FALSE;
+    ctx->timeout = timeout_seconds;
+    ctx->cancellable = (cancellable ? g_object_ref (cancellable) : NULL);
+
+    ctx->command = mm_hdlc_encapsulate (command, &error);
+    if (!ctx->command) {
+        g_simple_async_result_take_error (ctx->result, error);
         command_context_complete_and_free (ctx, TRUE);
         return;
     }
 
-    /* Clear the cached value for this command if not asking for cached value */
-    if (!allow_cached)
-        port_serial_set_cached_reply (self, ctx->command, NULL);
-
-    g_queue_push_tail (self->priv->queue, ctx);
-
-    if (g_queue_get_length (self->priv->queue) == 1)
-        port_serial_schedule_queue_process (self, 0);
+    _serial_command (self, ctx);
 }
 
 /*****************************************************************************/
@@ -475,12 +535,57 @@ real_config_fd (MMPortSerial *self, int fd, GError **error)
 }
 
 static void
-serial_debug (MMPortSerial *self, const char *prefix, const char *buf, gsize len)
+serial_debug (MMPortSerial *self,
+              gboolean binary,
+              const char *prefix,
+              const char *buf,
+              gsize len)
 {
     g_return_if_fail (len > 0);
 
     if (MM_PORT_SERIAL_GET_CLASS (self)->debug_log)
-        MM_PORT_SERIAL_GET_CLASS (self)->debug_log (self, prefix, buf, len);
+        MM_PORT_SERIAL_GET_CLASS (self)->debug_log (self, binary, prefix, buf, len);
+}
+
+void
+mm_port_serial_debug_log (MMPortSerial *port,
+                          gboolean binary,
+                          const char *prefix,
+                          const char *buf,
+                          gsize len)
+{
+    static GString *debug = NULL;
+    const char *s;
+
+    if (!debug)
+        debug = g_string_sized_new (256);
+
+    g_string_append (debug, prefix);
+    g_string_append (debug, " '");
+
+    s = buf;
+    while (len--) {
+        const guint8 byte = (guint8) (*s & 0xFF);
+
+        if (binary)
+            g_string_append_printf (debug, " %02x", byte);
+        else {
+            if (g_ascii_isprint (*s))
+                g_string_append_c (debug, *s);
+            else if (*s == '\r')
+                g_string_append (debug, "<CR>");
+            else if (*s == '\n')
+                g_string_append (debug, "<LF>");
+            else
+                g_string_append_printf (debug, "\\%u", byte);
+        }
+
+        s++;
+    }
+
+    g_string_append_c (debug, '\'');
+    mm_dbg ("(%s): %s", mm_port_get_device (MM_PORT (port)), debug->str);
+    g_string_truncate (debug, 0);
 }
 
 static gboolean
@@ -507,7 +612,11 @@ port_serial_process_command (MMPortSerial *self,
     /* Only print command the first time */
     if (ctx->started == FALSE) {
         ctx->started = TRUE;
-        serial_debug (self, "-->", (const char *) ctx->command->data, ctx->command->len);
+        serial_debug (self,
+                      self->priv->hdlc || (ctx ? ctx->hdlc : FALSE),
+                      "-->",
+                      (const char *) ctx->command->data,
+                      ctx->command->len);
     }
 
     if (self->priv->send_delay == 0 || mm_port_get_subsys (MM_PORT (self)) != MM_PORT_SUBSYS_TTY) {
@@ -837,10 +946,46 @@ port_serial_queue_process (gpointer data)
 }
 
 static void
-parse_response_buffer (MMPortSerial *self)
+parse_response_buffer (MMPortSerial *self, gboolean is_hdlc)
 {
     GError *error = NULL;
     GByteArray *parsed_response = NULL;
+    GByteArray *hdlc = NULL;
+    GByteArray *response = self->priv->response;
+    MMPortSerialResponseType response_type = MM_PORT_SERIAL_RESPONSE_NONE;
+
+    if (is_hdlc) {
+        guint used = 0;
+        gboolean need_more = FALSE;
+
+        hdlc = mm_hdlc_decapsulate (self->priv->response,
+                                    &used,
+                                    &need_more,
+                                    &error);
+        if (error) {
+            response_type = MM_PORT_SERIAL_RESPONSE_ERROR;
+            goto handle_response;
+        } else if (need_more) {
+            /* Need more data, we leave the original byte array untouched so that
+             * we can retry later when more data arrives. */
+            response_type = MM_PORT_SERIAL_RESPONSE_NONE;
+            goto handle_response;
+        } else if (!hdlc) {
+            /* Invalid HDLC frame or garbage in front of a control char,
+             * just discard used bytes.
+             */
+            g_byte_array_remove_range (self->priv->response, 0, used);
+            response_type = MM_PORT_SERIAL_RESPONSE_NONE;
+            goto handle_response;
+        }
+
+        /* Successfully decapsulated an HDLC frame; remove the used bytes
+         * from the response buffer and send unframed message to the
+         * subclass' response parser.
+         */
+        g_byte_array_remove_range (self->priv->response, 0, used);
+        response = hdlc;
+    }
 
     /* Parse unsolicited messages in the subclass.
      *
@@ -848,20 +993,25 @@ parse_response_buffer (MMPortSerial *self)
      * removed from the response buffer.
      */
     if (MM_PORT_SERIAL_GET_CLASS (self)->parse_unsolicited)
-        MM_PORT_SERIAL_GET_CLASS (self)->parse_unsolicited (self,
-                                                            self->priv->response);
+        MM_PORT_SERIAL_GET_CLASS (self)->parse_unsolicited (self, response);
 
-    /* Parse response in the subclass.
-     *
-     * Returns TRUE either if an error is provided or if we really have the
-     * response to process. The parsed string is returned already out of the
-     * response buffer, and the response buffer is cleaned up accordingly.
-     */
-    g_assert (MM_PORT_SERIAL_GET_CLASS (self)->parse_response != NULL);
-    switch (MM_PORT_SERIAL_GET_CLASS (self)->parse_response (self,
-                                                             self->priv->response,
-                                                             &parsed_response,
-                                                             &error)) {
+    if (response->len > 0) {
+        /* Parse response in the subclass since there's still data left after
+         * parsing any unsolicited responses.
+         *
+         * Returns TRUE either if an error is provided or if we really have the
+         * response to process. The parsed string is returned already out of the
+         * response buffer, and the response buffer is cleaned up accordingly.
+         */
+        g_assert (MM_PORT_SERIAL_GET_CLASS (self)->parse_response != NULL);
+        response_type = MM_PORT_SERIAL_GET_CLASS (self)->parse_response (self,
+                                                                         response,
+                                                                         &parsed_response,
+                                                                         &error);
+    }
+
+handle_response:
+    switch (response_type) {
     case MM_PORT_SERIAL_RESPONSE_BUFFER:
         /* We have a valid response to process */
         g_assert (parsed_response);
@@ -882,6 +1032,9 @@ parse_response_buffer (MMPortSerial *self)
         /* Nothing to do this time */
         break;
     }
+
+    if (hdlc)
+        g_byte_array_free (hdlc, TRUE);
 }
 
 static gboolean
@@ -896,6 +1049,7 @@ common_input_available (MMPortSerial *self,
     GError *error = NULL;
     gboolean iterate = TRUE;
     gboolean keep_source = G_SOURCE_CONTINUE;
+    gboolean is_hdlc = self->priv->hdlc;
 
     if (condition & G_IO_HUP) {
         device = mm_port_get_device (MM_PORT (self));
@@ -915,8 +1069,14 @@ common_input_available (MMPortSerial *self,
 
     /* Don't read any input if the current command isn't done being sent yet */
     ctx = g_queue_peek_nth (self->priv->queue, 0);
-    if (ctx && (ctx->started == TRUE) && (ctx->done == FALSE))
-        return G_SOURCE_CONTINUE;
+    if (ctx) {
+        if ((ctx->started == TRUE) && (ctx->done == FALSE))
+            return G_SOURCE_CONTINUE;
+
+        if (ctx->hdlc)
+            is_hdlc = TRUE;
+    }
+
 
     while (iterate) {
         bytes_read = 0;
@@ -964,7 +1124,7 @@ common_input_available (MMPortSerial *self,
             break;
 
         g_assert (bytes_read > 0);
-        serial_debug (self, "<--", buf, bytes_read);
+        serial_debug (self, is_hdlc, "<--", buf, bytes_read);
         g_byte_array_append (self->priv->response, (const guint8 *) buf, bytes_read);
 
         /* Make sure the response doesn't grow too long */
@@ -982,7 +1142,7 @@ common_input_available (MMPortSerial *self,
          * we should be keeping this socket/iochannel source or not. */
         g_object_ref (self);
         {
-            parse_response_buffer (self);
+            parse_response_buffer (self, is_hdlc);
 
             /* If we didn't end up closing the iochannel/socket in the previous
              * operation, we keep this source. */
@@ -1933,6 +2093,9 @@ set_property (GObject *object,
     case PROP_FLASH_OK:
         self->priv->flash_ok = g_value_get_boolean (value);
         break;
+    case PROP_HDLC:
+        self->priv->hdlc = g_value_get_boolean (value);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -1971,6 +2134,9 @@ get_property (GObject *object,
         break;
     case PROP_FLASH_OK:
         g_value_set_boolean (value, self->priv->flash_ok);
+        break;
+    case PROP_HDLC:
+        g_value_set_boolean (value, self->priv->hdlc);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -2018,6 +2184,7 @@ mm_port_serial_class_init (MMPortSerialClass *klass)
     object_class->finalize     = finalize;
 
     klass->config_fd = real_config_fd;
+    klass->debug_log = mm_port_serial_debug_log;
 
     /* Properties */
     g_object_class_install_property
@@ -2084,6 +2251,15 @@ mm_port_serial_class_init (MMPortSerialClass *klass)
                                "is allowed.",
                                TRUE,
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
+
+    g_object_class_install_property
+        (object_class, PROP_HDLC,
+         g_param_spec_boolean (MM_PORT_SERIAL_HDLC,
+                               "Hdlc",
+                               "The port sends and receives HDLC-encapsulated "
+                               "binary data",
+                               FALSE,
+                               G_PARAM_READWRITE));
 
     /* Signals */
     signals[BUFFER_FULL] =

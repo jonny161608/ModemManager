@@ -433,37 +433,6 @@ mm_port_serial_at_command (MMPortSerialAt *self,
     g_byte_array_unref (buf);
 }
 
-static void
-debug_log (MMPortSerial *port, const char *prefix, const char *buf, gsize len)
-{
-    static GString *debug = NULL;
-    const char *s;
-
-    if (!debug)
-        debug = g_string_sized_new (256);
-
-    g_string_append (debug, prefix);
-    g_string_append (debug, " '");
-
-    s = buf;
-    while (len--) {
-        if (g_ascii_isprint (*s))
-            g_string_append_c (debug, *s);
-        else if (*s == '\r')
-            g_string_append (debug, "<CR>");
-        else if (*s == '\n')
-            g_string_append (debug, "<LF>");
-        else
-            g_string_append_printf (debug, "\\%u", (guint8) (*s & 0xFF));
-
-        s++;
-    }
-
-    g_string_append_c (debug, '\'');
-    mm_dbg ("(%s): %s", mm_port_get_device (MM_PORT (port)), debug->str);
-    g_string_truncate (debug, 0);
-}
-
 void
 mm_port_serial_at_set_flags (MMPortSerialAt *self, MMPortSerialAtFlag flags)
 {
@@ -646,7 +615,6 @@ mm_port_serial_at_class_init (MMPortSerialAtClass *klass)
 
     serial_class->parse_unsolicited = parse_unsolicited;
     serial_class->parse_response = parse_response;
-    serial_class->debug_log = debug_log;
     serial_class->config = config;
 
     g_object_class_install_property
