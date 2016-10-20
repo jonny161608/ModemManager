@@ -373,6 +373,9 @@ AM_CONDITIONAL(WITH_INTERFACE_3GPP_USSD, test "x$with_interface_3gpp_ussd" = "xy
 if test "x$with_interface_3gpp_ussd" = "xyes"; then
     MM_INTERFACE_3GPP_USSD_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without 3GPP USSD interface if gtk-doc enabled])
+    fi
     with_interface_3gpp_ussd=no
     MM_INTERFACE_3GPP_USSD_SUPPORTED=0
 fi
@@ -387,6 +390,9 @@ AM_CONDITIONAL(WITH_INTERFACE_LOCATION, test "x$with_interface_location" = "xyes
 if test "x$with_interface_location" = "xyes"; then
     MM_INTERFACE_LOCATION_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without location interface if gtk-doc enabled])
+    fi
     with_interface_location=no
     MM_INTERFACE_LOCATION_SUPPORTED=0
 fi
@@ -401,6 +407,9 @@ AM_CONDITIONAL(WITH_INTERFACE_MESSAGING, test "x$with_interface_messaging" = "xy
 if test "x$with_interface_messaging" = "xyes"; then
     MM_INTERFACE_MESSAGING_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without messaging interface if gtk-doc enabled])
+    fi
     with_interface_messaging=no
     MM_INTERFACE_MESSAGING_SUPPORTED=0
 fi
@@ -415,6 +424,9 @@ AM_CONDITIONAL(WITH_INTERFACE_TIME, test "x$with_interface_time" = "xyes")
 if test "x$with_interface_time" = "xyes"; then
     MM_INTERFACE_TIME_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without time interface if gtk-doc enabled])
+    fi
     with_interface_time=no
     MM_INTERFACE_TIME_SUPPORTED=0
 fi
@@ -429,6 +441,9 @@ AM_CONDITIONAL(WITH_INTERFACE_VOICE, test "x$with_interface_voice" = "xyes")
 if test "x$with_interface_voice" = "xyes"; then
     MM_INTERFACE_VOICE_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without voice interface if gtk-doc enabled])
+    fi
     with_interface_voice=no
     MM_INTERFACE_VOICE_SUPPORTED=0
 fi
@@ -443,6 +458,9 @@ AM_CONDITIONAL(WITH_INTERFACE_SIGNAL, test "x$with_interface_signal" = "xyes")
 if test "x$with_interface_signal" = "xyes"; then
     MM_INTERFACE_SIGNAL_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without signal interface if gtk-doc enabled])
+    fi
     with_interface_signal=no
     MM_INTERFACE_SIGNAL_SUPPORTED=0
 fi
@@ -457,6 +475,9 @@ AM_CONDITIONAL(WITH_INTERFACE_OMA, test "x$with_interface_oma" = "xyes")
 if test "x$with_interface_oma" = "xyes"; then
     MM_INTERFACE_OMA_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without OMA interface if gtk-doc enabled])
+    fi
     with_interface_oma=no
     MM_INTERFACE_OMA_SUPPORTED=0
 fi
@@ -471,6 +492,9 @@ AM_CONDITIONAL(WITH_INTERFACE_FIRMWARE, test "x$with_interface_firmware" = "xyes
 if test "x$with_interface_firmware" = "xyes"; then
     MM_INTERFACE_FIRMWARE_SUPPORTED=1
 else
+    if test "x$enable_gtk_doc" = "xyes"; then
+        AC_MSG_ERROR([Cannot build without firmware interface if gtk-doc enabled])
+    fi
     with_interface_firmware=no
     MM_INTERFACE_FIRMWARE_SUPPORTED=0
 fi
