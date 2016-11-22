@@ -23,7 +23,20 @@ xml_DATA = \
 	org.freedesktop.ModemManager1.Call.xml \
 	$(NULL)
 
+all.xml: $(xml_DATA) Makefile
+	$(AM_V_GEN)	\
+		rm -f $@; \
+		echo "<tp:spec" >> $@; \
+		echo "   xmlns:tp=\"http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0\"" >> $@; \
+		echo "   xmlns:xi=\"http://www.w3.org/2001/XInclude\">" >> $@; \
+		for single in $(xml_DATA); do \
+			echo "   <xi:include href=\"$$single\"/>" >> $@; \
+		done; \
+		echo "</tp:spec>" >> $@
+
+BUILT_SOURCES = all.xml
+CLEANFILES = all.xml
+
 EXTRA_DIST = \
 	$(xml_DATA) \
-	all.xml \
 	$(NULL)

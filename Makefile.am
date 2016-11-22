@@ -1,6 +1,7 @@
 
 SUBDIRS = \
 	. \
+	introspection \
 	build-aux \
 	po \
 	data \
@@ -12,7 +13,6 @@ SUBDIRS = \
 	plugins \
 	cli \
 	vapi \
-	introspection \
 	uml290 \
 	test \
 	examples \

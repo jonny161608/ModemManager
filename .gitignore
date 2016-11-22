@@ -28,6 +28,8 @@ Makefile.in
 /TAGS
 /ABOUT-NLS
 
+/introspection/all.xml
+
 /include/ModemManager-version.h
 /include/ModemManager-names.h
 
