@@ -19,6 +19,9 @@
 
 #include "glib.h"
 #include "mm-broadband-modem.h"
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 #include "mm-iface-modem-location.h"
 
 void                  mm_common_cinterion_location_load_capabilities        (MMIfaceModemLocation *self,
@@ -45,5 +48,7 @@ gboolean              mm_common_cinterion_disable_location_gathering_finish (MMI
                                                                              GError **error);
 
 void                  mm_common_cinterion_peek_parent_location_interface    (MMIfaceModemLocation *iface);
+
+#endif /* MM_INTERFACE_LOCATION_SUPPORTED */
 
 #endif  /* MM_COMMON_CINTERION_H */

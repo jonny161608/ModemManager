@@ -33,7 +33,9 @@
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-messaging.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 #include "mm-base-modem-at.h"
 #include "mm-broadband-modem-cinterion.h"
 #include "mm-modem-helpers-cinterion.h"
@@ -43,7 +45,10 @@
 static void iface_modem_init      (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
+#endif
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
@@ -52,7 +57,10 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemCinterion, mm_broadband_modem_cinterion,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init))
+#if MM_INTERFACE_LOCATION_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
+                       )
 
 typedef enum {
     FEATURE_SUPPORT_UNKNOWN,
@@ -1987,6 +1995,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->enable_unsolicited_events_finish = messaging_enable_unsolicited_events_finish;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -1999,6 +2009,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->disable_location_gathering = mm_common_cinterion_disable_location_gathering;
     iface->disable_location_gathering_finish = mm_common_cinterion_disable_location_gathering_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_cinterion_class_init (MMBroadbandModemCinterionClass *klass)

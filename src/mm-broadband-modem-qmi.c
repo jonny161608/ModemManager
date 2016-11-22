@@ -35,7 +35,9 @@
 #include "mm-iface-modem-3gpp-ussd.h"
 #include "mm-iface-modem-cdma.h"
 #include "mm-iface-modem-messaging.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 #include "mm-iface-modem-firmware.h"
 #include "mm-iface-modem-signal.h"
 #include "mm-iface-modem-oma.h"
@@ -50,13 +52,16 @@ static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
-static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static void iface_modem_oma_init (MMIfaceModemOma *iface);
 static void iface_modem_firmware_init (MMIfaceModemFirmware *iface);
 static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
 static MMIfaceModemMessaging *iface_modem_messaging_parent;
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static MMIfaceModemLocation *iface_modem_location_parent;
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
@@ -64,7 +69,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BRO
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
+#if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_OMA, iface_modem_oma_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_FIRMWARE, iface_modem_firmware_init))
@@ -114,9 +121,11 @@ struct _MMBroadbandModemQmiPrivate {
     gboolean messaging_unsolicited_events_setup;
     guint messaging_event_report_indication_id;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     /* Location helpers */
     MMModemLocationSource enabled_sources;
     guint location_event_report_indication_id;
+#endif
 
     /* Oma helpers */
     gboolean oma_unsolicited_events_enabled;
@@ -4643,8 +4652,6 @@ common_process_serving_system_3gpp (MMBroadbandModemQmi *self,
     guint16 mnc;
     const gchar *description;
     gboolean has_pcs_digit;
-    guint16 lac;
-    guint32 cid;
     MMModemAccessTechnology mm_access_technologies;
     MMModem3gppRegistrationState mm_cs_registration_state;
     MMModem3gppRegistrationState mm_ps_registration_state;
@@ -4706,7 +4713,9 @@ common_process_serving_system_3gpp (MMBroadbandModemQmi *self,
         mm_iface_modem_3gpp_update_cs_registration_state (MM_IFACE_MODEM_3GPP (self), reg_state_3gpp);
         mm_iface_modem_3gpp_update_ps_registration_state (MM_IFACE_MODEM_3GPP (self), reg_state_3gpp);
         mm_iface_modem_3gpp_update_access_technologies (MM_IFACE_MODEM_3GPP (self), MM_MODEM_ACCESS_TECHNOLOGY_UNKNOWN);
+#if MM_INTERFACE_LOCATION_SUPPORTED
         mm_iface_modem_3gpp_update_location (MM_IFACE_MODEM_3GPP (self), 0, 0);
+#endif
         return;
     }
 
@@ -4793,18 +4802,23 @@ common_process_serving_system_3gpp (MMBroadbandModemQmi *self,
     mm_iface_modem_3gpp_update_cs_registration_state (MM_IFACE_MODEM_3GPP (self), mm_cs_registration_state);
     mm_iface_modem_3gpp_update_ps_registration_state (MM_IFACE_MODEM_3GPP (self), mm_ps_registration_state);
 
-    /* Get 3GPP location LAC and CI */
-    lac = 0;
-    cid = 0;
-    if ((response_output &&
-         qmi_message_nas_get_serving_system_output_get_lac_3gpp (response_output, &lac, NULL) &&
-         qmi_message_nas_get_serving_system_output_get_cid_3gpp (response_output, &cid, NULL)) ||
-        (indication_output &&
-         qmi_indication_nas_serving_system_output_get_lac_3gpp (indication_output, &lac, NULL) &&
-         qmi_indication_nas_serving_system_output_get_cid_3gpp (indication_output, &cid, NULL))) {
-        /* Only update info in the interface if we get something */
-        mm_iface_modem_3gpp_update_location (MM_IFACE_MODEM_3GPP (self), lac, cid);
+#if MM_INTERFACE_LOCATION_SUPPORTED
+    {
+        guint16 lac = 0;
+        guint32 cid = 0;
+
+        /* Get 3GPP location LAC and CI */
+        if ((response_output &&
+             qmi_message_nas_get_serving_system_output_get_lac_3gpp (response_output, &lac, NULL) &&
+             qmi_message_nas_get_serving_system_output_get_cid_3gpp (response_output, &cid, NULL)) ||
+            (indication_output &&
+             qmi_indication_nas_serving_system_output_get_lac_3gpp (indication_output, &lac, NULL) &&
+             qmi_indication_nas_serving_system_output_get_cid_3gpp (indication_output, &cid, NULL))) {
+            /* Only update info in the interface if we get something */
+            mm_iface_modem_3gpp_update_location (MM_IFACE_MODEM_3GPP (self), lac, cid);
+        }
     }
+#endif
 
     /* Note: don't update access technologies with the ones retrieved here; they
      * are not really the 'current' access technologies */
@@ -5602,9 +5616,6 @@ common_process_serving_system_cdma (MMBroadbandModemQmi *self,
     MMModemCdmaRegistrationState mm_evdo_registration_state;
     guint16 sid = 0;
     guint16 nid = 0;
-    guint16 bs_id = 0;
-    gint32 bs_longitude = G_MININT32;
-    gint32 bs_latitude = G_MININT32;
 
     if (response_output)
         qmi_message_nas_get_serving_system_output_get_serving_system (
@@ -5656,7 +5667,9 @@ common_process_serving_system_cdma (MMBroadbandModemQmi *self,
                                                              MM_MODEM_CDMA_REGISTRATION_STATE_UNKNOWN);
         mm_iface_modem_cdma_update_access_technologies (MM_IFACE_MODEM_CDMA (self),
                                                         MM_MODEM_ACCESS_TECHNOLOGY_UNKNOWN);
+#if MM_INTERFACE_LOCATION_SUPPORTED
         mm_iface_modem_location_cdma_bs_clear (MM_IFACE_MODEM_LOCATION (self));
+#endif
         return;
     }
 
@@ -5665,12 +5678,6 @@ common_process_serving_system_cdma (MMBroadbandModemQmi *self,
         qmi_message_nas_get_serving_system_output_get_cdma_system_id (response_output, &sid, &nid, NULL);
     else
         qmi_indication_nas_serving_system_output_get_cdma_system_id (indication_output, &sid, &nid, NULL);
-
-    /* Get BS location */
-    if (response_output)
-        qmi_message_nas_get_serving_system_output_get_cdma_base_station_info (response_output, &bs_id, &bs_latitude, &bs_longitude, NULL);
-    else
-        qmi_indication_nas_serving_system_output_get_cdma_base_station_info (indication_output, &bs_id, &bs_latitude, &bs_longitude, NULL);
 
     /* Build generic registration states */
     if (mm_access_technologies & MM_IFACE_MODEM_CDMA_ALL_CDMA1X_ACCESS_TECHNOLOGIES_MASK)
@@ -5751,20 +5758,34 @@ common_process_serving_system_cdma (MMBroadbandModemQmi *self,
     /* Note: don't update access technologies with the ones retrieved here; they
      * are not really the 'current' access technologies */
 
-    /* Longitude and latitude given in units of 0.25 secs
-     * Note that multiplying by 0.25 is like dividing by 4, so 60*60*4=14400 */
-#define QMI_LONGITUDE_TO_DEGREES(longitude)       \
-    (longitude != G_MININT32 ? \
-     (((gdouble)longitude) / 14400.0) :           \
-     MM_LOCATION_LONGITUDE_UNKNOWN)
-#define QMI_LATITUDE_TO_DEGREES(latitude)         \
-    (latitude != G_MININT32 ?   \
-     (((gdouble)latitude) / 14400.0) :            \
-     MM_LOCATION_LATITUDE_UNKNOWN)
+#if MM_INTERFACE_LOCATION_SUPPORTED
+    {
+        guint16 bs_id = 0;
+        gint32 bs_longitude = G_MININT32;
+        gint32 bs_latitude = G_MININT32;
 
-    mm_iface_modem_location_cdma_bs_update (MM_IFACE_MODEM_LOCATION (self),
-                                            QMI_LONGITUDE_TO_DEGREES (bs_longitude),
-                                            QMI_LATITUDE_TO_DEGREES (bs_latitude));
+        /* Get BS location */
+        if (response_output)
+            qmi_message_nas_get_serving_system_output_get_cdma_base_station_info (response_output, &bs_id, &bs_latitude, &bs_longitude, NULL);
+        else
+            qmi_indication_nas_serving_system_output_get_cdma_base_station_info (indication_output, &bs_id, &bs_latitude, &bs_longitude, NULL);
+
+        /* Longitude and latitude given in units of 0.25 secs
+         * Note that multiplying by 0.25 is like dividing by 4, so 60*60*4=14400 */
+#define QMI_LONGITUDE_TO_DEGREES(longitude)       \
+        (longitude != G_MININT32 ?                \
+         (((gdouble)longitude) / 14400.0) :       \
+         MM_LOCATION_LONGITUDE_UNKNOWN)
+#define QMI_LATITUDE_TO_DEGREES(latitude)         \
+        (latitude != G_MININT32 ?                 \
+         (((gdouble)latitude) / 14400.0) :        \
+         MM_LOCATION_LATITUDE_UNKNOWN)
+
+        mm_iface_modem_location_cdma_bs_update (MM_IFACE_MODEM_LOCATION (self),
+                                                QMI_LONGITUDE_TO_DEGREES (bs_longitude),
+                                                QMI_LATITUDE_TO_DEGREES (bs_latitude));
+    }
+#endif
 }
 
 static void
@@ -8393,6 +8414,8 @@ messaging_create_sms (MMIfaceModemMessaging *_self)
     return mm_sms_qmi_new (MM_BASE_MODEM (self));
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 /*****************************************************************************/
 /* Location capabilities loading (Location interface) */
 
@@ -9391,6 +9414,8 @@ enable_location_gathering (MMIfaceModemLocation *self,
         (GAsyncReadyCallback)parent_enable_location_gathering_ready,
         ctx);
 }
+
+#endif /* MM_INTERFACE_LOCATION_SUPPORTED */
 
 /*****************************************************************************/
 /* Check support (OMA interface) */
@@ -11223,11 +11248,13 @@ enabling_started (MMBroadbandModem *self,
 /*****************************************************************************/
 /* First initialization step */
 
+#define MAX_SERVICES 32
+
 typedef struct {
     MMBroadbandModem *self;
     GSimpleAsyncResult *result;
     MMPortQmi *qmi;
-    QmiService services[32];
+    QmiService services[MAX_SERVICES];
     guint service_index;
 } InitializationStartedContext;
 
@@ -11371,6 +11398,7 @@ initialization_started (MMBroadbandModem *self,
                         gpointer user_data)
 {
     InitializationStartedContext *ctx;
+    guint i;
 
     ctx = g_new0 (InitializationStartedContext, 1);
     ctx->self = g_object_ref (self);
@@ -11396,14 +11424,19 @@ initialization_started (MMBroadbandModem *self,
         return;
     }
 
+    for (i = 0; i < MAX_SERVICES; i++)
+        ctx->services[i] = QMI_SERVICE_UNKNOWN;
+
     /* Setup services to open */
-    ctx->services[0] = QMI_SERVICE_DMS;
-    ctx->services[1] = QMI_SERVICE_NAS;
-    ctx->services[2] = QMI_SERVICE_WMS;
-    ctx->services[3] = QMI_SERVICE_PDS;
-    ctx->services[4] = QMI_SERVICE_OMA;
-    ctx->services[5] = QMI_SERVICE_UIM;
-    ctx->services[6] = QMI_SERVICE_UNKNOWN;
+    i = 0;
+    ctx->services[i++] = QMI_SERVICE_DMS;
+    ctx->services[i++] = QMI_SERVICE_NAS;
+    ctx->services[i++] = QMI_SERVICE_WMS;
+    ctx->services[i++] = QMI_SERVICE_OMA;
+    ctx->services[i++] = QMI_SERVICE_UIM;
+#if MM_INTERFACE_LOCATION_SUPPORTED
+    ctx->services[i++] = QMI_SERVICE_PDS;
+#endif
 
     /* Now open our QMI port */
     mm_port_qmi_open (ctx->qmi,
@@ -11666,6 +11699,8 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
     iface->create_sms = messaging_create_sms;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -11682,6 +11717,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->disable_location_gathering = disable_location_gathering;
     iface->disable_location_gathering_finish = disable_location_gathering_finish;
 }
+
+#endif /* MM_INTERFACE_LOCATION_SUPPORTED */
 
 static void
 iface_modem_signal_init (MMIfaceModemSignal *iface)

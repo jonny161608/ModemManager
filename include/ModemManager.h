@@ -21,6 +21,7 @@
  * Copyright (C) 2009 - 2013 Red Hat, Inc.
  * Copyright (C) 2011 - 2013 Google, Inc.
  * Copyright (C) 2011 - 2013 Lanedo Gmbh
+
  */
 
 #ifndef _MODEM_MANAGER_H_
@@ -31,16 +32,19 @@
 /* Public header with DBus Interface, Method, Signal and Property names */
 #include <ModemManager-names.h>
 
-/* Public header with enumerations and flags */
+/* Public header with version info */
+#include <ModemManager-version.h>
+
+/* Public headers with enumerations and flags */
 #include <ModemManager-enums.h>
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include <ModemManager-enums-location.h>
+#endif
 
 /* Public header with errors */
 #include <ModemManager-errors.h>
 
 /* Public header with compability types and methods */
 #include <ModemManager-compat.h>
-
-/* Public header with version info */
-#include <ModemManager-version.h>
 
 #endif /*  _MODEM_MANAGER_H_ */

@@ -24,8 +24,6 @@ libmm_glib_la_SOURCES = \
 	mm-modem-cdma.c \
 	mm-modem-simple.h \
 	mm-modem-simple.c \
-	mm-modem-location.h \
-	mm-modem-location.c \
 	mm-modem-time.h \
 	mm-modem-time.c \
 	mm-modem-firmware.h \
@@ -62,15 +60,6 @@ libmm_glib_la_SOURCES = \
 	mm-bearer-ip-config.c \
 	mm-bearer-stats.h \
 	mm-bearer-stats.c \
-	mm-location-common.h \
-	mm-location-3gpp.h \
-	mm-location-3gpp.c \
-	mm-location-gps-raw.h \
-	mm-location-gps-raw.c \
-	mm-location-gps-nmea.h \
-	mm-location-gps-nmea.c \
-	mm-location-cdma-bs.h \
-	mm-location-cdma-bs.c \
 	mm-unlock-retries.h \
 	mm-unlock-retries.c \
 	mm-network-timezone.h \
@@ -84,6 +73,22 @@ libmm_glib_la_SOURCES = \
 	mm-kernel-event-properties.h \
 	mm-kernel-event-properties.c \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+libmm_glib_la_SOURCES += \
+	mm-modem-location.h \
+	mm-modem-location.c \
+	mm-location-common.h \
+	mm-location-3gpp.h \
+	mm-location-3gpp.c \
+	mm-location-gps-raw.h \
+	mm-location-gps-raw.c \
+	mm-location-gps-nmea.h \
+	mm-location-gps-nmea.c \
+	mm-location-cdma-bs.h \
+	mm-location-cdma-bs.c \
+	$(NULL)
+endif
 
 libmm_glib_la_CPPFLAGS = \
 	-I$(srcdir) \
@@ -123,7 +128,6 @@ include_HEADERS = \
 	mm-modem-3gpp-ussd.h \
 	mm-modem-cdma.h \
 	mm-modem-messaging.h \
-	mm-modem-location.h \
 	mm-modem-time.h \
 	mm-modem-firmware.h \
 	mm-modem-signal.h \
@@ -141,11 +145,6 @@ include_HEADERS = \
 	mm-call-properties.h \
 	mm-bearer-ip-config.h \
 	mm-bearer-stats.h \
-	mm-location-common.h \
-	mm-location-3gpp.h \
-	mm-location-gps-nmea.h \
-	mm-location-gps-raw.h \
-	mm-location-cdma-bs.h \
 	mm-unlock-retries.h \
 	mm-network-timezone.h \
 	mm-firmware-properties.h \
@@ -153,6 +152,17 @@ include_HEADERS = \
 	mm-signal.h \
 	mm-kernel-event-properties.h \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+include_HEADERS += \
+	mm-modem-location.h \
+	mm-location-common.h \
+	mm-location-3gpp.h \
+	mm-location-gps-nmea.h \
+	mm-location-gps-raw.h \
+	mm-location-cdma-bs.h \
+	$(NULL)
+endif
 
 CLEANFILES =
 
@@ -189,6 +199,10 @@ PUBLIC_H = \
 	ModemManager-compat.h \
 	ModemManager.h \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+PUBLIC_H += ModemManager-enums-location.h
+endif
 
 INTROSPECTION_GIRS = ModemManager-1.0.gir
 INTROSPECTION_SCANNER_ARGS = --warn-all

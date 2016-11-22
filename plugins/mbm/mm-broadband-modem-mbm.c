@@ -42,23 +42,31 @@
 #include "mm-base-modem-at.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 
 /* sets the interval in seconds on how often the card emits the NMEA sentences */
 #define MBM_GPS_NMEA_INTERVAL   "5"
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
-static void iface_modem_location_init (MMIfaceModemLocation *iface);
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static MMIfaceModemLocation *iface_modem_location_parent;
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemMbm, mm_broadband_modem_mbm, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init))
+#if MM_INTERFACE_LOCATION_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
+                        )
 
 #define MBM_E2NAP_DISCONNECTED 0
 #define MBM_E2NAP_CONNECTED    1
@@ -76,7 +84,9 @@ struct _MMBroadbandModemMbmPrivate {
     GRegex *emwi_regex;
     GRegex *erinfo_regex;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     MMModemLocationSource enabled_sources;
+#endif
 
     guint mbm_mode;
 };
@@ -1055,6 +1065,8 @@ modem_3gpp_disable_unsolicited_events (MMIfaceModem3gpp *self,
         g_task_new (self, NULL, callback, user_data));
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 /*****************************************************************************/
 /* Location capabilities loading (Location interface) */
 
@@ -1347,6 +1359,8 @@ enable_location_gathering (MMIfaceModemLocation *self,
                                                             task);
 }
 
+#endif /* MM_INTERFACE_LOCATION_SUPPORTED */
+
 /*****************************************************************************/
 /* Setup ports (Broadband modem class) */
 
@@ -1358,6 +1372,7 @@ emrdy_received (MMPortSerialAt *port,
     self->priv->have_emrdy = TRUE;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
 static void
 gps_trace_received (MMPortSerialGps *port,
                     const gchar *trace,
@@ -1365,13 +1380,13 @@ gps_trace_received (MMPortSerialGps *port,
 {
     mm_iface_modem_location_gps_update (self, trace);
 }
+#endif
 
 static void
 setup_ports (MMBroadbandModem *_self)
 {
     MMBroadbandModemMbm *self = MM_BROADBAND_MODEM_MBM (_self);
     MMPortSerialAt *ports[2];
-    MMPortSerialGps *gps_data_port;
     guint i;
 
     /* Call parent's setup ports first always */
@@ -1426,19 +1441,25 @@ setup_ports (MMBroadbandModem *_self)
     /* Now reset the unsolicited messages we'll handle when enabled */
     set_unsolicited_events_handlers (MM_BROADBAND_MODEM_MBM (self), FALSE);
 
-    /* NMEA GPS monitoring */
-    gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
-    if (gps_data_port) {
-        /* make sure GPS is stopped incase it was left enabled */
-        mm_base_modem_at_command_full (MM_BASE_MODEM (self),
-                                       mm_base_modem_peek_port_primary (MM_BASE_MODEM (self)),
-                                       "AT*E2GPSCTL=0",
-                                       3, FALSE, FALSE, NULL, NULL, NULL);
-        /* Add handler for the NMEA traces */
-        mm_port_serial_gps_add_trace_handler (gps_data_port,
-                                              (MMPortSerialGpsTraceFn)gps_trace_received,
-                                              self, NULL);
+#if MM_INTERFACE_LOCATION_SUPPORTED
+    {
+        MMPortSerialGps *gps_data_port;
+
+        /* NMEA GPS monitoring */
+        gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
+        if (gps_data_port) {
+            /* make sure GPS is stopped incase it was left enabled */
+            mm_base_modem_at_command_full (MM_BASE_MODEM (self),
+                                           mm_base_modem_peek_port_primary (MM_BASE_MODEM (self)),
+                                           "AT*E2GPSCTL=0",
+                                           3, FALSE, FALSE, NULL, NULL, NULL);
+            /* Add handler for the NMEA traces */
+            mm_port_serial_gps_add_trace_handler (gps_data_port,
+                                                  (MMPortSerialGpsTraceFn)gps_trace_received,
+                                                  self, NULL);
+        }
     }
+#endif
 }
 
 /*****************************************************************************/
@@ -1552,6 +1573,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->cleanup_unsolicited_events_finish = modem_3gpp_setup_cleanup_unsolicited_events_finish;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -1564,6 +1587,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->disable_location_gathering = disable_location_gathering;
     iface->disable_location_gathering_finish = disable_location_gathering_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_mbm_class_init (MMBroadbandModemMbmClass *klass)

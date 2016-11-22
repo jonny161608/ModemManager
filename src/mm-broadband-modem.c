@@ -34,7 +34,9 @@
 #include "mm-iface-modem-3gpp-ussd.h"
 #include "mm-iface-modem-cdma.h"
 #include "mm-iface-modem-simple.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 #include "mm-iface-modem-messaging.h"
 #include "mm-iface-modem-voice.h"
 #include "mm-iface-modem-time.h"
@@ -62,7 +64,9 @@ static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
 static void iface_modem_simple_init (MMIfaceModemSimple *iface);
+#if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
+#endif
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 static void iface_modem_voice_init (MMIfaceModemVoice *iface);
 static void iface_modem_time_init (MMIfaceModemTime *iface);
@@ -76,7 +80,9 @@ G_DEFINE_TYPE_EXTENDED (MMBroadbandModem, mm_broadband_modem, MM_TYPE_BASE_MODEM
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIMPLE, iface_modem_simple_init)
+#if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_VOICE, iface_modem_voice_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
@@ -91,7 +97,9 @@ enum {
     PROP_MODEM_3GPP_USSD_DBUS_SKELETON,
     PROP_MODEM_CDMA_DBUS_SKELETON,
     PROP_MODEM_SIMPLE_DBUS_SKELETON,
+#if MM_INTERFACE_LOCATION_SUPPORTED
     PROP_MODEM_LOCATION_DBUS_SKELETON,
+#endif
     PROP_MODEM_MESSAGING_DBUS_SKELETON,
     PROP_MODEM_VOICE_DBUS_SKELETON,
     PROP_MODEM_TIME_DBUS_SKELETON,
@@ -194,9 +202,11 @@ struct _MMBroadbandModemPrivate {
     GObject *modem_simple_dbus_skeleton;
     MMSimpleStatus *modem_simple_status;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     /*<--- Modem Location interface --->*/
     /* Properties */
     GObject *modem_location_dbus_skeleton;
+#endif
 
     /*<--- Modem Messaging interface --->*/
     /* Properties */
@@ -3739,7 +3749,9 @@ registration_state_changed (MMPortSerialAt *port,
         MM_IFACE_MODEM_GET_INTERFACE (self)->load_access_technologies == NULL)
         mm_iface_modem_3gpp_update_access_technologies (MM_IFACE_MODEM_3GPP (self), act);
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     mm_iface_modem_3gpp_update_location (MM_IFACE_MODEM_3GPP (self), lac, cell_id);
+#endif
 }
 
 static void
@@ -4076,7 +4088,9 @@ registration_status_check_ready (MMBroadbandModem *self,
     }
 
     mm_iface_modem_3gpp_update_access_technologies (MM_IFACE_MODEM_3GPP (self), act);
+#if MM_INTERFACE_LOCATION_SUPPORTED
     mm_iface_modem_3gpp_update_location (MM_IFACE_MODEM_3GPP (self), lac, cid);
+#endif
 
     run_registration_checks_context_step (task);
 }
@@ -8158,6 +8172,8 @@ modem_cdma_register_in_network (MMIfaceModemCdma *self,
         ctx);
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 /*****************************************************************************/
 /* Load location capabilities (Location interface) */
 
@@ -8235,6 +8251,8 @@ enable_location_gathering (MMIfaceModemLocation *self,
     g_task_return_boolean (task, TRUE);
     g_object_unref (task);
 }
+
+#endif /*  MM_INTERFACE_LOCATION_SUPPORTED */
 
 /*****************************************************************************/
 /* Load network time (Time interface) */
@@ -8951,7 +8969,9 @@ typedef enum {
     DISABLING_STEP_IFACE_TIME,
     DISABLING_STEP_IFACE_MESSAGING,
     DISABLING_STEP_IFACE_VOICE,
+#if MM_INTERFACE_LOCATION_SUPPORTED
     DISABLING_STEP_IFACE_LOCATION,
+#endif
     DISABLING_STEP_IFACE_CONTACTS,
     DISABLING_STEP_IFACE_CDMA,
     DISABLING_STEP_IFACE_3GPP_USSD,
@@ -9038,7 +9058,9 @@ INTERFACE_DISABLE_READY_FN (iface_modem,           MM_IFACE_MODEM,           TRU
 INTERFACE_DISABLE_READY_FN (iface_modem_3gpp,      MM_IFACE_MODEM_3GPP,      TRUE)
 INTERFACE_DISABLE_READY_FN (iface_modem_3gpp_ussd, MM_IFACE_MODEM_3GPP_USSD, TRUE)
 INTERFACE_DISABLE_READY_FN (iface_modem_cdma,      MM_IFACE_MODEM_CDMA,      TRUE)
+#if MM_INTERFACE_LOCATION_SUPPORTED
 INTERFACE_DISABLE_READY_FN (iface_modem_location,  MM_IFACE_MODEM_LOCATION,  FALSE)
+#endif
 INTERFACE_DISABLE_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALSE)
 INTERFACE_DISABLE_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 INTERFACE_DISABLE_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
@@ -9211,6 +9233,7 @@ disabling_step (GTask *task)
         /* Fall down to next step */
         ctx->step++;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     case DISABLING_STEP_IFACE_LOCATION:
         if (ctx->self->priv->modem_location_dbus_skeleton) {
             mm_dbg ("Modem has location capabilities, disabling the Location interface...");
@@ -9222,6 +9245,7 @@ disabling_step (GTask *task)
         }
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case DISABLING_STEP_IFACE_CONTACTS:
         /* Fall down to next step */
@@ -9317,7 +9341,9 @@ typedef enum {
     ENABLING_STEP_IFACE_3GPP_USSD,
     ENABLING_STEP_IFACE_CDMA,
     ENABLING_STEP_IFACE_CONTACTS,
+#if MM_INTERFACE_LOCATION_SUPPORTED
     ENABLING_STEP_IFACE_LOCATION,
+#endif
     ENABLING_STEP_IFACE_MESSAGING,
     ENABLING_STEP_IFACE_VOICE,
     ENABLING_STEP_IFACE_TIME,
@@ -9397,7 +9423,9 @@ INTERFACE_ENABLE_READY_FN (iface_modem,           MM_IFACE_MODEM,           TRUE
 INTERFACE_ENABLE_READY_FN (iface_modem_3gpp,      MM_IFACE_MODEM_3GPP,      TRUE)
 INTERFACE_ENABLE_READY_FN (iface_modem_3gpp_ussd, MM_IFACE_MODEM_3GPP_USSD, TRUE)
 INTERFACE_ENABLE_READY_FN (iface_modem_cdma,      MM_IFACE_MODEM_CDMA,      TRUE)
+#if MM_INTERFACE_LOCATION_SUPPORTED
 INTERFACE_ENABLE_READY_FN (iface_modem_location,  MM_IFACE_MODEM_LOCATION,  FALSE)
+#endif
 INTERFACE_ENABLE_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALSE)
 INTERFACE_ENABLE_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 INTERFACE_ENABLE_READY_FN (iface_modem_signal,    MM_IFACE_MODEM_SIGNAL,    FALSE)
@@ -9544,6 +9572,7 @@ enabling_step (GTask *task)
         /* Fall down to next step */
         ctx->step++;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     case ENABLING_STEP_IFACE_LOCATION:
         if (ctx->self->priv->modem_location_dbus_skeleton) {
             mm_dbg ("Modem has location capabilities, enabling the Location interface...");
@@ -9556,6 +9585,7 @@ enabling_step (GTask *task)
         }
         /* Fall down to next step */
         ctx->step++;
+#endif
 
     case ENABLING_STEP_IFACE_MESSAGING:
         if (ctx->self->priv->modem_messaging_dbus_skeleton) {
@@ -9739,7 +9769,9 @@ typedef enum {
     INITIALIZE_STEP_IFACE_3GPP_USSD,
     INITIALIZE_STEP_IFACE_CDMA,
     INITIALIZE_STEP_IFACE_CONTACTS,
+#if MM_INTERFACE_LOCATION_SUPPORTED
     INITIALIZE_STEP_IFACE_LOCATION,
+#endif
     INITIALIZE_STEP_IFACE_MESSAGING,
     INITIALIZE_STEP_IFACE_VOICE,
     INITIALIZE_STEP_IFACE_TIME,
@@ -9924,7 +9956,9 @@ iface_modem_initialize_ready (MMBroadbandModem *self,
 INTERFACE_INIT_READY_FN (iface_modem_3gpp,      MM_IFACE_MODEM_3GPP,      TRUE)
 INTERFACE_INIT_READY_FN (iface_modem_3gpp_ussd, MM_IFACE_MODEM_3GPP_USSD, FALSE)
 INTERFACE_INIT_READY_FN (iface_modem_cdma,      MM_IFACE_MODEM_CDMA,      TRUE)
+#if MM_INTERFACE_LOCATION_SUPPORTED
 INTERFACE_INIT_READY_FN (iface_modem_location,  MM_IFACE_MODEM_LOCATION,  FALSE)
+#endif
 INTERFACE_INIT_READY_FN (iface_modem_messaging, MM_IFACE_MODEM_MESSAGING, FALSE)
 INTERFACE_INIT_READY_FN (iface_modem_voice,     MM_IFACE_MODEM_VOICE,     FALSE)
 INTERFACE_INIT_READY_FN (iface_modem_time,      MM_IFACE_MODEM_TIME,      FALSE)
@@ -10024,6 +10058,7 @@ initialize_step (GTask *task)
         /* Fall down to next step */
         ctx->step++;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     case INITIALIZE_STEP_IFACE_LOCATION:
         /* Initialize the Location interface */
         mm_iface_modem_location_initialize (MM_IFACE_MODEM_LOCATION (ctx->self),
@@ -10031,6 +10066,7 @@ initialize_step (GTask *task)
                                             (GAsyncReadyCallback)iface_modem_location_initialize_ready,
                                             task);
         return;
+#endif
 
     case INITIALIZE_STEP_IFACE_MESSAGING:
         /* Initialize the Messaging interface */
@@ -10181,7 +10217,9 @@ sim_hot_swap_enabled:
                 mm_iface_modem_3gpp_shutdown (MM_IFACE_MODEM_3GPP (ctx->self));
                 mm_iface_modem_3gpp_ussd_shutdown (MM_IFACE_MODEM_3GPP_USSD (ctx->self));
                 mm_iface_modem_cdma_shutdown (MM_IFACE_MODEM_CDMA (ctx->self));
+#if MM_INTERFACE_LOCATION_SUPPORTED
                 mm_iface_modem_location_shutdown (MM_IFACE_MODEM_LOCATION (ctx->self));
+#endif
                 mm_iface_modem_messaging_shutdown (MM_IFACE_MODEM_MESSAGING (ctx->self));
                 mm_iface_modem_voice_shutdown (MM_IFACE_MODEM_VOICE (ctx->self));
                 mm_iface_modem_time_shutdown (MM_IFACE_MODEM_TIME (ctx->self));
@@ -10413,10 +10451,12 @@ set_property (GObject *object,
         g_clear_object (&self->priv->modem_simple_dbus_skeleton);
         self->priv->modem_simple_dbus_skeleton = g_value_dup_object (value);
         break;
+#if MM_INTERFACE_LOCATION_SUPPORTED
     case PROP_MODEM_LOCATION_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_location_dbus_skeleton);
         self->priv->modem_location_dbus_skeleton = g_value_dup_object (value);
         break;
+#endif
     case PROP_MODEM_MESSAGING_DBUS_SKELETON:
         g_clear_object (&self->priv->modem_messaging_dbus_skeleton);
         self->priv->modem_messaging_dbus_skeleton = g_value_dup_object (value);
@@ -10533,9 +10573,11 @@ get_property (GObject *object,
     case PROP_MODEM_SIMPLE_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_simple_dbus_skeleton);
         break;
+#if MM_INTERFACE_LOCATION_SUPPORTED
     case PROP_MODEM_LOCATION_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_location_dbus_skeleton);
         break;
+#endif
     case PROP_MODEM_MESSAGING_DBUS_SKELETON:
         g_value_set_object (value, self->priv->modem_messaging_dbus_skeleton);
         break;
@@ -10691,10 +10733,12 @@ dispose (GObject *object)
         g_clear_object (&self->priv->modem_cdma_dbus_skeleton);
     }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     if (self->priv->modem_location_dbus_skeleton) {
         mm_iface_modem_location_shutdown (MM_IFACE_MODEM_LOCATION (object));
         g_clear_object (&self->priv->modem_location_dbus_skeleton);
     }
+#endif
 
     if (self->priv->modem_messaging_dbus_skeleton) {
         mm_iface_modem_messaging_shutdown (MM_IFACE_MODEM_MESSAGING (object));
@@ -10885,6 +10929,8 @@ iface_modem_simple_init (MMIfaceModemSimple *iface)
 {
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -10893,6 +10939,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->enable_location_gathering = enable_location_gathering;
     iface->enable_location_gathering_finish = enable_location_gathering_finish;
 }
+
+#endif
 
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)
@@ -11013,9 +11061,11 @@ mm_broadband_modem_class_init (MMBroadbandModemClass *klass)
                                       PROP_MODEM_SIMPLE_DBUS_SKELETON,
                                       MM_IFACE_MODEM_SIMPLE_DBUS_SKELETON);
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     g_object_class_override_property (object_class,
                                       PROP_MODEM_LOCATION_DBUS_SKELETON,
                                       MM_IFACE_MODEM_LOCATION_DBUS_SKELETON);
+#endif
 
     g_object_class_override_property (object_class,
                                       PROP_MODEM_MESSAGING_DBUS_SKELETON,

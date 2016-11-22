@@ -238,9 +238,12 @@ void mm_iface_modem_3gpp_update_subscription_state (MMIfaceModem3gpp *self,
                                                     MMModem3gppSubscriptionState state);
 void mm_iface_modem_3gpp_update_access_technologies (MMIfaceModem3gpp *self,
                                                      MMModemAccessTechnology access_tech);
-void mm_iface_modem_3gpp_update_location            (MMIfaceModem3gpp *self,
-                                                     gulong location_area_code,
-                                                     gulong cell_id);
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+void mm_iface_modem_3gpp_update_location (MMIfaceModem3gpp *self,
+                                          gulong location_area_code,
+                                          gulong cell_id);
+#endif
 
 /* Run all registration checks */
 void mm_iface_modem_3gpp_run_registration_checks (MMIfaceModem3gpp *self,

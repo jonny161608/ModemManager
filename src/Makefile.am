@@ -322,8 +322,6 @@ ModemManager_SOURCES = \
 	mm-iface-modem-cdma.c \
 	mm-iface-modem-simple.h \
 	mm-iface-modem-simple.c \
-	mm-iface-modem-location.h \
-	mm-iface-modem-location.c \
 	mm-iface-modem-messaging.h \
 	mm-iface-modem-messaging.c \
 	mm-iface-modem-voice.h \
@@ -345,6 +343,13 @@ ModemManager_SOURCES = \
 	mm-plugin.c \
 	mm-plugin.h \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+ModemManager_SOURCES += \
+	mm-iface-modem-location.h \
+	mm-iface-modem-location.c \
+	$(NULL)
+endif
 
 nodist_ModemManager_SOURCES = $(DAEMON_ENUMS_GENERATED)
 

@@ -39,7 +39,9 @@
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
 #include "mm-iface-modem-3gpp-ussd.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 #include "mm-iface-modem-time.h"
 #include "mm-iface-modem-cdma.h"
 #include "mm-iface-modem-signal.h"
@@ -54,7 +56,6 @@
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
 static void iface_modem_3gpp_ussd_init (MMIfaceModem3gppUssd *iface);
-static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static void iface_modem_cdma_init (MMIfaceModemCdma *iface);
 static void iface_modem_time_init (MMIfaceModemTime *iface);
 static void iface_modem_voice_init (MMIfaceModemVoice *iface);
@@ -62,16 +63,22 @@ static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 
 static MMIfaceModem *iface_modem_parent;
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
-static MMIfaceModemLocation *iface_modem_location_parent;
 static MMIfaceModemCdma *iface_modem_cdma_parent;
 static MMIfaceModemVoice *iface_modem_voice_parent;
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+static void iface_modem_location_init (MMIfaceModemLocation *iface);
+static MMIfaceModemLocation *iface_modem_location_parent;
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHuawei, mm_broadband_modem_huawei, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP_USSD, iface_modem_3gpp_ussd_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_CDMA, iface_modem_cdma_init)
+#if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_TIME, iface_modem_time_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_VOICE, iface_modem_voice_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init))
@@ -140,7 +147,9 @@ struct _MMBroadbandModemHuaweiPrivate {
     FeatureSupport time_support;
     FeatureSupport nwtime_support;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     MMModemLocationSource enabled_sources;
+#endif
 
     GArray *syscfg_supported_modes;
     GArray *syscfgex_supported_modes;
@@ -3564,6 +3573,7 @@ huawei_modem_create_sim (MMIfaceModem *self,
                        user_data);
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
 
 /*****************************************************************************/
 /* Location capabilities loading (Location interface) */
@@ -3865,6 +3875,8 @@ enable_location_gathering (MMIfaceModemLocation *self,
                                                             task);
 }
 
+#endif /* MM_INTERFACE_LOCATION_SUPPORTED */
+
 /*****************************************************************************/
 /* Check support (Time interface) */
 
@@ -4161,6 +4173,7 @@ set_ignored_unsolicited_events_handlers (MMBroadbandModemHuawei *self)
     g_list_free_full (ports, g_object_unref);
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
 static void
 gps_trace_received (MMPortSerialGps *port,
                     const gchar *trace,
@@ -4168,12 +4181,11 @@ gps_trace_received (MMPortSerialGps *port,
 {
     mm_iface_modem_location_gps_update (self, trace);
 }
+#endif
 
 static void
 setup_ports (MMBroadbandModem *self)
 {
-    MMPortSerialGps *gps_data_port;
-
     /* Call parent's setup ports first always */
     MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_huawei_parent_class)->setup_ports (self);
 
@@ -4185,19 +4197,25 @@ setup_ports (MMBroadbandModem *self)
     set_cdma_unsolicited_events_handlers (MM_BROADBAND_MODEM_HUAWEI (self), FALSE);
     set_voice_unsolicited_events_handlers(MM_BROADBAND_MODEM_HUAWEI (self), FALSE);
 
-    /* NMEA GPS monitoring */
-    gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
-    if (gps_data_port) {
-        /* make sure GPS is stopped incase it was left enabled */
-        mm_base_modem_at_command_full (MM_BASE_MODEM (self),
-                                       mm_base_modem_peek_port_primary (MM_BASE_MODEM (self)),
-                                       "^WPEND",
-                                       3, FALSE, FALSE, NULL, NULL, NULL);
-        /* Add handler for the NMEA traces */
-        mm_port_serial_gps_add_trace_handler (gps_data_port,
-                                              (MMPortSerialGpsTraceFn)gps_trace_received,
-                                              self, NULL);
+#if MM_INTERFACE_LOCATION_SUPPORTED
+    {
+        MMPortSerialGps *gps_data_port;
+
+        /* NMEA GPS monitoring */
+        gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
+        if (gps_data_port) {
+            /* make sure GPS is stopped incase it was left enabled */
+            mm_base_modem_at_command_full (MM_BASE_MODEM (self),
+                                           mm_base_modem_peek_port_primary (MM_BASE_MODEM (self)),
+                                           "^WPEND",
+                                           3, FALSE, FALSE, NULL, NULL, NULL);
+            /* Add handler for the NMEA traces */
+            mm_port_serial_gps_add_trace_handler (gps_data_port,
+                                                  (MMPortSerialGpsTraceFn)gps_trace_received,
+                                                  self, NULL);
+        }
     }
+#endif
 }
 
 /*****************************************************************************/
@@ -4452,6 +4470,8 @@ iface_modem_cdma_init (MMIfaceModemCdma *iface)
     iface->get_detailed_registration_state_finish = get_detailed_registration_state_finish;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -4464,6 +4484,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->disable_location_gathering = disable_location_gathering;
     iface->disable_location_gathering_finish = disable_location_gathering_finish;
 }
+
+#endif
 
 static void
 iface_modem_time_init (MMIfaceModemTime *iface)

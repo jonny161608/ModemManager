@@ -38,7 +38,6 @@ GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml \
@@ -49,21 +48,33 @@ GENERATED_DOC = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml \
 	$(NULL)
 
+if WITH_INTERFACE_LOCATION
+GENERATED_DOC += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml
+endif
+
 BUILT_SOURCES = $(GENERATED_H) $(GENERATED_C) $(GENERATED_DOC)
 
 # Enum types
-mm-enums-types.h: Makefile.am $(top_srcdir)/include/ModemManager-enums.h $(top_srcdir)/build-aux/mm-enums-template.h
+ENUM_FILES = \
+	$(top_srcdir)/include/ModemManager-enums.h \
+	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+ENUM_FILES += $(top_srcdir)/include/ModemManager-enums-location.h
+endif
+
+mm-enums-types.h: Makefile.am $(ENUM_FILES) $(top_srcdir)/build-aux/mm-enums-template.h
 	$(AM_V_GEN) $(GLIB_MKENUMS) \
 		--fhead "#include <ModemManager.h>\n#ifndef __MM_ENUMS_TYPES_H__\n#define __MM_ENUMS_TYPES_H__\n" \
 		--template $(top_srcdir)/build-aux/mm-enums-template.h \
 		--ftail "#endif /* __MM_ENUMS_TYPES_H__ */\n" \
-		$(top_srcdir)/include/ModemManager-enums.h > $@
+		$(ENUM_FILES) > $@
 
-mm-enums-types.c: Makefile.am $(top_srcdir)/include/ModemManager-enums.h $(top_srcdir)/build-aux/mm-enums-template.c mm-enums-types.h
+mm-enums-types.c: Makefile.am $(ENUM_FILES) $(top_srcdir)/build-aux/mm-enums-template.c mm-enums-types.h
 	$(AM_V_GEN) $(GLIB_MKENUMS) \
 		--fhead "#include \"mm-enums-types.h\"\n" \
 		--template $(top_srcdir)/build-aux/mm-enums-template.c \
-		$(top_srcdir)/include/ModemManager-enums.h > $@
+		$(ENUM_FILES) > $@
 
 # Error types & quarks
 mm-errors-types.h: Makefile.am $(top_srcdir)/include/ModemManager-errors.h $(top_srcdir)/build-aux/mm-errors-template.h
@@ -112,7 +123,6 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Voice.xml \
-	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Time.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Oma.xml \
@@ -122,11 +132,15 @@ mm_gdbus_modem_generated = \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Simple.xml \
 	mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Signal.xml \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+mm_gdbus_modem_generated += mm-gdbus-doc-org.freedesktop.ModemManager1.Modem.Location.xml
+endif
+
 mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Voice.xml \
-	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Location.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Time.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Firmware.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Oma.xml \
@@ -136,6 +150,11 @@ mm_gdbus_modem_deps = \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Simple.xml \
 	$(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Signal.xml \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+mm_gdbus_modem_deps += $(top_srcdir)/introspection/org.freedesktop.ModemManager1.Modem.Location.xml
+endif
+
 mm-gdbus-modem.c: $(mm_gdbus_modem_deps)
 	$(AM_V_GEN) $(GDBUS_CODEGEN) \
 		--interface-prefix org.freedesktop.ModemManager1. \

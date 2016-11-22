@@ -35,10 +35,13 @@
 #include "mm-bearer-list.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
-#include "mm-iface-modem-location.h"
 #include "mm-iface-modem-messaging.h"
 #include "mm-iface-modem-signal.h"
 #include "mm-sms-part-3gpp.h"
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 
 #if defined WITH_QMI
 # include <libqmi-glib.h>
@@ -46,14 +49,19 @@
 
 static void iface_modem_init           (MMIfaceModem          *iface);
 static void iface_modem_3gpp_init      (MMIfaceModem3gpp      *iface);
-static void iface_modem_location_init  (MMIfaceModemLocation  *iface);
 static void iface_modem_messaging_init (MMIfaceModemMessaging *iface);
 static void iface_modem_signal_init    (MMIfaceModemSignal    *iface);
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+static void iface_modem_location_init  (MMIfaceModemLocation  *iface);
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemMbim, mm_broadband_modem_mbim, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
+#if MM_INTERFACE_LOCATION_SUPPORTED
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_MESSAGING, iface_modem_messaging_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_SIGNAL, iface_modem_signal_init))
 
@@ -3434,6 +3442,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->scan_networks_finish = modem_3gpp_scan_networks_finish;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -3442,6 +3452,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->enable_location_gathering = NULL;
     iface->enable_location_gathering_finish = NULL;
 }
+
+#endif
 
 static void
 iface_modem_messaging_init (MMIfaceModemMessaging *iface)

@@ -39,7 +39,9 @@
 # include <mm-modem-3gpp-ussd.h>
 # include <mm-modem-cdma.h>
 # include <mm-modem-simple.h>
-# include <mm-modem-location.h>
+# if MM_INTERFACE_LOCATION_SUPPORTED
+#  include <mm-modem-location.h>
+# endif
 # include <mm-modem-messaging.h>
 # include <mm-modem-voice.h>
 # include <mm-modem-time.h>
@@ -62,11 +64,13 @@
 #include <mm-call-properties.h>
 #include <mm-bearer-properties.h>
 #include <mm-bearer-ip-config.h>
-#include <mm-location-common.h>
-#include <mm-location-3gpp.h>
-#include <mm-location-gps-raw.h>
-#include <mm-location-gps-nmea.h>
-#include <mm-location-cdma-bs.h>
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include <mm-location-common.h>
+# include <mm-location-3gpp.h>
+# include <mm-location-gps-raw.h>
+# include <mm-location-gps-nmea.h>
+# include <mm-location-cdma-bs.h>
+#endif
 #include <mm-unlock-retries.h>
 #include <mm-network-timezone.h>
 #include <mm-firmware-properties.h>

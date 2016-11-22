@@ -12,8 +12,12 @@ include_HEADERS = \
 	ModemManager-version.h \
 	ModemManager.h
 
+if WITH_INTERFACE_LOCATION
+include_HEADERS += ModemManager-enums-location.h
+endif
+
 ModemManager-names.h: $(XMLS) $(top_srcdir)/build-aux/header-generator.xsl
-	$(AM_V_GEN) $(XSLTPROC) $(top_srcdir)/build-aux/header-generator.xsl $(top_srcdir)/introspection/all.xml > $@
+	$(AM_V_GEN) $(XSLTPROC) $(top_srcdir)/build-aux/header-generator.xsl $(top_builddir)/introspection/all.xml > $@
 
 CLEANFILES = \
 	ModemManager-names.h

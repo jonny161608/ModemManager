@@ -11,7 +11,6 @@ xml_DATA = \
 	org.freedesktop.ModemManager1.Modem.Simple.xml \
 	org.freedesktop.ModemManager1.Sim.xml \
 	org.freedesktop.ModemManager1.Bearer.xml \
-	org.freedesktop.ModemManager1.Modem.Location.xml \
 	org.freedesktop.ModemManager1.Modem.Messaging.xml \
 	org.freedesktop.ModemManager1.Sms.xml \
 	org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd.xml \
@@ -22,6 +21,10 @@ xml_DATA = \
 	org.freedesktop.ModemManager1.Modem.Voice.xml \
 	org.freedesktop.ModemManager1.Call.xml \
 	$(NULL)
+
+if WITH_INTERFACE_LOCATION
+xml_DATA += org.freedesktop.ModemManager1.Modem.Location.xml
+endif
 
 all.xml: $(xml_DATA) Makefile
 	$(AM_V_GEN)	\

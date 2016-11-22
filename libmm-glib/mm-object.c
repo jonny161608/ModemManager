@@ -267,6 +267,7 @@ mm_object_peek_modem_simple (MMObject *self)
 }
 
 /*****************************************************************************/
+#if MM_INTERFACE_LOCATION_SUPPORTED
 
 /**
  * mm_object_get_modem_location:
@@ -301,6 +302,8 @@ mm_object_peek_modem_location (MMObject *self)
 
     return (MMModemLocation *)mm_gdbus_object_peek_modem_location (MM_GDBUS_OBJECT (self));
 }
+
+#endif /*  MM_INTERFACE_LOCATION_SUPPORTED */
 
 /*****************************************************************************/
 

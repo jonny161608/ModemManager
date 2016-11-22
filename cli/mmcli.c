@@ -198,8 +198,10 @@ main (gint argc, gchar **argv)
                                 mmcli_modem_cdma_get_option_group ());
     g_option_context_add_group (context,
                                 mmcli_modem_simple_get_option_group ());
+#if MM_INTERFACE_LOCATION_SUPPORTED
     g_option_context_add_group (context,
                                 mmcli_modem_location_get_option_group ());
+#endif
     g_option_context_add_group (context,
                                 mmcli_modem_messaging_get_option_group ());
     g_option_context_add_group (context,
@@ -310,6 +312,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_simple_run_synchronous (connection);
     }
+#if MM_INTERFACE_LOCATION_SUPPORTED
     /* Modem Location options? */
     else if (mmcli_modem_location_options_enabled ()) {
         if (async_flag)
@@ -317,6 +320,7 @@ main (gint argc, gchar **argv)
         else
             mmcli_modem_location_run_synchronous (connection);
     }
+#endif
     /* Modem Messaging options? */
     else if (mmcli_modem_messaging_options_enabled ()) {
         if (async_flag)
@@ -387,8 +391,10 @@ main (gint argc, gchar **argv)
         mmcli_modem_cdma_shutdown ();
     } else if (mmcli_modem_simple_options_enabled ()) {
         mmcli_modem_simple_shutdown ();
+#if MM_INTERFACE_LOCATION_SUPPORTED
     } else if (mmcli_modem_location_options_enabled ()) {
         mmcli_modem_location_shutdown ();
+#endif
     } else if (mmcli_modem_messaging_options_enabled ()) {
         mmcli_modem_messaging_shutdown ();
     } else if (mmcli_modem_voice_options_enabled ()) {

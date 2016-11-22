@@ -29,7 +29,9 @@
 #include "mm-errors-types.h"
 #include "mm-iface-modem.h"
 #include "mm-iface-modem-3gpp.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
 #include "mm-iface-modem-location.h"
+#endif
 #include "mm-base-modem-at.h"
 #include "mm-broadband-modem-hso.h"
 #include "mm-broadband-bearer-hso.h"
@@ -37,21 +39,29 @@
 
 static void iface_modem_init (MMIfaceModem *iface);
 static void iface_modem_3gpp_init (MMIfaceModem3gpp *iface);
-static void iface_modem_location_init (MMIfaceModemLocation *iface);
 
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
+static void iface_modem_location_init (MMIfaceModemLocation *iface);
 static MMIfaceModemLocation *iface_modem_location_parent;
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemHso, mm_broadband_modem_hso, MM_TYPE_BROADBAND_MODEM_OPTION, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_3GPP, iface_modem_3gpp_init)
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init));
+#if MM_INTERFACE_LOCATION_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
+                       )
 
 struct _MMBroadbandModemHsoPrivate {
     /* Regex for connected notifications */
     GRegex *_owancall_regex;
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     MMModemLocationSource enabled_sources;
+#endif
 };
 
 /*****************************************************************************/
@@ -331,6 +341,8 @@ modem_3gpp_cleanup_unsolicited_events (MMIfaceModem3gpp *self,
         (GAsyncReadyCallback)parent_cleanup_unsolicited_events_ready,
         g_task_new (self, NULL, callback, user_data));
 }
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
 
 /*****************************************************************************/
 /* Location capabilities loading (Location interface) */
@@ -625,8 +637,12 @@ enable_location_gathering (MMIfaceModemLocation *self,
         task);
 }
 
+#endif
+
 /*****************************************************************************/
 /* Setup ports (Broadband modem class) */
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
 
 static void
 trace_received (MMPortSerialGps *port,
@@ -657,12 +673,11 @@ trace_received (MMPortSerialGps *port,
     mm_iface_modem_location_gps_update (self, trace);
 }
 
+#endif
+
 static void
 setup_ports (MMBroadbandModem *self)
 {
-    MMPortSerialAt *gps_control_port;
-    MMPortSerialGps *gps_data_port;
-
     /* Call parent's setup ports first always */
     MM_BROADBAND_MODEM_CLASS (mm_broadband_modem_hso_parent_class)->setup_ports (self);
 
@@ -679,23 +694,30 @@ setup_ports (MMBroadbandModem *self)
                   MM_PORT_SERIAL_AT_REMOVE_ECHO, FALSE,
                   NULL);
 
-    gps_control_port = mm_base_modem_peek_port_gps_control (MM_BASE_MODEM (self));
-    gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
-    if (gps_control_port && gps_data_port) {
-        /* It may happen that the modem was started with GPS already enabled, or
-         * maybe ModemManager got rebooted and it was left enabled before. We'll make
-         * sure that it is disabled when we initialize the modem */
-        mm_base_modem_at_command_full (MM_BASE_MODEM (self),
-                                       gps_control_port,
-                                       "_OGPS=0",
-                                       3, FALSE, FALSE, NULL, NULL, NULL);
+#if MM_INTERFACE_LOCATION_SUPPORTED
+    {
+        MMPortSerialAt *gps_control_port;
+        MMPortSerialGps *gps_data_port;
 
-        /* Add handler for the NMEA traces */
-        mm_port_serial_gps_add_trace_handler (gps_data_port,
-                                              (MMPortSerialGpsTraceFn)trace_received,
-                                              self,
-                                              NULL);
+        gps_control_port = mm_base_modem_peek_port_gps_control (MM_BASE_MODEM (self));
+        gps_data_port = mm_base_modem_peek_port_gps (MM_BASE_MODEM (self));
+        if (gps_control_port && gps_data_port) {
+            /* It may happen that the modem was started with GPS already enabled, or
+             * maybe ModemManager got rebooted and it was left enabled before. We'll make
+             * sure that it is disabled when we initialize the modem */
+            mm_base_modem_at_command_full (MM_BASE_MODEM (self),
+                                           gps_control_port,
+                                           "_OGPS=0",
+                                           3, FALSE, FALSE, NULL, NULL, NULL);
+
+            /* Add handler for the NMEA traces */
+            mm_port_serial_gps_add_trace_handler (gps_data_port,
+                                                  (MMPortSerialGpsTraceFn)trace_received,
+                                                  self,
+                                                  NULL);
+        }
     }
+#endif
 }
 
 /*****************************************************************************/
@@ -736,7 +758,9 @@ mm_broadband_modem_hso_init (MMBroadbandModemHso *self)
 
     self->priv->_owancall_regex = g_regex_new ("_OWANCALL: (\\d),\\s*(\\d)\\r\\n",
                                                G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
+#if MM_INTERFACE_LOCATION_SUPPORTED
     self->priv->enabled_sources = MM_MODEM_LOCATION_SOURCE_NONE;
+#endif
 }
 
 static void
@@ -763,6 +787,8 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->cleanup_unsolicited_events_finish = modem_3gpp_setup_cleanup_unsolicited_events_finish;
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -775,6 +801,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->disable_location_gathering = disable_location_gathering;
     iface->disable_location_gathering_finish = disable_location_gathering_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_hso_class_init (MMBroadbandModemHsoClass *klass)

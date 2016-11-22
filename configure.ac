@@ -361,6 +361,24 @@ case $with_qmi in
         ;;
 esac
 
+dnl-----------------------------------------------------------------------------
+dnl Location interface
+dnl
+
+AC_ARG_WITH(interface-location, AS_HELP_STRING([--without-interface-location], [Build without location interface support]), [], [with_interface_location=yes])
+AM_CONDITIONAL(WITH_INTERFACE_LOCATION, test "x$with_interface_location" = "xyes")
+if test "x$with_interface_location" = "xyes"; then
+    MM_INTERFACE_LOCATION_SUPPORTED=1
+else
+    with_interface_location=no
+    MM_INTERFACE_LOCATION_SUPPORTED=0
+fi
+AC_SUBST(MM_INTERFACE_LOCATION_SUPPORTED)
+
+dnl-----------------------------------------------------------------------------
+dnl Compiler warnings
+dnl
+
 NM_COMPILER_WARNINGS
 
 dnl-----------------------------------------------------------------------------
@@ -449,6 +467,9 @@ echo "
       qmi:                     ${with_qmi}
       systemd suspend/resume:  ${with_systemd_suspend_resume}
       systemd journal:         ${with_systemd_journal}
+
+    Optional interfaces:
+      location:                ${with_interface_location}
 
     Miscellaneous:
       gobject introspection:   ${found_introspection}

@@ -21,7 +21,9 @@
 #include <libmm-glib.h>
 
 #include "mm-iface-modem.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 #include "mm-iface-modem-3gpp.h"
 #include "mm-base-modem.h"
 #include "mm-modem-helpers.h"
@@ -241,7 +243,9 @@ register_in_network_context_complete_failed (GTask *task,
     mm_iface_modem_3gpp_update_ps_registration_state (ctx->self, MM_MODEM_3GPP_REGISTRATION_STATE_IDLE);
     mm_iface_modem_3gpp_update_eps_registration_state (ctx->self, MM_MODEM_3GPP_REGISTRATION_STATE_IDLE);
     mm_iface_modem_3gpp_update_access_technologies (ctx->self, MM_MODEM_ACCESS_TECHNOLOGY_UNKNOWN);
+#if MM_INTERFACE_LOCATION_SUPPORTED
     mm_iface_modem_3gpp_update_location (ctx->self, 0, 0);
+#endif
 
     g_task_return_error (task, error);
     g_object_unref (task);
@@ -890,9 +894,11 @@ load_operator_code_ready (MMIfaceModem3gpp *self,
     if (ctx->skeleton)
         mm_gdbus_modem3gpp_set_operator_code (ctx->skeleton, str);
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
     /* If we also implement the location interface, update the 3GPP location */
     if (mcc && MM_IS_IFACE_MODEM_LOCATION (self))
         mm_iface_modem_location_3gpp_update_mcc_mnc (MM_IFACE_MODEM_LOCATION (self), mcc, mnc);
+#endif
 
     g_free (str);
 
@@ -995,8 +1001,10 @@ mm_iface_modem_3gpp_reload_current_registration_info (MMIfaceModem3gpp *self,
                                   MM_IFACE_MODEM_3GPP_GET_INTERFACE (self)->load_operator_code_finish);
     if (ctx->operator_code_loaded) {
         mm_gdbus_modem3gpp_set_operator_code (ctx->skeleton, NULL);
+#if MM_INTERFACE_LOCATION_SUPPORTED
         if (MM_IS_IFACE_MODEM_LOCATION (self))
             mm_iface_modem_location_3gpp_update_mcc_mnc (MM_IFACE_MODEM_LOCATION (self), 0, 0);
+#endif
     }
 
     ctx->operator_name_loaded = !(MM_IFACE_MODEM_3GPP_GET_INTERFACE (self)->load_operator_name &&
@@ -1025,8 +1033,10 @@ mm_iface_modem_3gpp_clear_current_operator (MMIfaceModem3gpp *self)
 
     mm_gdbus_modem3gpp_set_operator_code (skeleton, NULL);
     mm_gdbus_modem3gpp_set_operator_name (skeleton, NULL);
+#if MM_INTERFACE_LOCATION_SUPPORTED
     if (MM_IS_IFACE_MODEM_LOCATION (self))
         mm_iface_modem_location_3gpp_update_mcc_mnc (MM_IFACE_MODEM_LOCATION (self), 0, 0);
+#endif
 }
 
 static void
@@ -1077,6 +1087,8 @@ mm_iface_modem_3gpp_update_access_technologies (MMIfaceModem3gpp *self,
                                                    MM_IFACE_MODEM_3GPP_ALL_ACCESS_TECHNOLOGIES_MASK);
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 void
 mm_iface_modem_3gpp_update_location (MMIfaceModem3gpp *self,
                                      gulong location_area_code,
@@ -1113,6 +1125,8 @@ mm_iface_modem_3gpp_update_location (MMIfaceModem3gpp *self,
     } else
         mm_iface_modem_location_3gpp_clear (MM_IFACE_MODEM_LOCATION (self));
 }
+
+#endif
 
 /*****************************************************************************/
 
@@ -1550,7 +1564,10 @@ interface_disabling_step (GTask *task)
     case DISABLING_STEP_REGISTRATION_STATE:
         update_registration_state (self, MM_MODEM_3GPP_REGISTRATION_STATE_UNKNOWN, FALSE);
         mm_iface_modem_3gpp_update_access_technologies (self, MM_MODEM_ACCESS_TECHNOLOGY_UNKNOWN);
+
+#if MM_INTERFACE_LOCATION_SUPPORTED
         mm_iface_modem_3gpp_update_location (self, 0, 0);
+#endif
         /* Fall down to next step */
         ctx->step++;
 

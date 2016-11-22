@@ -18,6 +18,8 @@
 #include "mm-base-modem-at.h"
 #include "mm-log.h"
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static MMIfaceModemLocation *iface_modem_location_parent;
 
 /*****************************************************************************/
@@ -800,3 +802,5 @@ mm_common_cinterion_peek_parent_location_interface (MMIfaceModemLocation *iface)
 {
     iface_modem_location_parent = g_type_interface_peek_parent (iface);
 }
+
+#endif /* MM_INTERFACE_LOCATION_SUPPORTED */

@@ -25,14 +25,21 @@
 #include "ModemManager.h"
 #include "mm-log.h"
 #include "mm-errors-types.h"
-#include "mm-iface-modem-location.h"
+#if MM_INTERFACE_LOCATION_SUPPORTED
+# include "mm-iface-modem-location.h"
+#endif
 #include "mm-broadband-modem-qmi-cinterion.h"
 #include "mm-common-cinterion.h"
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
 static void iface_modem_location_init (MMIfaceModemLocation *iface);
+#endif
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmiCinterion, mm_broadband_modem_qmi_cinterion, MM_TYPE_BROADBAND_MODEM_QMI, 0,
-                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init))
+#if MM_INTERFACE_LOCATION_SUPPORTED
+                        G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM_LOCATION, iface_modem_location_init)
+#endif
+                       )
 
 /*****************************************************************************/
 
@@ -57,6 +64,8 @@ mm_broadband_modem_qmi_cinterion_init (MMBroadbandModemQmiCinterion *self)
 {
 }
 
+#if MM_INTERFACE_LOCATION_SUPPORTED
+
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
@@ -69,6 +78,8 @@ iface_modem_location_init (MMIfaceModemLocation *iface)
     iface->disable_location_gathering = mm_common_cinterion_disable_location_gathering;
     iface->disable_location_gathering_finish = mm_common_cinterion_disable_location_gathering_finish;
 }
+
+#endif
 
 static void
 mm_broadband_modem_qmi_cinterion_class_init (MMBroadbandModemQmiCinterionClass *klass)
