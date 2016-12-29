@@ -81,6 +81,11 @@ enum {
 
 /**********************************************************************/
 
+/* Returns negative QCDM_ERROR_* on errors, 0 on valid command */
+int qcdm_cmd_check (const char *buf, size_t len);
+
+/**********************************************************************/
+
 #define QCDM_CMD_VERSION_INFO_ITEM_COMP_DATE "comp-date"
 #define QCDM_CMD_VERSION_INFO_ITEM_COMP_TIME "comp-time"
 #define QCDM_CMD_VERSION_INFO_ITEM_RELEASE_DATE "release-date"

@@ -284,18 +284,28 @@ print_buf (const char *detail, const char *buf, gsize len)
 }
 
 static gboolean
-send_command (TestComData *d, char *buf, gsize len)
+send_command (TestComData *d, char *buf, gsize len, size_t buflen)
 {
     int status;
     int eagain_count = 1000;
     gsize i = 0;
+	char encap[1024];
+	size_t encap_len;
+
+    qcdm_return_val_if_fail (sizeof (encap) > len + 2, FALSE);
+
+	encap_len = dm_encapsulate_buffer (buf, len, buflen, encap, sizeof (encap));
+	if (!encap_len) {
+		fprintf (stderr, "failed to encapsulate QCDM command\n");
+		return FALSE;
+	}
 
     if (d->debug)
-        print_buf (">>>", buf, len);
+        print_buf (">>>", encap, encap_len);
 
     while (i < len) {
         errno = 0;
-        status = write (d->fd, &buf[i], 1);
+        status = write (d->fd, &encap[i], 1);
         if (status < 0) {
             if (errno == EAGAIN) {
                 eagain_count--;
@@ -401,7 +411,7 @@ test_com_version_info (void *f, void *data)
     g_assert (len == 4);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -451,7 +461,7 @@ test_com_esn (void *f, void *data)
     g_assert (len == 4);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -486,7 +496,7 @@ test_com_mdn (void *f, void *data)
     g_assert (len > 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -529,7 +539,7 @@ test_com_read_roam_pref (void *f, void *data)
     g_assert (len > 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -587,7 +597,7 @@ test_com_read_mode_pref (void *f, void *data)
     g_assert (len > 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -671,7 +681,7 @@ test_com_read_hybrid_pref (void *f, void *data)
     g_assert (len > 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -714,7 +724,7 @@ test_com_read_ipv6_enabled (void *f, void *data)
     g_assert (len > 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -769,7 +779,7 @@ test_com_read_hdr_rev_pref (void *f, void *data)
     g_assert (len > 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -828,7 +838,7 @@ test_com_status (void *f, void *data)
     g_assert (len == 4);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -948,7 +958,7 @@ test_com_sw_version (void *f, void *data)
     g_assert (len == 4);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -993,7 +1003,7 @@ test_com_status_snapshot (void *f, void *data)
     g_assert (len == 4);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1053,7 +1063,7 @@ test_com_pilot_sets (void *f, void *data)
     g_assert (len == 4);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1138,7 +1148,7 @@ test_com_cm_subsys_state_info (void *f, void *data)
     g_assert (len == 7);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1266,7 +1276,7 @@ test_com_hdr_subsys_state_info (void *f, void *data)
     g_assert (len == 7);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1487,7 +1497,7 @@ test_com_ext_logmask (void *f, void *data)
     len = qcdm_cmd_ext_logmask_new (buf, sizeof (buf), NULL, 0);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1508,7 +1518,7 @@ test_com_ext_logmask (void *f, void *data)
     len = qcdm_cmd_ext_logmask_new (buf, sizeof (buf), items, (uint16_t) maxlog);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1542,7 +1552,7 @@ test_com_event_report (void *f, void *data)
     len = qcdm_cmd_event_report_new (buf, sizeof (buf), TRUE);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1564,7 +1574,7 @@ test_com_event_report (void *f, void *data)
     len = qcdm_cmd_event_report_new (buf, sizeof (buf), FALSE);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1592,7 +1602,7 @@ test_com_log_config (void *f, void *data)
     g_assert (len);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1619,7 +1629,7 @@ test_com_log_config (void *f, void *data)
     g_assert (len);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1638,7 +1648,7 @@ test_com_log_config (void *f, void *data)
     g_assert (len);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1678,7 +1688,7 @@ test_com_zte_subsys_status (void *f, void *data)
     g_assert (len == 7);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1719,7 +1729,7 @@ test_com_nw_subsys_modem_snapshot_cdma (void *f, void *data)
     g_assert (len == 12);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1773,7 +1783,7 @@ test_com_nw_subsys_eri (void *f, void *data)
     g_assert_cmpint (len, ==, 7);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1833,7 +1843,7 @@ test_com_wcdma_subsys_state_info (void *f, void *data)
     g_assert (len == 7);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */
@@ -1929,7 +1939,7 @@ test_com_gsm_subsys_state_info (void *f, void *data)
     g_assert (len == 7);
 
     /* Send the command */
-    success = send_command (d, buf, len);
+    success = send_command (d, buf, len, sizeof (buf));
     g_assert (success);
 
     /* Get a response */

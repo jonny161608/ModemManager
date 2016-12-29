@@ -177,6 +177,32 @@ bin2hexstr (const uint8_t *bytes, int len)
 
 /**********************************************************************/
 
+int
+qcdm_cmd_check (const char *buf, size_t len)
+{
+    if (len < 1)
+        return -QCDM_ERROR_RESPONSE_MALFORMED;
+
+    switch (buf[0]) {
+    case DIAG_CMD_BAD_CMD:
+        return -QCDM_ERROR_RESPONSE_BAD_COMMAND;
+    case DIAG_CMD_BAD_PARM:
+        return -QCDM_ERROR_RESPONSE_BAD_PARAMETER;
+    case DIAG_CMD_BAD_LEN:
+        return -QCDM_ERROR_RESPONSE_BAD_LENGTH;
+    case DIAG_CMD_BAD_DEV:
+        return -QCDM_ERROR_RESPONSE_NOT_ACCEPTED;
+    case DIAG_CMD_BAD_MODE:
+        return -QCDM_ERROR_RESPONSE_BAD_MODE;
+    case DIAG_CMD_BAD_SPC_MODE:
+        return -QCDM_ERROR_SPC_LOCKED;
+    default:
+        break;
+    }
+
+    return 0;
+}
+
 static qcdmbool
 check_command (const char *buf, size_t len, uint8_t cmd, size_t min_len, int *out_error)
 {
@@ -298,16 +324,15 @@ check_nv_cmd (DMCmdNVReadWrite *cmd, uint16_t nv_item, int *out_error)
 size_t
 qcdm_cmd_version_info_new (char *buf, size_t len)
 {
-    char cmdbuf[3];
-    DMCmdHeader *cmd = (DMCmdHeader *) &cmdbuf[0];
+    DMCmdHeader *cmd = (DMCmdHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_VERSION_INFO;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -357,16 +382,15 @@ qcdm_cmd_version_info_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_esn_new (char *buf, size_t len)
 {
-    char cmdbuf[3];
-    DMCmdHeader *cmd = (DMCmdHeader *) &cmdbuf[0];
+    DMCmdHeader *cmd = (DMCmdHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_ESN;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -405,17 +429,16 @@ qcdm_cmd_esn_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_control_new (char *buf, size_t len, uint8_t mode)
 {
-    char cmdbuf[5];
-    DMCmdControl *cmd = (DMCmdControl *) &cmdbuf[0];
+    DMCmdControl *cmd = (DMCmdControl *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_CONTROL;
     cmd->mode = htole16 ((uint16_t) mode);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -434,16 +457,15 @@ qcdm_cmd_control_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_cdma_status_new (char *buf, size_t len)
 {
-    char cmdbuf[3];
-    DMCmdHeader *cmd = (DMCmdHeader *) &cmdbuf[0];
+    DMCmdHeader *cmd = (DMCmdHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_STATUS;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -505,16 +527,15 @@ qcdm_cmd_cdma_status_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_sw_version_new (char *buf, size_t len)
 {
-    char cmdbuf[3];
-    DMCmdHeader *cmd = (DMCmdHeader *) &cmdbuf[0];
+    DMCmdHeader *cmd = (DMCmdHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_SW_VERSION;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -554,16 +575,15 @@ qcdm_cmd_sw_version_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_status_snapshot_new (char *buf, size_t len)
 {
-    char cmdbuf[3];
-    DMCmdHeader *cmd = (DMCmdHeader *) &cmdbuf[0];
+    DMCmdHeader *cmd = (DMCmdHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_STATUS_SNAPSHOT;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 static uint8_t
@@ -636,16 +656,15 @@ qcdm_cmd_status_snapshot_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_pilot_sets_new (char *buf, size_t len)
 {
-    char cmdbuf[3];
-    DMCmdHeader *cmd = (DMCmdHeader *) &cmdbuf[0];
+    DMCmdHeader *cmd = (DMCmdHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_PILOT_SETS;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 #define PILOT_SETS_CMD_ACTIVE_SET    "active-set"
@@ -762,12 +781,11 @@ qcdm_cmd_pilot_sets_result_get_pilot (QcdmResult *result,
 size_t
 qcdm_cmd_nv_get_mdn_new (char *buf, size_t len, uint8_t profile)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemMdn *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_READ;
@@ -776,7 +794,7 @@ qcdm_cmd_nv_get_mdn_new (char *buf, size_t len, uint8_t profile)
     req = (DMNVItemMdn *) &cmd->data[0];
     req->profile = profile;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -824,12 +842,11 @@ roam_pref_validate (uint8_t dm)
 size_t
 qcdm_cmd_nv_get_roam_pref_new (char *buf, size_t len, uint8_t profile)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemRoamPref *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_READ;
@@ -838,7 +855,7 @@ qcdm_cmd_nv_get_roam_pref_new (char *buf, size_t len, uint8_t profile)
     req = (DMNVItemRoamPref *) &cmd->data[0];
     req->profile = profile;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -876,12 +893,11 @@ qcdm_cmd_nv_set_roam_pref_new (char *buf,
                                uint8_t profile,
                                uint8_t roam_pref)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemRoamPref *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     if (!roam_pref_validate (roam_pref)) {
         qcdm_err (0, "Invalid roam preference %d", roam_pref);
@@ -896,7 +912,7 @@ qcdm_cmd_nv_set_roam_pref_new (char *buf,
     req->profile = profile;
     req->roam_pref = roam_pref;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -918,12 +934,11 @@ qcdm_cmd_nv_set_roam_pref_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_nv_get_mode_pref_new (char *buf, size_t len, uint8_t profile)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemModePref *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_READ;
@@ -932,7 +947,7 @@ qcdm_cmd_nv_get_mode_pref_new (char *buf, size_t len, uint8_t profile)
     req = (DMNVItemModePref *) &cmd->data[0];
     req->profile = profile;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -965,12 +980,11 @@ qcdm_cmd_nv_set_mode_pref_new (char *buf,
                                uint8_t profile,
                                uint8_t mode_pref)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemModePref *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_WRITE;
@@ -980,7 +994,7 @@ qcdm_cmd_nv_set_mode_pref_new (char *buf,
     req->profile = profile;
     req->mode_pref = nv_mode_pref_from_qcdm (mode_pref);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1002,17 +1016,16 @@ qcdm_cmd_nv_set_mode_pref_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_nv_get_hybrid_pref_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_READ;
     cmd->nv_item = htole16 (DIAG_NV_HYBRID_PREF);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1046,12 +1059,11 @@ qcdm_cmd_nv_set_hybrid_pref_new (char *buf,
                                  size_t len,
                                  uint8_t hybrid_pref)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemHybridPref *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     if (hybrid_pref > QCDM_CMD_NV_HYBRID_PREF_ITEM_REV_HYBRID_ON) {
         qcdm_err (0, "Invalid hybrid preference %d", hybrid_pref);
@@ -1068,7 +1080,7 @@ qcdm_cmd_nv_set_hybrid_pref_new (char *buf,
     else if (hybrid_pref == QCDM_CMD_NV_HYBRID_PREF_ITEM_REV_HYBRID_ON)
         req->hybrid_pref = DIAG_NV_HYBRID_PREF_ON;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1090,17 +1102,16 @@ qcdm_cmd_nv_set_hybrid_pref_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_nv_get_ipv6_enabled_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_READ;
     cmd->nv_item = htole16 (DIAG_NV_IPV6_ENABLED);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1134,12 +1145,11 @@ qcdm_cmd_nv_set_ipv6_enabled_new (char *buf,
                                  size_t len,
                                  uint8_t enabled)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemIPv6Enabled *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     if (enabled > QCDM_CMD_NV_IPV6_ENABLED_ON) {
         qcdm_err (0, "Invalid ipv6 preference %d", enabled);
@@ -1156,7 +1166,7 @@ qcdm_cmd_nv_set_ipv6_enabled_new (char *buf,
     else if (enabled == QCDM_CMD_NV_IPV6_ENABLED_ON)
         req->enabled = DIAG_NV_IPV6_ENABLED_ON;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1188,17 +1198,16 @@ hdr_rev_pref_validate (uint8_t dm)
 size_t
 qcdm_cmd_nv_get_hdr_rev_pref_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_NV_READ;
     cmd->nv_item = htole16 (DIAG_NV_HDR_REV_PREF);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1234,12 +1243,11 @@ qcdm_cmd_nv_set_hdr_rev_pref_new (char *buf,
                                   size_t len,
                                   uint8_t rev_pref)
 {
-    char cmdbuf[sizeof (DMCmdNVReadWrite) + 2];
-    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) &cmdbuf[0];
+    DMCmdNVReadWrite *cmd = (DMCmdNVReadWrite *) buf;
     DMNVItemHdrRevPref *req;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     if (!hdr_rev_pref_validate (rev_pref)) {
         qcdm_err (0, "Invalid HDR revision preference %d", rev_pref);
@@ -1253,7 +1261,7 @@ qcdm_cmd_nv_set_hdr_rev_pref_new (char *buf,
     req = (DMNVItemHdrRevPref *) &cmd->data[0];
     req->rev_pref = rev_pref;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1275,18 +1283,17 @@ qcdm_cmd_nv_set_hdr_rev_pref_result (const char *buf, size_t len, int *out_error
 size_t
 qcdm_cmd_cm_subsys_state_info_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdSubsysHeader) + 2];
-    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) &cmdbuf[0];
+    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_SUBSYS;
     cmd->subsys_id = DIAG_SUBSYS_CM;
     cmd->subsys_cmd = htole16 (DIAG_SUBSYS_CM_STATE_INFO);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1347,18 +1354,17 @@ qcdm_cmd_cm_subsys_state_info_result (const char *buf, size_t len, int *out_erro
 size_t
 qcdm_cmd_hdr_subsys_state_info_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdSubsysHeader) + 2];
-    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) &cmdbuf[0];
+    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_SUBSYS;
     cmd->subsys_id = DIAG_SUBSYS_HDR;
     cmd->subsys_cmd = htole16 (DIAG_SUBSYS_HDR_STATE_INFO);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1395,14 +1401,13 @@ qcdm_cmd_ext_logmask_new (char *buf,
                           uint32_t items[],
                           uint16_t maxlog)
 {
-    char cmdbuf[sizeof (DMCmdExtLogMask) + 2];
-    DMCmdExtLogMask *cmd = (DMCmdExtLogMask *) &cmdbuf[0];
+    DMCmdExtLogMask *cmd = (DMCmdExtLogMask *) buf;
     uint16_t highest = 0;
     size_t total = 3;
     uint32_t i;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_EXT_LOGMASK;
@@ -1424,7 +1429,7 @@ qcdm_cmd_ext_logmask_new (char *buf,
     if (maxlog && maxlog % 8)
         total++;
 
-    return dm_encapsulate_buffer (cmdbuf, total, sizeof (cmdbuf), buf, len);
+    return total;
 }
 
 QcdmResult *
@@ -1489,17 +1494,16 @@ qcmd_cmd_ext_logmask_result_get_item (QcdmResult *result,
 size_t
 qcdm_cmd_event_report_new (char *buf, size_t len, qcdmbool start)
 {
-    char cmdbuf[4];
-    DMCmdEventReport *cmd = (DMCmdEventReport *) &cmdbuf[0];
+    DMCmdEventReport *cmd = (DMCmdEventReport *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_EVENT_REPORT;
     cmd->on = start ? 1 : 0;
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1518,18 +1522,17 @@ qcdm_cmd_event_report_result (const char *buf, size_t len, int *out_error)
 size_t
 qcdm_cmd_zte_subsys_status_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdSubsysHeader) + 2];
-    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) &cmdbuf[0];
+    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_SUBSYS;
     cmd->subsys_id = DIAG_SUBSYS_ZTE;
     cmd->subsys_cmd = htole16 (DIAG_SUBSYS_ZTE_STATUS);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1557,11 +1560,10 @@ qcdm_cmd_nw_subsys_modem_snapshot_cdma_new (char *buf,
                                             size_t len,
                                             uint8_t chipset)
 {
-    char cmdbuf[sizeof (DMCmdSubsysNwSnapshotReq) + 2];
-    DMCmdSubsysNwSnapshotReq *cmd = (DMCmdSubsysNwSnapshotReq *) &cmdbuf[0];
+    DMCmdSubsysNwSnapshotReq *cmd = (DMCmdSubsysNwSnapshotReq *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     /* Validate chipset */
     if (chipset != QCDM_NW_CHIPSET_6500 && chipset != QCDM_NW_CHIPSET_6800) {
@@ -1585,7 +1587,7 @@ qcdm_cmd_nw_subsys_modem_snapshot_cdma_new (char *buf,
     cmd->technology = DIAG_SUBSYS_NOVATEL_MODEM_SNAPSHOT_TECH_CDMA_EVDO;
     cmd->snapshot_mask = htole32 (0xFFFF);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1640,11 +1642,10 @@ qcdm_cmd_nw_subsys_eri_new (char *buf,
                             size_t len,
                             uint8_t chipset)
 {
-    char cmdbuf[sizeof (DMCmdSubsysHeader) + 2];
-    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) &cmdbuf[0];
+    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     /* Validate chipset */
     if (chipset != QCDM_NW_CHIPSET_6500 && chipset != QCDM_NW_CHIPSET_6800) {
@@ -1666,7 +1667,7 @@ qcdm_cmd_nw_subsys_eri_new (char *buf,
     }
     cmd->subsys_cmd = htole16 (DIAG_SUBSYS_NOVATEL_ERI);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -1712,7 +1713,7 @@ qcdm_cmd_log_config_new (char *buf,
                          uint32_t equip_id,
                          uint16_t items[])
 {
-    DMCmdLogConfig *cmd;
+    DMCmdLogConfig *cmd = (DMCmdLogConfig *) buf;
     uint16_t highest = 0;
     uint32_t items_len = 0;
     size_t cmdsize = 0, cmdbufsize;
@@ -1737,7 +1738,7 @@ qcdm_cmd_log_config_new (char *buf,
 
     qcdm_return_val_if_fail (len >= cmdsize, 0);
 
-    cmd = calloc (1, cmdbufsize);
+    memset (cmd, 0, cmdbufsize);
     cmd->code = DIAG_CMD_LOG_CONFIG;
     cmd->op = htole32 (op);
     cmd->equipid = htole32 (equip_id);
@@ -1751,7 +1752,7 @@ qcdm_cmd_log_config_new (char *buf,
         cmd->num_items = htole32 (highest);
     }
 
-    return dm_encapsulate_buffer ((char *) cmd, cmdsize, cmdbufsize, buf, len);
+    return cmdsize;
 }
 
 size_t
@@ -1976,18 +1977,17 @@ imxi_bcd_to_string (uint8_t bytes[8], size_t len, char *buf, size_t buflen)
 size_t
 qcdm_cmd_wcdma_subsys_state_info_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdSubsysHeader) + 2];
-    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) &cmdbuf[0];
+    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_SUBSYS;
     cmd->subsys_id = DIAG_SUBSYS_WCDMA;
     cmd->subsys_cmd = htole16 (DIAG_SUBSYS_WCDMA_STATE_INFO);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *
@@ -2022,18 +2022,17 @@ qcdm_cmd_wcdma_subsys_state_info_result (const char *buf, size_t len, int *out_e
 size_t
 qcdm_cmd_gsm_subsys_state_info_new (char *buf, size_t len)
 {
-    char cmdbuf[sizeof (DMCmdSubsysHeader) + 2];
-    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) &cmdbuf[0];
+    DMCmdSubsysHeader *cmd = (DMCmdSubsysHeader *) buf;
 
     qcdm_return_val_if_fail (buf != NULL, 0);
-    qcdm_return_val_if_fail (len >= sizeof (*cmd) + DIAG_TRAILER_LEN, 0);
+    qcdm_return_val_if_fail (len >= sizeof (*cmd), 0);
 
     memset (cmd, 0, sizeof (*cmd));
     cmd->code = DIAG_CMD_SUBSYS;
     cmd->subsys_id = DIAG_SUBSYS_GSM;
     cmd->subsys_cmd = htole16 (DIAG_SUBSYS_GSM_STATE_INFO);
 
-    return dm_encapsulate_buffer (cmdbuf, sizeof (*cmd), sizeof (cmdbuf), buf, len);
+    return sizeof (*cmd);
 }
 
 QcdmResult *

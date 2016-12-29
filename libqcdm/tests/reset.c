@@ -85,32 +85,42 @@ com_setup (const char *port)
 /******************************************************************/
 
 static qcdmbool
-qcdm_send (int fd, char *buf, size_t len)
+qcdm_send (int fd, char *buf, size_t cmdlen, size_t buflen)
 {
-    int status;
-    int eagain_count = 1000;
-    size_t i = 0;
+	int status;
+	int eagain_count = 1000;
+	size_t i = 0;
+	char encap[1024];
+	size_t encap_len;
 
-    if (debug)
-        print_buf ("DM:ENC>>>", buf, len);
+    qcdm_return_val_if_fail (sizeof (encap) > cmdlen + 2, FALSE);
 
-    while (i < len) {
-        errno = 0;
-        status = write (fd, &buf[i], 1);
-        if (status < 0) {
-            if (errno == EAGAIN) {
-                eagain_count--;
-                if (eagain_count <= 0)
-                    return FALSE;
-            } else
-                assert (errno == 0);
-        } else
-            i++;
+	encap_len = dm_encapsulate_buffer (buf, cmdlen, buflen, encap, sizeof (encap));
+	if (!encap_len) {
+		fprintf (stderr, "failed to encapsulate QCDM command\n");
+		return FALSE;
+	}
 
-        usleep (1000);
-    }
+	if (debug)
+		print_buf ("DM:ENC>>>", encap, encap_len);
 
-    return TRUE;
+	while (i < encap_len) {
+		errno = 0;
+		status = write (fd, &encap[i], 1);
+		if (status < 0) {
+			if (errno == EAGAIN) {
+				eagain_count--;
+				if (eagain_count <= 0)
+					return FALSE;
+			} else
+				assert (errno == 0);
+		} else
+			i++;
+
+		usleep (1000);
+	}
+
+	return TRUE;
 }
 
 static size_t
@@ -186,7 +196,7 @@ qcdm_set_mode (int fd, uint8_t mode)
     assert (len);
 
     /* Send the command */
-    if (!qcdm_send (fd, buf, len)) {
+    if (!qcdm_send (fd, buf, len, sizeof (buf))) {
         fprintf (stderr, "E: failed to send QCDM Control command\n");
         goto error;
     }
