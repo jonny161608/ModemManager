@@ -598,9 +598,9 @@ wdm_probe (MMPortProbe *self)
 /* QCDM */
 
 static void
-serial_probe_qcdm_parse_response (MMPortSerialQcdm *port,
-                                  GAsyncResult     *res,
-                                  MMPortProbe      *self)
+serial_probe_qcdm_parse_response (MMPortSerial *port,
+                                  GAsyncResult *res,
+                                  MMPortProbe  *self)
 {
     QcdmResult          *result;
     gint                 err = QCDM_SUCCESS;
@@ -612,11 +612,13 @@ serial_probe_qcdm_parse_response (MMPortSerialQcdm *port,
 
     ctx = g_task_get_task_data (self->priv->task);
 
+    g_object_set (port, MM_PORT_SERIAL_HDLC, FALSE, NULL);
+
     /* If already cancelled, do nothing else */
     if (port_probe_task_return_error_if_cancelled (self))
         return;
 
-    response = mm_port_serial_qcdm_command_finish (port, res, &error);
+    response = mm_port_serial_command_finish (port, res, &error);
     if (!error) {
         /* Parse the response */
         result = qcdm_cmd_version_info_result ((const gchar *) response->data, response->len, &err);
@@ -649,12 +651,14 @@ serial_probe_qcdm_parse_response (MMPortSerialQcdm *port,
         cmd2 = g_object_steal_data (G_OBJECT (self), "cmd2");
         if (cmd2) {
             /* second try */
-            mm_port_serial_qcdm_command (MM_PORT_SERIAL_QCDM (ctx->serial),
-                                         cmd2,
-                                         3,
-                                         NULL,
-                                         (GAsyncReadyCallback) serial_probe_qcdm_parse_response,
-                                         self);
+            g_object_set (port, MM_PORT_SERIAL_HDLC, TRUE, NULL);
+            mm_port_serial_command (port,
+                                    cmd2,
+                                    3,
+                                    FALSE,
+                                    NULL,
+                                    (GAsyncReadyCallback) serial_probe_qcdm_parse_response,
+                                    self);
             g_byte_array_unref (cmd2);
             return;
         }
@@ -672,9 +676,7 @@ serial_probe_qcdm (MMPortProbe *self)
 {
     GError              *error = NULL;
     GByteArray          *verinfo = NULL;
-    GByteArray          *verinfo2;
-    gint                 len;
-    guint8               marker = 0x7E;
+    const guint8         diag_verinfo_cmd[] = { 0x7e, 0x00, 0x78, 0xf0, 0x7e };
     PortProbeRunContext *ctx;
 
     g_assert (self->priv->task);
@@ -730,38 +732,23 @@ serial_probe_qcdm (MMPortProbe *self)
         return G_SOURCE_REMOVE;
     }
 
-    /* Build up the probe command; 0x7E is the frame marker, so put one at the
-     * beginning of the buffer to ensure that the device discards any AT
-     * commands that probing might have sent earlier.  Should help devices
-     * respond more quickly and speed up QCDM probing.
+    /* Create the DM "Get Version Info" command and cache it for the second try.
+     * We don't use mm_port_serial_hdlc_command() here becasue we want to prefix
+     * the command with a leading 0x7E frame marker to ensure that the device
+     * discards any AT commands that probing might have sent earlier.  Should
+     * help devices respond more quickly and speed up QCDM probing.
      */
-    verinfo = g_byte_array_sized_new (10);
-    g_byte_array_append (verinfo, &marker, 1);
-    len = qcdm_cmd_version_info_new ((char *) (verinfo->data + 1), 9);
-    if (len <= 0) {
-        g_byte_array_unref (verinfo);
-        port_probe_task_return_error (self,
-                                      g_error_new (MM_SERIAL_ERROR,
-                                                   MM_SERIAL_ERROR_OPEN_FAILED,
-                                                   "(%s/%s) Failed to create QCDM version info command",
-                                                   mm_kernel_device_get_subsystem (self->priv->port),
-                                                   mm_kernel_device_get_name (self->priv->port)));
-        return G_SOURCE_REMOVE;
-    }
-    verinfo->len = len + 1;
-
-    /* Queuing the command takes ownership over it; save it for the second try */
-    verinfo2 = g_byte_array_sized_new (verinfo->len);
-    g_byte_array_append (verinfo2, verinfo->data, verinfo->len);
-    g_object_set_data_full (G_OBJECT (self), "cmd2", verinfo2, (GDestroyNotify) g_byte_array_unref);
-
-    mm_port_serial_qcdm_command (MM_PORT_SERIAL_QCDM (ctx->serial),
-                                 verinfo,
-                                 3,
-                                 NULL,
-                                 (GAsyncReadyCallback) serial_probe_qcdm_parse_response,
-                                 self);
-    g_byte_array_unref (verinfo);
+    verinfo = g_byte_array_sized_new (sizeof (diag_verinfo_cmd));
+    g_byte_array_append (verinfo, diag_verinfo_cmd, sizeof (diag_verinfo_cmd));
+    g_object_set_data_full (G_OBJECT (self), "cmd2", verinfo, (GDestroyNotify) g_byte_array_unref);
+    g_object_set (ctx->serial, MM_PORT_SERIAL_HDLC, TRUE, NULL);
+    mm_port_serial_command (ctx->serial,
+                            verinfo,
+                            3,
+                            FALSE,
+                            NULL,
+                            (GAsyncReadyCallback) serial_probe_qcdm_parse_response,
+                            self);
 
     return G_SOURCE_REMOVE;
 }
