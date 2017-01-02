@@ -2145,7 +2145,7 @@ get_property (GObject *object,
 }
 
 static void
-finalize (GObject *object)
+dispose (GObject *object)
 {
     MMPortSerial *self = MM_PORT_SERIAL (object);
 
@@ -2157,6 +2157,14 @@ finalize (GObject *object)
     g_assert (self->priv->iochannel_id  == 0);
     g_assert (self->priv->socket        == NULL);
     g_assert (self->priv->socket_source == NULL);
+
+    G_OBJECT_CLASS (mm_port_serial_parent_class)->dispose (object);
+}
+
+static void
+finalize (GObject *object)
+{
+    MMPortSerial *self = MM_PORT_SERIAL (object);
 
     if (self->priv->timeout_id)
         g_source_remove (self->priv->timeout_id);
@@ -2181,6 +2189,7 @@ mm_port_serial_class_init (MMPortSerialClass *klass)
     /* Virtual methods */
     object_class->set_property = set_property;
     object_class->get_property = get_property;
+    object_class->dispose      = dispose;
     object_class->finalize     = finalize;
 
     klass->config_fd = real_config_fd;
