@@ -256,7 +256,7 @@ mm_port_serial_hdlc_command (MMPortSerial *self,
     ctx->timeout = timeout_seconds;
     ctx->cancellable = (cancellable ? g_object_ref (cancellable) : NULL);
 
-    ctx->command = mm_hdlc_encapsulate (command, &error);
+    ctx->command = mm_hdlc_encapsulate (command, 0, &error);
     if (!ctx->command) {
         g_simple_async_result_take_error (ctx->result, error);
         command_context_complete_and_free (ctx, TRUE);
@@ -959,6 +959,7 @@ parse_response_buffer (MMPortSerial *self, gboolean is_hdlc)
         gboolean need_more = FALSE;
 
         hdlc = mm_hdlc_decapsulate (self->priv->response,
+                                    0,
                                     &used,
                                     &need_more,
                                     &error);

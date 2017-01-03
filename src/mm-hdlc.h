@@ -19,9 +19,12 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-GByteArray *mm_hdlc_encapsulate (GByteArray *bytes, GError **error);
+GByteArray *mm_hdlc_encapsulate (GByteArray *bytes,
+                                 guint32 accm,
+                                 GError **error);
 
 GByteArray *mm_hdlc_decapsulate (GByteArray *bytes,
+                                 guint32 accm,
                                  guint *out_bytes_used,
                                  gboolean *out_need_more,
                                  GError **error);

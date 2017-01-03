@@ -72,7 +72,7 @@ test_hdlc_decapsulate ()
     framed = g_byte_array_sized_new (sizeof (hdlc));
     g_byte_array_append (framed, hdlc, sizeof (hdlc));
 
-    unframed = mm_hdlc_decapsulate (framed, &bytes_used, &need_more, &error);
+    unframed = mm_hdlc_decapsulate (framed, 0, &bytes_used, &need_more, &error);
     g_assert_no_error (error);
     g_assert (unframed);
     g_assert_cmpint (bytes_used, ==, 221);
@@ -100,7 +100,7 @@ test_hdlc_encapsulate ()
     unframed = g_byte_array_sized_new (sizeof (raw));
     g_byte_array_append (unframed, raw, sizeof (raw));
 
-    framed = mm_hdlc_encapsulate (unframed, &error);
+    framed = mm_hdlc_encapsulate (unframed, 0 ,&error);
     g_assert (framed);
     g_assert_cmpint (framed->len, ==, sizeof (encapsulated));
     g_assert_cmpint (memcmp (framed->data, encapsulated, sizeof (encapsulated)), ==, 0);
@@ -129,7 +129,7 @@ test_hdlc_bad_frames ()
     framed = g_byte_array_sized_new (sizeof (buf));
     g_byte_array_append (framed, buf, sizeof (buf));
 
-    unframed = mm_hdlc_decapsulate (framed, &bytes_used, &need_more, &error);
+    unframed = mm_hdlc_decapsulate (framed, 0, &bytes_used, &need_more, &error);
     g_assert (unframed == NULL);
     g_assert_cmpint (bytes_used, ==, 15);
     g_assert (need_more == FALSE);
@@ -144,7 +144,7 @@ test_hdlc_bad_frames ()
     framed = g_byte_array_sized_new (sizeof (buf2));
     g_byte_array_append (framed, buf2, sizeof (buf2));
 
-    unframed = mm_hdlc_decapsulate (framed, &bytes_used, &need_more, &error);
+    unframed = mm_hdlc_decapsulate (framed, 0, &bytes_used, &need_more, &error);
     g_assert (unframed == NULL);
     g_assert_cmpint (bytes_used, ==, sizeof (buf2));
     g_assert (need_more == FALSE);

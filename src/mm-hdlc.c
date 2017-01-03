@@ -73,8 +73,11 @@ const guint8  HDLC_ESC_MASK = 0x20;  /* Escape sequence complement value */
 const guint16 HDLC_CRC_INIT = 0xFFFF;
 const guint16 HDLC_CRC_GOOD = 0xF0B8;
 
+#define FIND_ACCM(a, v) (v < 0x20 && (accm & (1 << val)))
+#define NEED_ESCAPE(a, v) (v == HDLC_CONTROL || v == HDLC_ESC_CHAR || FIND_ACCM(a, v))
+
 static guint
-framed_len (GByteArray *bytes)
+framed_len (guint32 accm, GByteArray *bytes)
 {
     guint required = bytes->len + 4;  /* +1 for leading control, +2 for CRC, +1 for trailing control */
     guint i;
@@ -88,9 +91,9 @@ framed_len (GByteArray *bytes)
 }
 
 static void
-escape_and_add (GByteArray *buf, guint8 val)
+escape_and_add (GByteArray *buf, guint32 accm, guint8 val)
 {
-    if (val == HDLC_CONTROL || val == HDLC_ESC_CHAR) {
+    if (NEED_ESCAPE(accm, val)) {
         guint8 esc = val ^ HDLC_ESC_MASK;
 
         g_byte_array_append (buf, &HDLC_ESC_CHAR, 1);
@@ -102,6 +105,9 @@ escape_and_add (GByteArray *buf, guint8 val)
 /**
  * mm_hdlc_encapsulate:
  * @bytes: input data buffer
+ * @accm: the Async Control Character Map bitmap used for handling bytes with
+ * values less than 0x20. If the bit number corresponding to a byte value is
+ * set in the ACCM, that byte value will be escaped.
  * @error: on return contains an error or %NULL if no error occurred
  *
  * Encapsulates @bytes into an HDLC frame with leading and trailing HDLC
@@ -110,7 +116,9 @@ escape_and_add (GByteArray *buf, guint8 val)
  * Returns: the HDLC frame, or %NULL if an error occurred
  */
 GByteArray *
-mm_hdlc_encapsulate (GByteArray *bytes, GError **error)
+mm_hdlc_encapsulate (GByteArray *bytes,
+                     guint32 accm,
+                     GError **error)
 {
     guint len, i = 0;
     GByteArray *framed;
@@ -118,7 +126,7 @@ mm_hdlc_encapsulate (GByteArray *bytes, GError **error)
 
     g_return_val_if_fail (bytes, NULL);
 
-    len = framed_len (bytes);
+    len = framed_len (accm, bytes);
     if (len > 50000) {
         g_set_error (error, G_FILE_ERROR, G_FILE_ERROR_NOMEM, "too large");
         return NULL;
@@ -128,13 +136,13 @@ mm_hdlc_encapsulate (GByteArray *bytes, GError **error)
 
     for (i = 0; i < bytes->len; i++) {
         crc = crc_update (crc, bytes->data[i]);
-        escape_and_add (framed, bytes->data[i]);
+        escape_and_add (framed, accm, bytes->data[i]);
     }
 
     /* Append and escape the complement of the CRC */
     crc = ~crc;
-    escape_and_add (framed, crc & 0xFF);
-    escape_and_add (framed, (crc >> 8) & 0xFF);
+    escape_and_add (framed, accm, crc & 0xFF);
+    escape_and_add (framed, accm, (crc >> 8) & 0xFF);
 
     g_byte_array_append (framed, &HDLC_CONTROL, 1);
 
@@ -144,6 +152,10 @@ mm_hdlc_encapsulate (GByteArray *bytes, GError **error)
 /**
  * mm_hdlc_decapsulate:
  * @bytes: input data buffer
+ * @accm: the Async Control Character Map bitmap used for handling bytes with
+ * values less than 0x20. If the bit number corresponding to a byte value is
+ * set in the ACCM, that byte value is expected to be escaped and will be ignored
+ * if found un-escaped.
  * @out_bytes_used: on return, the number of bytes of @bytes used
  * to create the decapsulated data.  This number of bytes can be discarded
  * from @bytes.
@@ -165,6 +177,7 @@ mm_hdlc_encapsulate (GByteArray *bytes, GError **error)
  */
 GByteArray *
 mm_hdlc_decapsulate (GByteArray *bytes,
+                     guint32 accm,
                      guint *out_bytes_used,
                      gboolean *out_need_more,
                      GError **error)
@@ -216,6 +229,9 @@ mm_hdlc_decapsulate (GByteArray *bytes,
         } else if (unescaping) {
             val ^= HDLC_ESC_MASK;
             unescaping = FALSE;
+        } else if (FIND_ACCM(accm, val)) {
+            /* ACCM says value should be escaped but it's not; ignore it */
+            continue;
         }
         crc = crc_update (crc, val);
 
