@@ -67,16 +67,11 @@ crc_update (guint16 crc, guint8 val)
     return crc_table[(crc ^ val) & 0xff] ^ (crc >> 8);
 }
 
-static guint16
-crc_finish (guint16 crc)
-{
-    return ~crc;
-}
-
 const guint8  HDLC_CONTROL  = 0x7E;  /* Control character */
 const guint8  HDLC_ESC_CHAR = 0x7D;  /* Escape sequence 1st character value */
 const guint8  HDLC_ESC_MASK = 0x20;  /* Escape sequence complement value */
 const guint16 HDLC_CRC_INIT = 0xFFFF;
+const guint16 HDLC_CRC_GOOD = 0xF0B8;
 
 static guint
 framed_len (GByteArray *bytes)
@@ -136,8 +131,8 @@ mm_hdlc_encapsulate (GByteArray *bytes, GError **error)
         escape_and_add (framed, bytes->data[i]);
     }
 
-    /* Append and escape the CRC */
-    crc = crc_finish (crc);
+    /* Append and escape the complement of the CRC */
+    crc = ~crc;
     escape_and_add (framed, crc & 0xFF);
     escape_and_add (framed, (crc >> 8) & 0xFF);
 
@@ -178,7 +173,6 @@ mm_hdlc_decapsulate (GByteArray *bytes,
     guint i, frame_len = 0;
     gboolean unescaping = FALSE;
     guint16 crc = HDLC_CRC_INIT;
-    guint16 found_crc = 0;
 
     if (out_bytes_used)
         *out_bytes_used = 0;
@@ -214,33 +208,26 @@ mm_hdlc_decapsulate (GByteArray *bytes,
     unframed = g_byte_array_sized_new (frame_len);
 
     for (i = 0; i < frame_len; i++) {
-        guint8 val;
+        guint8 val = bytes->data[i];
 
-        if (bytes->data[i] == HDLC_ESC_CHAR) {
+        if (val == HDLC_ESC_CHAR) {
             unescaping = TRUE;
             continue;
-        }
-
-        if (unescaping) {
-            val = bytes->data[i] ^ HDLC_ESC_MASK;
+        } else if (unescaping) {
+            val ^= HDLC_ESC_MASK;
             unescaping = FALSE;
-        } else
-            val = bytes->data[i];
+        }
+        crc = crc_update (crc, val);
 
-        /* Don't CRC the CRC */
-        if (i < frame_len - 2) {
-            crc = crc_update (crc, val);
+        /* Ignore the CRC when returning the frame */
+        if (i < frame_len - 2)
             g_byte_array_append (unframed, &val, 1);
-        } else if (i == frame_len - 2)
-            found_crc = val;
-        else if (i == frame_len - 1)
-            found_crc |= val << 8;
     }
 
     if (out_bytes_used)
         *out_bytes_used = frame_len + 1;
 
-    if (crc_finish (crc) != found_crc) {
+    if (crc != HDLC_CRC_GOOD) {
         g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "HDLC CRC mismatch");
         g_byte_array_free (unframed, TRUE);
         return NULL;
