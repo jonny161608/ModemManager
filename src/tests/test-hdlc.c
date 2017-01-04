@@ -110,7 +110,7 @@ test_hdlc_encapsulate ()
 }
 
 static void
-test_hdlc_bad_frame ()
+test_hdlc_bad_frames ()
 {
     GByteArray *framed, *unframed;
     guint bytes_used = 0;
@@ -122,12 +122,31 @@ test_hdlc_bad_frame ()
         0x00, 0x00, 0x7e
     };
 
+    static const guint8 buf2[] = {
+        0x00, 0x0a, 0x6b, 0x74, 0x00, 0x00, 0x7D, 0x7E
+    };
+
     framed = g_byte_array_sized_new (sizeof (buf));
     g_byte_array_append (framed, buf, sizeof (buf));
 
     unframed = mm_hdlc_decapsulate (framed, &bytes_used, &need_more, &error);
     g_assert (unframed == NULL);
     g_assert_cmpint (bytes_used, ==, 15);
+    g_assert (need_more == FALSE);
+    g_assert_error (error, G_IO_ERROR, G_IO_ERROR_FAILED);
+
+    g_byte_array_free (framed, TRUE);
+    g_clear_error (&error);
+
+    /* Test that a Control Escape (0x7D) followed by a Flag Sequence (0x7E) is
+     * recognized as an error.  See RFC 1662 section 4.3 "Invalid Frames".
+     */
+    framed = g_byte_array_sized_new (sizeof (buf2));
+    g_byte_array_append (framed, buf2, sizeof (buf2));
+
+    unframed = mm_hdlc_decapsulate (framed, &bytes_used, &need_more, &error);
+    g_assert (unframed == NULL);
+    g_assert_cmpint (bytes_used, ==, sizeof (buf2));
     g_assert (need_more == FALSE);
     g_assert_error (error, G_IO_ERROR, G_IO_ERROR_FAILED);
 
@@ -141,7 +160,7 @@ int main (int argc, char **argv)
 
     g_test_add_func ("/ModemManager/HDLC/decapsulate", test_hdlc_decapsulate);
     g_test_add_func ("/ModemManager/HDLC/encapsulate", test_hdlc_encapsulate);
-    g_test_add_func ("/ModemManager/HDLC/bad-frame",   test_hdlc_bad_frame);
+    g_test_add_func ("/ModemManager/HDLC/bad-frames",   test_hdlc_bad_frames);
 
     return g_test_run ();
 }
