@@ -79,14 +79,12 @@ handle_start_ready (MMBaseCall *self,
 {
     GError *error = NULL;
 
-    if (!MM_BASE_CALL_GET_CLASS (self)->start_finish (self, res, &error)) {
+    if (!MM_BASE_CALL_GET_CLASS (self)->start_finish (self, res, &error))
         g_dbus_method_invocation_take_error (ctx->invocation, error);
-    } else {
-        /* Transition from Unknown->Dialing */
-        if (mm_gdbus_call_get_state (MM_GDBUS_CALL (ctx->self)) == MM_CALL_STATE_UNKNOWN ) {
-            /* Update state */
-            mm_base_call_change_state (self, MM_CALL_STATE_DIALING, MM_CALL_STATE_REASON_OUTGOING_STARTED);
-        }
+    else {
+        /* Modem will update call state when when it receives unsolicited
+         * notification that the call is ringing.
+         */
         mm_gdbus_call_complete_start (MM_GDBUS_CALL (ctx->self), ctx->invocation);
     }
 
@@ -181,14 +179,11 @@ handle_accept_ready (MMBaseCall *self,
 {
     GError *error = NULL;
 
-    if (!MM_BASE_CALL_GET_CLASS (self)->accept_finish (self, res, &error)) {
+    if (!MM_BASE_CALL_GET_CLASS (self)->accept_finish (self, res, &error))
         g_dbus_method_invocation_take_error (ctx->invocation, error);
-    } else {
-        /* Transition from Unknown->Dialing */
-        if (mm_gdbus_call_get_state (MM_GDBUS_CALL (ctx->self)) == MM_CALL_STATE_RINGING_IN) {
-            /* Update state */
+    else {
+        if (mm_gdbus_call_get_state (MM_GDBUS_CALL (ctx->self)) == MM_CALL_STATE_RINGING_IN)
             mm_base_call_change_state (self, MM_CALL_STATE_ACTIVE, MM_CALL_STATE_REASON_ACCEPTED);
-        }
         mm_gdbus_call_complete_accept (MM_GDBUS_CALL (ctx->self), ctx->invocation);
     }
 
@@ -645,10 +640,11 @@ call_start_ready (MMBaseModem *modem,
                              "Modem response '%s'", response);
         /* Update state */
         mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_REFUSED_OR_BUSY);
-    } else {
-        /* Update state */
-        mm_base_call_change_state (ctx->self, MM_CALL_STATE_ACTIVE, MM_CALL_STATE_REASON_ACCEPTED);
     }
+
+    /* Modem will update call state when it receives unsolicited notification
+     * that the call is ringing.
+     */
 
     if (error) {
         g_simple_async_result_take_error (ctx->result, error);
@@ -685,8 +681,8 @@ call_start (MMBaseCall *self,
                               (GAsyncReadyCallback)call_start_ready,
                               ctx);
 
-    /* Update state */
-    mm_base_call_change_state(self, MM_CALL_STATE_RINGING_OUT, MM_CALL_STATE_REASON_OUTGOING_STARTED);
+    /* Call is now dialing */
+    mm_base_call_change_state(self, MM_CALL_STATE_DIALING, MM_CALL_STATE_REASON_OUTGOING_STARTED);
     g_free (cmd);
 }
 
