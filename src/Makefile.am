@@ -23,6 +23,7 @@ AM_CFLAGS = \
 	-I${top_builddir}/libmm-glib/generated \
 	-I${top_builddir}/libmm-glib/generated/tests \
 	-I$(srcdir)/kerneldevice \
+	-I$(srcdir)/ppp \
 	$(NULL)
 
 AM_LDFLAGS = \
@@ -232,6 +233,24 @@ BUILT_SOURCES += $(PORT_ENUMS_GENERATED)
 CLEANFILES    += $(PORT_ENUMS_GENERATED)
 
 ################################################################################
+# PPP library
+################################################################################
+
+noinst_LTLIBRARIES += libppp.la
+
+libppp_la_CPPFLAGS = \
+	-DUDEVRULESDIR=\"$(udevrulesdir)\" \
+	$(NULL)
+
+libppp_la_SOURCES = \
+	ppp/mm-ppp.h \
+	ppp/mm-ppp.c \
+	$(NULL)
+
+libppp_la_LIBADD = \
+	$(NULL)
+
+################################################################################
 # ModemManager daemon
 ################################################################################
 
@@ -273,6 +292,7 @@ ModemManager_LDADD = \
 	$(top_builddir)/libmm-glib/libmm-glib.la \
 	$(top_builddir)/libmm-glib/generated/tests/libmm-test-generated.la \
 	$(builddir)/libport.la \
+	$(builddir)/libppp.la \
 	$(NULL)
 
 ModemManager_SOURCES = \

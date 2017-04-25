@@ -17,6 +17,7 @@ AM_CFLAGS = \
 	-I${top_srcdir}/src/ \
 	-I${top_builddir}/src/ \
 	-I${top_srcdir}/src/kerneldevice \
+	-I${top_srcdir}/src/ppp \
 	-DTESTUDEVRULESDIR=\"${top_srcdir}/src/\" \
 	$(NULL)
 
@@ -24,6 +25,7 @@ LDADD = \
 	$(top_builddir)/src/libhelpers.la \
 	$(top_builddir)/src/libport.la \
 	$(top_builddir)/src/libkerneldevice.la \
+	$(top_builddir)/src/libppp.la \
 	$(NULL)
 
 AM_LDFLAGS = \
@@ -56,6 +58,7 @@ noinst_PROGRAMS = \
 	test-sms-part-3gpp \
 	test-sms-part-cdma \
 	test-udev-rules \
+	test-ppp \
 	$(NULL)
 
 if WITH_QMI
