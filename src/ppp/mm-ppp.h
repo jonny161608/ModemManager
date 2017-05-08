@@ -50,6 +50,7 @@ typedef enum {
  * MMPppError:
  * @MM_PPP_ERROR_UNKNOWN: unknown or unclassified error
  * @MM_PPP_ERROR_MALFORMED_FRAME: the PPP frame is malformed
+ * @MM_PPP_ERROR_UNHANDLED_FRAME: the PPP frame could not be handled
  */
 typedef enum {
 	MM_PPP_ERROR_UNKNOWN = 0,
@@ -65,7 +66,7 @@ MMPpp *mm_ppp_new (MMPppAuth    auth,
                    const gchar *username,
                    const gchar *password);
 
-gboolean mm_ppp_process (MMPpp *ppp,
+gboolean mm_ppp_process (MMPpp *self,
                          GByteArray *data,
                          GError **error);
 

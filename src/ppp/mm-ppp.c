@@ -33,13 +33,24 @@ enum {
 
 static GParamSpec *properties[PROP_LAST];
 
+typedef enum {
+    MM_PPP_PHASE_DEAD         = 0,
+    MM_PPP_PHASE_ESTABLISH    = 1 << 0,
+    MM_PPP_PHASE_AUTHENTICATE = 1 << 1,
+    MM_PPP_PHASE_NETWORK      = 1 << 2,
+    MM_PPP_PHASE_TERMINATE    = 1 << 3,
+} MMPppPhase;
+
 struct _MMPppPrivate {
+    MMPppPhase phase;
+    MMLcp     *lcp;
+
     MMPppAuth  auth;
     gchar     *username;
     gchar     *password;
 
-    guint     mtu;
-    guint     mru;
+    guint      mtu;
+    guint      mru;
 };
 
 /*****************************************************************************/
@@ -53,13 +64,6 @@ mm_ppp_error_quark (void)
 }
 
 /*****************************************************************************/
-
-#define PPP_PROTO_IP     0x0021
-#define PPP_PROTO_IPCP   0x8021
-#define PPP_PROTO_IPV6CP 0x8057
-#define PPP_PROTO_LCP    0xC021
-#define PPP_PROTO_PAP    0xC023
-#define PPP_PROTO_CHAP   0xC223
 
 /* Retrieves a guint16 in host byte order, handling
  * alignment issues.
@@ -78,6 +82,8 @@ get_host_u16 (const guint8 *bytes)
 
 /*****************************************************************************/
 
+https://www.rfc-editor.org/rfc/rfc1548.txt
+
 MMPpp *
 mm_ppp_new (MMPppAuth    auth,
             const gchar *username,
@@ -90,8 +96,51 @@ mm_ppp_new (MMPppAuth    auth,
                          NULL);
 }
 
+#define PPP_PROTO_IP     0x0021
+#define PPP_PROTO_IPCP   0x8021
+#define PPP_PROTO_IPV6CP 0x8057
+#define PPP_PROTO_LCP    0xC021
+#define PPP_PROTO_PAP    0xC023
+#define PPP_PROTO_CHAP   0xC223
+
+static gboolean
+protocol_allowed (guint protocol,
+                  MMPppPhase phase,
+                  GError **error)
+{
+    switch (phase) {
+    case MM_PPP_PHASE_DEAD:
+    case MM_PPP_PHASE_ESTABLISH:
+    case MM_PPP_PHASE_TERMINATE:
+        if (protocol == PPP_PROTO_LCP)
+            return TRUE;
+        break;
+    case MM_PPP_PHASE_AUTHENTICATE:
+        if (protocol == PPP_PROTO_LCP ||
+            protocol == PPP_PROTO_PAP ||
+            protocol == PPP_PROTO_CHAP)
+            return TRUE;
+        break;
+    case MM_PPP_PHASE_NETWORK:
+        if (protocol == PPP_PROTO_LCP ||
+            protocol == PPP_PROTO_IPCP ||
+            protocol == PPP_PROTO_IPV6CP ||
+            protocol == PPP_PROTO_IP)
+            return TRUE;
+        break;
+    }
+
+    g_set_error (error,
+                 MM_PPP_ERROR,
+                 MM_PPP_ERROR_UNHANDLED_FRAME,
+                 "unhandled or disallowed protocol %d frame (phase %d)",
+                 protocol,
+                 phase);
+    return FALSE;
+}
+
 gboolean
-mm_ppp_process (MMPpp *ppp,
+mm_ppp_process (MMPpp *self,
                 GByteArray *data,
                 GError **error)
 {
@@ -133,6 +182,7 @@ mm_ppp_process (MMPpp *ppp,
         /* single byte */
         protocol = (guint16) buf[0];
         buf++;
+        len--;
     } else if (len < 2) {
         g_set_error (error,
                      MM_PPP_ERROR,
@@ -143,7 +193,11 @@ mm_ppp_process (MMPpp *ppp,
         /* two bytes */
         protocol = get_host_u16 (buf);
         buf += 2;
+        len -= 2;
     }
+
+    if (!protocol_allowed (protocol, self->priv->phase, error))
+        return FALSE;
 
     switch (protocol) {
     case PPP_PROTO_IP:
@@ -153,6 +207,9 @@ mm_ppp_process (MMPpp *ppp,
     case PPP_PROTO_IPV6CP:
         break;
     case PPP_PROTO_LCP:
+        if (!self->priv->lcp)
+            self->priv->lcp = mm_lcp_new ();
+        mm_lcp_process (self->priv->lcp, buf, len);
         break;
     case PPP_PROTO_PAP:
         break;
@@ -177,9 +234,10 @@ mm_ppp_init (MMPpp *self)
 {
     /* Initialize private data */
     self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, MM_TYPE_PPP, MMPppPrivate);
-    self->priv->auth = MM_PPP_AUTH_CHAP;
+    self->priv->auth = MM_PPP_AUTH_NONE;
     self->priv->mtu = 1500;
     self->priv->mru = 1500;
+    self->priv->phase = MM_PPP_PHASE_DEAD;
 }
 
 static void
@@ -236,6 +294,8 @@ static void
 dispose (GObject *object)
 {
     MMPpp *self = MM_PPP (object);
+
+    g_clear_pointer (&self->priv->lcp, mm_lcp_free);
 
     g_clear_pointer (&self->priv->username, g_free);
     g_clear_pointer (&self->priv->password, g_free);
