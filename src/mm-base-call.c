@@ -254,7 +254,6 @@ handle_accept (MMBaseCall *self,
 }
 
 /*****************************************************************************/
-
 /* Hangup call (DBus call handling) */
 
 typedef struct {
@@ -384,11 +383,10 @@ handle_send_dtmf_ready (MMBaseCall *self,
 {
     GError *error = NULL;
 
-    if (!MM_BASE_CALL_GET_CLASS (self)->send_dtmf_finish (self, res, &error)) {
+    if (!MM_BASE_CALL_GET_CLASS (self)->send_dtmf_finish (self, res, &error))
         g_dbus_method_invocation_take_error (ctx->invocation, error);
-    } else {
+    else
         mm_gdbus_call_complete_send_dtmf (MM_GDBUS_CALL (ctx->self), ctx->invocation);
-    }
 
     handle_send_dtmf_context_free (ctx);
 }
@@ -421,7 +419,7 @@ handle_send_dtmf_auth_ready (MMBaseModem *modem,
     }
 
     /* We can only send_dtmf when call is in ACTIVE state */
-    if (state != MM_CALL_STATE_ACTIVE ){
+    if (state != MM_CALL_STATE_ACTIVE) {
         g_dbus_method_invocation_return_error (ctx->invocation,
                                                MM_CORE_ERROR,
                                                MM_CORE_ERROR_FAILED,
@@ -536,31 +534,38 @@ mm_base_call_get_path (MMBaseCall *self)
 }
 
 void
-mm_base_call_change_state(MMBaseCall *self, MMCallState new_state, MMCallStateReason reason)
+mm_base_call_change_state (MMBaseCall *self,
+                           MMCallState new_state,
+                           MMCallStateReason reason)
 {
-    int old_state = mm_gdbus_call_get_state (MM_GDBUS_CALL (self));
+    int old_state;
+
+    old_state = mm_gdbus_call_get_state (MM_GDBUS_CALL (self));
 
     g_object_set (self,
-                  "state",          new_state,
-                  "state-reason",   reason,
+                  "state",        new_state,
+                  "state-reason", reason,
                   NULL);
 
     mm_gdbus_call_set_state (MM_GDBUS_CALL (self), new_state);
-    mm_gdbus_call_set_state_reason(MM_GDBUS_CALL (self), reason);
+    mm_gdbus_call_set_state_reason (MM_GDBUS_CALL (self), reason);
 
-    mm_gdbus_call_emit_state_changed(MM_GDBUS_CALL (self),
-                                     old_state,
-                                     new_state,
-                                     reason);
-}
-
-void mm_base_call_received_dtmf  (MMBaseCall *self, gchar *dtmf)
-{
-    mm_gdbus_call_emit_dtmf_received(MM_GDBUS_CALL (self), dtmf);
+    mm_gdbus_call_emit_state_changed (MM_GDBUS_CALL (self),
+                                      old_state,
+                                      new_state,
+                                      reason);
 }
 
 void
-mm_base_call_set_audio_port (MMBaseCall *self, const gchar *port)
+mm_base_call_received_dtmf (MMBaseCall *self,
+                            gchar *dtmf)
+{
+    mm_gdbus_call_emit_dtmf_received (MM_GDBUS_CALL (self), dtmf);
+}
+
+void
+mm_base_call_set_audio_port (MMBaseCall *self,
+                             const gchar *port)
 {
     mm_gdbus_call_set_audio_port (MM_GDBUS_CALL (self), port);
 }
@@ -617,14 +622,14 @@ call_start_ready (MMBaseModem *modem,
 
         if (g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_DIALTONE)) {
             /* Update state */
-            mm_base_call_change_state(ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
+            mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
         }
 
         if (g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_BUSY)      ||
             g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_ANSWER) ||
             g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_CARRIER)) {
             /* Update state */
-            mm_base_call_change_state(ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_REFUSED_OR_BUSY);
+            mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_REFUSED_OR_BUSY);
         }
 
         mm_dbg ("Couldn't start call : '%s'", error->message);
@@ -634,7 +639,7 @@ call_start_ready (MMBaseModem *modem,
     }
 
     /* check response for error */
-    if (response && strlen (response) > 0 ) {
+    if (response && strlen (response) > 0) {
         error = g_error_new (MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
                              "Couldn't start the call: "
                              "Modem response '%s'", response);
@@ -682,12 +687,11 @@ call_start (MMBaseCall *self,
                               ctx);
 
     /* Call is now dialing */
-    mm_base_call_change_state(self, MM_CALL_STATE_DIALING, MM_CALL_STATE_REASON_OUTGOING_STARTED);
+    mm_base_call_change_state (self, MM_CALL_STATE_DIALING, MM_CALL_STATE_REASON_OUTGOING_STARTED);
     g_free (cmd);
 }
 
 /*****************************************************************************/
-
 /* Accept the CALL */
 
 typedef struct {
@@ -736,17 +740,17 @@ call_accept_ready (MMBaseModem *modem,
     }
 
     /* check response for error */
-    if( response && strlen(response) > 0 ) {
+    if (response && strlen (response) > 0) {
         g_set_error (&error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
-                                     "Couldn't accept the call: "
-                                     "Unhandled response '%s'", response);
+                     "Couldn't accept the call: "
+                     "Unhandled response '%s'", response);
 
         /* Update state */
-        mm_base_call_change_state(ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
+        mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
     } else {
 
         /* Update state */
-        mm_base_call_change_state(ctx->self, MM_CALL_STATE_ACTIVE, MM_CALL_STATE_REASON_ACCEPTED);
+        mm_base_call_change_state (ctx->self, MM_CALL_STATE_ACTIVE, MM_CALL_STATE_REASON_ACCEPTED);
     }
 
     if (error) {
@@ -784,7 +788,6 @@ call_accept (MMBaseCall *self,
 }
 
 /*****************************************************************************/
-
 /* Hangup the CALL */
 
 typedef struct {
@@ -813,8 +816,8 @@ call_hangup_finish (MMBaseCall *self,
 
 static void
 call_hangup_ready (MMBaseModem *modem,
-                  GAsyncResult *res,
-                  CallHangupContext *ctx)
+                   GAsyncResult *res,
+                   CallHangupContext *ctx)
 {
     GError *error = NULL;
     const gchar *response;
@@ -833,7 +836,7 @@ call_hangup_ready (MMBaseModem *modem,
     }
 
     /* Update state */
-    mm_base_call_change_state(ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_TERMINATED);
+    mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_TERMINATED);
 
     if (error) {
         g_simple_async_result_take_error (ctx->result, error);
@@ -941,7 +944,6 @@ call_send_dtmf (MMBaseCall *self,
                               FALSE,
                               (GAsyncReadyCallback)call_send_dtmf_ready,
                               ctx);
-
     g_free (cmd);
 }
 
@@ -954,8 +956,8 @@ typedef struct {
 
 static void
 call_delete (MMBaseCall *self,
-            GAsyncReadyCallback callback,
-            gpointer user_data)
+             GAsyncReadyCallback callback,
+             gpointer user_data)
 {
     CallDeleteContext *ctx;
 
@@ -977,8 +979,8 @@ call_delete (MMBaseCall *self,
 
 static gboolean
 call_delete_finish (MMBaseCall *self,
-                   GAsyncResult *res,
-                   GError **error)
+                    GAsyncResult *res,
+                    GError **error)
 {
     return !g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (res), error);
 }
@@ -996,7 +998,7 @@ mm_base_call_delete_finish (MMBaseCall *self,
         deleted = MM_BASE_CALL_GET_CLASS (self)->delete_finish (self, res, error);
         if (deleted)
             /* We do change the state of this call back to UNKNOWN */
-            mm_base_call_change_state(self, MM_CALL_STATE_UNKNOWN, MM_CALL_STATE_REASON_UNKNOWN);
+            mm_base_call_change_state (self, MM_CALL_STATE_UNKNOWN, MM_CALL_STATE_REASON_UNKNOWN);
 
         return deleted;
     }
@@ -1029,14 +1031,14 @@ MMBaseCall *
 mm_base_call_new (MMBaseModem *modem)
 {
     return MM_BASE_CALL (g_object_new (MM_TYPE_BASE_CALL,
-                                      MM_BASE_CALL_MODEM, modem,
-                                      NULL));
+                                       MM_BASE_CALL_MODEM, modem,
+                                       NULL));
 }
 
 MMBaseCall *
 mm_base_call_new_from_properties (MMBaseModem *modem,
-                                 MMCallProperties *properties,
-                                 GError **error)
+                                  MMCallProperties *properties,
+                                  GError **error)
 {
     MMBaseCall *self;
     const gchar *number;
@@ -1044,11 +1046,11 @@ mm_base_call_new_from_properties (MMBaseModem *modem,
 
     g_assert (MM_IS_IFACE_MODEM_VOICE (modem));
 
-    number      = mm_call_properties_get_number (properties);
-    direction   = mm_call_properties_get_direction(properties);
+    number    = mm_call_properties_get_number (properties);
+    direction = mm_call_properties_get_direction (properties);
 
     /* Don't create CALL from properties if either number is missing */
-    if ( !number ) {
+    if (!number) {
         g_set_error (error,
                      MM_CORE_ERROR,
                      MM_CORE_ERROR_INVALID_ARGS,
@@ -1057,9 +1059,8 @@ mm_base_call_new_from_properties (MMBaseModem *modem,
     }
 
     /* if no direction is specified force to outgoing */
-    if(direction == MM_CALL_DIRECTION_UNKNOWN ) {
+    if (direction == MM_CALL_DIRECTION_UNKNOWN)
         direction = MM_CALL_DIRECTION_OUTGOING;
-    }
 
     /* Create a call object as defined by the interface */
     self = mm_iface_modem_voice_create_call (MM_IFACE_MODEM_VOICE (modem));
@@ -1153,7 +1154,6 @@ mm_base_call_init (MMBaseCall *self)
 {
     /* Initialize private data */
     self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, MM_TYPE_BASE_CALL, MMBaseCallPrivate);
-    /* Defaults */
 }
 
 static void
