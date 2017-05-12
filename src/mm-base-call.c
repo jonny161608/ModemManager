@@ -616,21 +616,13 @@ call_start_ready (MMBaseModem *modem,
 
     response = mm_base_modem_at_command_finish (modem, res, &error);
     if (error) {
-        if (g_error_matches (error, MM_SERIAL_ERROR, MM_SERIAL_ERROR_RESPONSE_TIMEOUT)) {
-            /* something is wrong, serial timeout could never occurs */
-        }
-
-        if (g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_DIALTONE)) {
-            /* Update state */
-            mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
-        }
-
+        /* Select call state based on reported error */
         if (g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_BUSY)      ||
             g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_ANSWER) ||
-            g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_CARRIER)) {
-            /* Update state */
+            g_error_matches (error, MM_CONNECTION_ERROR, MM_CONNECTION_ERROR_NO_CARRIER))
             mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_REFUSED_OR_BUSY);
-        }
+        else
+            mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
 
         mm_dbg ("Couldn't start call : '%s'", error->message);
         g_simple_async_result_take_error (ctx->result, error);
