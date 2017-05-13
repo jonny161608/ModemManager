@@ -723,24 +723,19 @@ call_accept_ready (MMBaseModem *modem,
     }
 
     /* check response for error */
-    if (response && strlen (response) > 0) {
-        g_set_error (&error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
-                     "Couldn't accept the call: "
-                     "Unhandled response '%s'", response);
-
+    if (response && response[0]) {
         /* Update state */
         mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_ERROR);
-    } else {
-
-        /* Update state */
-        mm_base_call_change_state (ctx->self, MM_CALL_STATE_ACTIVE, MM_CALL_STATE_REASON_ACCEPTED);
-    }
-
-    if (error) {
-        g_simple_async_result_take_error (ctx->result, error);
+        g_simple_async_result_set_error (ctx->result, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                                         "Couldn't accept the call: "
+                                         "Unhandled response '%s'",
+                                         response);
         call_accept_context_complete_and_free (ctx);
         return;
     }
+
+    /* Update state */
+    mm_base_call_change_state (ctx->self, MM_CALL_STATE_ACTIVE, MM_CALL_STATE_REASON_ACCEPTED);
 
     g_simple_async_result_set_op_res_gboolean (ctx->result, TRUE);
     call_accept_context_complete_and_free (ctx);
