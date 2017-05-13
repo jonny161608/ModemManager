@@ -51,7 +51,7 @@ struct _MMCallAudioFormatPrivate {
  * Gets the encoding of the audio format.  For example, "pcm" for PCM-encoded
  * audio.
  *
- * Returns: a string with the the encoding, or #NULL if unknown. Do not free the returned value, it is owned by @self.
+ * Returns: a string with the encoding, or #NULL if unknown. Do not free the returned value, it is owned by @self.
  */
 const gchar *
 mm_call_audio_format_get_encoding (MMCallAudioFormat *self)
