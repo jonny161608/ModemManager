@@ -820,12 +820,6 @@ call_hangup_ready (MMBaseModem *modem,
     /* Update state */
     mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_TERMINATED);
 
-    if (error) {
-        g_simple_async_result_take_error (ctx->result, error);
-        call_hangup_context_complete_and_free (ctx);
-        return;
-    }
-
     g_simple_async_result_set_op_res_gboolean (ctx->result, TRUE);
     call_hangup_context_complete_and_free (ctx);
 }
