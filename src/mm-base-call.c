@@ -720,14 +720,9 @@ call_accept_ready (MMBaseModem *modem,
 
     response = mm_base_modem_at_command_finish (modem, res, &error);
     if (error) {
-        if (g_error_matches (error, MM_SERIAL_ERROR, MM_SERIAL_ERROR_RESPONSE_TIMEOUT)) {
-            g_simple_async_result_take_error (ctx->result, error);
-            call_accept_context_complete_and_free (ctx);
-            return;
-        }
-
         mm_dbg ("Couldn't accept call : '%s'", error->message);
-        g_error_free (error);
+        g_simple_async_result_take_error (ctx->result, error);
+        call_accept_context_complete_and_free (ctx);
         return;
     }
 
