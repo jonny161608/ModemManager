@@ -95,6 +95,7 @@ call_start_audio_ready (MMBaseModem *modem,
     if (error) {
         mm_dbg ("Couldn't start call audio: '%s'", error->message);
         g_task_return_error (task, error);
+        g_object_unref (task);
         return;
     }
 
@@ -110,6 +111,7 @@ call_start_audio_ready (MMBaseModem *modem,
     }
 
     g_task_return_boolean (task, TRUE);
+    g_object_unref (task);
 }
 
 static void
@@ -121,6 +123,7 @@ parent_call_start_ready (MMBaseCall *self,
 
     if (!MM_BASE_CALL_CLASS (mm_call_huawei_parent_class)->start_finish (self, res, &error)) {
         g_task_return_error (task, error);
+        g_object_unref (task);
         return;
     }
 
@@ -179,6 +182,7 @@ call_accept_audio_ready (MMBaseModem *modem,
     if (error) {
         mm_dbg ("Couldn't start call audio: '%s'", error->message);
         g_task_return_error (task, error);
+        g_object_unref (task);
         return;
     }
 
@@ -194,6 +198,7 @@ call_accept_audio_ready (MMBaseModem *modem,
     }
 
     g_task_return_boolean (task, TRUE);
+    g_object_unref (task);
 }
 
 static void
@@ -205,6 +210,7 @@ parent_call_accept_ready (MMBaseCall *self,
 
     if (!MM_BASE_CALL_CLASS (mm_call_huawei_parent_class)->accept_finish (self, res, &error)) {
         g_task_return_error (task, error);
+        g_object_unref (task);
         return;
     }
 
@@ -260,6 +266,7 @@ parent_call_hangup_ready (MMBaseCall *self,
 
     if (!MM_BASE_CALL_CLASS (mm_call_huawei_parent_class)->hangup_finish (self, res, &error)) {
         g_task_return_error (task, error);
+        g_object_unref (task);
         return;
     }
 
@@ -273,6 +280,7 @@ parent_call_hangup_ready (MMBaseCall *self,
     }
 
     g_task_return_boolean (task, TRUE);
+    g_object_unref (task);
 }
 
 static void
