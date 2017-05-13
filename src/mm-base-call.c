@@ -631,7 +631,7 @@ call_start_ready (MMBaseModem *modem,
     }
 
     /* check response for error */
-    if (response && strlen (response) > 0) {
+    if (response && response[0]) {
         /* Update state */
         mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_REFUSED_OR_BUSY);
         g_simple_async_result_set_error (ctx->result,
