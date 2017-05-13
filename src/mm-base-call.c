@@ -632,23 +632,19 @@ call_start_ready (MMBaseModem *modem,
 
     /* check response for error */
     if (response && strlen (response) > 0) {
-        error = g_error_new (MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
-                             "Couldn't start the call: "
-                             "Modem response '%s'", response);
         /* Update state */
         mm_base_call_change_state (ctx->self, MM_CALL_STATE_TERMINATED, MM_CALL_STATE_REASON_REFUSED_OR_BUSY);
+        g_simple_async_result_set_error (ctx->result,
+                                         MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                                         "Couldn't start the call: %s",
+                                         response);
+        call_start_context_complete_and_free (ctx);
+        return;
     }
 
     /* Modem will update call state when it receives unsolicited notification
      * that the call is ringing.
      */
-
-    if (error) {
-        g_simple_async_result_take_error (ctx->result, error);
-        call_start_context_complete_and_free (ctx);
-        return;
-    }
-
     g_simple_async_result_set_op_res_gboolean (ctx->result, TRUE);
     call_start_context_complete_and_free (ctx);
 }
