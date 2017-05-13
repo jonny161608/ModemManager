@@ -1410,10 +1410,11 @@ done:
 /*****************************************************************************/
 /* ^CVOICE response parser */
 
-gboolean mm_huawei_parse_cvoice_response (const gchar *response,
-                                          guint *out_hz,
-                                          guint *out_bits,
-                                          GError **error)
+gboolean
+mm_huawei_parse_cvoice_response (const gchar *response,
+                                 guint *out_hz,
+                                 guint *out_bits,
+                                 GError **error)
 {
     GRegex *r;
     GMatchInfo *match_info = NULL;
