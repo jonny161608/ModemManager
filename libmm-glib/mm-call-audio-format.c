@@ -30,7 +30,7 @@
  * mm_call_peek_audio_format().
  */
 
-G_DEFINE_TYPE (MMCallAudioFormat, mm_call_audio_format, G_TYPE_OBJECT);
+G_DEFINE_TYPE (MMCallAudioFormat, mm_call_audio_format, G_TYPE_OBJECT)
 
 #define PROPERTY_ENCODING   "encoding"
 #define PROPERTY_RESOLUTION "resolution"
