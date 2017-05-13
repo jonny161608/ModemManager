@@ -263,7 +263,7 @@ parent_call_hangup_ready (MMBaseCall *self,
         return;
     }
 
-    qcdm = mm_base_modem_peek_port_qcdm (MM_BASE_MODEM (self));
+    qcdm = mm_base_modem_peek_port_qcdm (MM_BASE_MODEM (g_task_get_task_data (task)));
     if (qcdm) {
         /* Unblock the QCDM port so it can be used for QCDM again */
         call_set_audio_properties (
