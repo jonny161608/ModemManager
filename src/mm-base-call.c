@@ -924,84 +924,6 @@ call_send_dtmf (MMBaseCall *self,
 }
 
 /*****************************************************************************/
-typedef struct {
-    MMBaseCall *self;
-    MMBaseModem *modem;
-    GSimpleAsyncResult *result;
-} CallDeleteContext;
-
-static void
-call_delete (MMBaseCall *self,
-             GAsyncReadyCallback callback,
-             gpointer user_data)
-{
-    CallDeleteContext *ctx;
-
-    ctx = g_new0 (CallDeleteContext, 1);
-    ctx->result = g_simple_async_result_new (G_OBJECT (self),
-                                             callback,
-                                             user_data,
-                                             call_delete);
-    ctx->self = g_object_ref (self);
-    ctx->modem = g_object_ref (self->priv->modem);
-
-    g_simple_async_result_set_op_res_gboolean (ctx->result, TRUE);
-    g_simple_async_result_complete_in_idle (ctx->result);
-    g_object_unref (ctx->result);
-    g_object_unref (ctx->modem);
-    g_object_unref (ctx->self);
-    g_free (ctx);
-}
-
-static gboolean
-call_delete_finish (MMBaseCall *self,
-                    GAsyncResult *res,
-                    GError **error)
-{
-    return !g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (res), error);
-}
-
-/*****************************************************************************/
-
-gboolean
-mm_base_call_delete_finish (MMBaseCall *self,
-                            GAsyncResult *res,
-                            GError **error)
-{
-    if (MM_BASE_CALL_GET_CLASS (self)->delete_finish) {
-        gboolean deleted;
-
-        deleted = MM_BASE_CALL_GET_CLASS (self)->delete_finish (self, res, error);
-        if (deleted)
-            /* We do change the state of this call back to UNKNOWN */
-            mm_base_call_change_state (self, MM_CALL_STATE_UNKNOWN, MM_CALL_STATE_REASON_UNKNOWN);
-
-        return deleted;
-    }
-
-    return !g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (res), error);
-}
-
-void
-mm_base_call_delete (MMBaseCall *self,
-                     GAsyncReadyCallback callback,
-                     gpointer user_data)
-{
-    if (MM_BASE_CALL_GET_CLASS (self)->delete &&
-        MM_BASE_CALL_GET_CLASS (self)->delete_finish) {
-        MM_BASE_CALL_GET_CLASS (self)->delete (self, callback, user_data);
-        return;
-    }
-
-    g_simple_async_report_error_in_idle (G_OBJECT (self),
-                                         callback,
-                                         user_data,
-                                         MM_CORE_ERROR,
-                                         MM_CORE_ERROR_UNSUPPORTED,
-                                         "Deleting call is not supported by this modem");
-}
-
-/*****************************************************************************/
 
 MMBaseCall *
 mm_base_call_new (MMBaseModem *modem)
@@ -1178,8 +1100,6 @@ mm_base_call_class_init (MMBaseCallClass *klass)
     klass->accept_finish    = call_accept_finish;
     klass->hangup           = call_hangup;
     klass->hangup_finish    = call_hangup_finish;
-    klass->delete           = call_delete;
-    klass->delete_finish    = call_delete_finish;
     klass->send_dtmf        = call_send_dtmf;
     klass->send_dtmf_finish = call_send_dtmf_finish;
 

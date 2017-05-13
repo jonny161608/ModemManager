@@ -111,11 +111,4 @@ void         mm_base_call_set_audio_format (MMBaseCall *self,
 void         mm_base_call_received_dtmf  (MMBaseCall *self,
                                           gchar *dtmf);
 
-void         mm_base_call_delete         (MMBaseCall *self,
-                                          GAsyncReadyCallback callback,
-                                          gpointer user_data);
-gboolean     mm_base_call_delete_finish  (MMBaseCall *self,
-                                          GAsyncResult *res,
-                                          GError **error);
-
 #endif /* MM_BASE_CALL_H */
