@@ -18,9 +18,11 @@
 #include <string.h>
 #include <unistd.h>
 
-typedef struct {
+#include "mm-lcp.h"
+
+struct _MMLcp {
     guint i;
-} MMLcp;
+};
 
 /*****************************************************************************/
 
@@ -32,11 +34,11 @@ mm_lcp_new (void)
 
 gboolean
 mm_lcp_process (MMLcp        *lcp,
-                const gchar  *data,
+                const guint8 *data,
                 gsize         len,
                 GError      **error)
 {
-    
+    return TRUE;
 }
 
 void

@@ -18,12 +18,12 @@
 
 #include <glib.h>
 
-typedef struct MMLcp MMLcp;
+typedef struct _MMLcp MMLcp;
 
 MMLcp *mm_lcp_new (void);
 
 gboolean mm_lcp_process (MMLcp        *lcp,
-                         const gchar  *data,
+                         const guint8 *data,
                          gsize         len,
                          GError      **error);
 

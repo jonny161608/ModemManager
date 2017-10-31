@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "mm-ppp.h"
+#include "mm-lcp.h"
 #include "mm-log.h"
 
 G_DEFINE_TYPE (MMPpp, mm_ppp, G_TYPE_OBJECT)
@@ -82,7 +83,7 @@ get_host_u16 (const guint8 *bytes)
 
 /*****************************************************************************/
 
-https://www.rfc-editor.org/rfc/rfc1548.txt
+//https://www.rfc-editor.org/rfc/rfc1548.txt
 
 MMPpp *
 mm_ppp_new (MMPppAuth    auth,
@@ -209,7 +210,8 @@ mm_ppp_process (MMPpp *self,
     case PPP_PROTO_LCP:
         if (!self->priv->lcp)
             self->priv->lcp = mm_lcp_new ();
-        mm_lcp_process (self->priv->lcp, buf, len);
+        if (!mm_lcp_process (self->priv->lcp, buf, len, error))
+            return FALSE;
         break;
     case PPP_PROTO_PAP:
         break;

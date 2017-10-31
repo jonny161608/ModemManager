@@ -245,6 +245,8 @@ libppp_la_CPPFLAGS = \
 libppp_la_SOURCES = \
 	ppp/mm-ppp.h \
 	ppp/mm-ppp.c \
+	ppp/mm-lcp.h \
+	ppp/mm-lcp.c \
 	$(NULL)
 
 libppp_la_LIBADD = \
