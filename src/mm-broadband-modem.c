@@ -6872,7 +6872,7 @@ ring_received (MMPortSerialAt *port,
                MMBroadbandModem *self)
 {
     mm_dbg ("Ringing");
-    mm_iface_modem_voice_incoming_call (MM_IFACE_MODEM_VOICE (self));
+    mm_iface_modem_voice_report_incoming_call (MM_IFACE_MODEM_VOICE (self), NULL);
 }
 
 static void
@@ -6880,7 +6880,6 @@ cring_received (MMPortSerialAt *port,
                 GMatchInfo *info,
                 MMBroadbandModem *self)
 {
-    /* The match info gives us in which storage the index applies */
     gchar *str;
 
     /* We could have "VOICE" or "DATA". Now consider only "VOICE" */
@@ -6889,7 +6888,7 @@ cring_received (MMPortSerialAt *port,
     mm_dbg ("Ringing (%s)", str);
     g_free (str);
 
-    mm_iface_modem_voice_incoming_call (MM_IFACE_MODEM_VOICE (self));
+    mm_iface_modem_voice_report_incoming_call (MM_IFACE_MODEM_VOICE (self), NULL);
 }
 
 static void
@@ -6897,24 +6896,11 @@ clip_received (MMPortSerialAt *port,
                GMatchInfo *info,
                MMBroadbandModem *self)
 {
-    /* The match info gives us in which storage the index applies */
     gchar *str;
 
     str = mm_get_string_unquoted_from_match_info (info, 1);
-
-    if (str) {
-        guint validity  = 0;
-        guint type      = 0;
-
-        mm_get_uint_from_match_info (info, 2, &type);
-        mm_get_uint_from_match_info (info, 3, &validity);
-
-        mm_dbg ("Caller ID received: number '%s', type '%d', validity '%d'", str, type, validity);
-
-        mm_iface_modem_voice_update_incoming_call_number (MM_IFACE_MODEM_VOICE (self), str, type, validity);
-
-        g_free (str);
-    }
+    mm_iface_modem_voice_report_incoming_call (MM_IFACE_MODEM_VOICE (self), str);
+    g_free (str);
 }
 
 static void
