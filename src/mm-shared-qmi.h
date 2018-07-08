@@ -57,6 +57,15 @@ gboolean   mm_shared_qmi_ensure_client (MMSharedQmi          *self,
                                         GAsyncReadyCallback   callback,
                                         gpointer              user_data);
 
+/* Shared QMI device management support */
+
+void     mm_shared_qmi_reset        (MMIfaceModem         *self,
+                                     GAsyncReadyCallback   callback,
+                                     gpointer              user_data);
+gboolean mm_shared_qmi_reset_finish (MMIfaceModem         *self,
+                                     GAsyncResult         *res,
+                                     GError              **error);
+
 /* Shared QMI location support */
 
 void                               mm_shared_qmi_peek_parent_location_interface                 (MMIfaceModemLocation *iface);
