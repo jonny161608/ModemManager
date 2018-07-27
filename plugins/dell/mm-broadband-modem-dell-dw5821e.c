@@ -187,7 +187,7 @@ disable_location_gathering (MMIfaceModemLocation  *_self,
     }
 
     mm_base_modem_at_command (MM_BASE_MODEM (_self),
-                              "NV=30007,01,\"00\"",
+                              "^NV=30007,01,\"00\"",
                               3,
                               FALSE,
                               (GAsyncReadyCallback)unmanaged_gps_disabled_ready,
@@ -244,7 +244,7 @@ parent_enable_location_gathering_ready (MMIfaceModemLocation *_self,
     }
 
     mm_base_modem_at_command (MM_BASE_MODEM (_self),
-                              "NV=30007,01,\"01\"",
+                              "^NV=30007,01,\"01\"",
                               3,
                               FALSE,
                               (GAsyncReadyCallback)unmanaged_gps_enabled_ready,
