@@ -59,6 +59,8 @@ gboolean   mm_shared_qmi_ensure_client (MMSharedQmi          *self,
 
 /* Shared QMI location support */
 
+void                               mm_shared_qmi_peek_parent_location_interface                 (MMIfaceModemLocation *iface);
+
 void                               mm_shared_qmi_location_load_capabilities                     (MMIfaceModemLocation   *self,
                                                                                                  GAsyncReadyCallback     callback,
                                                                                                  gpointer                user_data);
