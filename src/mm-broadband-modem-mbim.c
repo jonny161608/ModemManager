@@ -3475,6 +3475,8 @@ static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
 #if defined WITH_QMI && QMI_MBIM_QMUX_SUPPORTED
+    mm_shared_qmi_peek_parent_location_interface (iface);
+
     iface->load_capabilities = mm_shared_qmi_location_load_capabilities;
     iface->load_capabilities_finish = mm_shared_qmi_location_load_capabilities_finish;
     iface->enable_location_gathering = mm_shared_qmi_enable_location_gathering;
