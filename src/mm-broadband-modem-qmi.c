@@ -58,7 +58,6 @@ static void iface_modem_signal_init (MMIfaceModemSignal *iface);
 static void shared_qmi_init (MMSharedQmi *iface);
 
 static MMIfaceModemMessaging *iface_modem_messaging_parent;
-static MMIfaceModemLocation *iface_modem_location_parent;
 
 G_DEFINE_TYPE_EXTENDED (MMBroadbandModemQmi, mm_broadband_modem_qmi, MM_TYPE_BROADBAND_MODEM, 0,
                         G_IMPLEMENT_INTERFACE (MM_TYPE_IFACE_MODEM, iface_modem_init)
@@ -10564,7 +10563,7 @@ iface_modem_messaging_init (MMIfaceModemMessaging *iface)
 static void
 iface_modem_location_init (MMIfaceModemLocation *iface)
 {
-    iface_modem_location_parent = g_type_interface_peek_parent (iface);
+    mm_shared_qmi_peek_parent_location_interface (iface);
 
     iface->load_capabilities = location_load_capabilities;
     iface->load_capabilities_finish = location_load_capabilities_finish;

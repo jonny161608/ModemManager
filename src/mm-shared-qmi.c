@@ -33,6 +33,8 @@
 /* Default session id to use in LOC operations */
 #define DEFAULT_LOC_SESSION_ID 0x10
 
+static MMIfaceModemLocation *iface_modem_location_parent;
+
 /*****************************************************************************/
 /* Private data context */
 
@@ -1750,13 +1752,11 @@ parent_enable_location_gathering_ready (MMIfaceModemLocation *_self,
     MMSharedQmi           *self = MM_SHARED_QMI (_self);
     Private               *priv;
     MMModemLocationSource  source;
-    MMIfaceModemLocation  *parent_iface;
     GError                *error = NULL;
 
     priv = get_private (self);
 
-    parent_iface = g_type_interface_peek_parent (MM_IFACE_MODEM_LOCATION_GET_INTERFACE (self));
-    if (!parent_iface->enable_location_gathering_finish (_self, res, &error)) {
+    if (!iface_modem_location_parent->enable_location_gathering_finish (_self, res, &error)) {
         g_task_return_error (task, error);
         g_object_unref (task);
         return;
@@ -1802,15 +1802,13 @@ mm_shared_qmi_enable_location_gathering (MMIfaceModemLocation  *self,
                                          GAsyncReadyCallback    callback,
                                          gpointer               user_data)
 {
-    GTask                *task;
-    MMIfaceModemLocation *parent_iface;
+    GTask *task;
 
     task = g_task_new (self, NULL, callback, user_data);
     g_task_set_task_data (task, GUINT_TO_POINTER (source), NULL);
 
     /* Chain up parent's gathering enable */
-    parent_iface = g_type_interface_peek_parent (MM_IFACE_MODEM_LOCATION_GET_INTERFACE (self));
-    parent_iface->enable_location_gathering (
+    iface_modem_location_parent->enable_location_gathering (
         self,
         source,
         (GAsyncReadyCallback)parent_enable_location_gathering_ready,
@@ -1841,12 +1839,10 @@ parent_load_capabilities_ready (MMIfaceModemLocation *self,
                                 GAsyncResult         *res,
                                 GTask                *task)
 {
-    MMIfaceModemLocation  *parent_iface;
     MMModemLocationSource  sources;
     GError                *error = NULL;
 
-    parent_iface = g_type_interface_peek_parent (MM_IFACE_MODEM_LOCATION_GET_INTERFACE (self));
-    sources = parent_iface->load_capabilities_finish (self, res, &error);
+    sources = iface_modem_location_parent->load_capabilities_finish (self, res, &error);
     if (error) {
         g_task_return_error (task, error);
         g_object_unref (task);
@@ -1877,15 +1873,13 @@ mm_shared_qmi_location_load_capabilities (MMIfaceModemLocation *self,
                                           GAsyncReadyCallback   callback,
                                           gpointer              user_data)
 {
-    MMIfaceModemLocation *parent_iface;
-    GTask                *task;
+    GTask *task;
 
     task = g_task_new (self, NULL, callback, user_data);
 
-    parent_iface = g_type_interface_peek_parent (MM_IFACE_MODEM_LOCATION_GET_INTERFACE (self));
-    parent_iface->load_capabilities (self,
-                                     (GAsyncReadyCallback)parent_load_capabilities_ready,
-                                     task);
+    iface_modem_location_parent->load_capabilities (self,
+                                                    (GAsyncReadyCallback)parent_load_capabilities_ready,
+                                                    task);
 }
 
 /*****************************************************************************/
@@ -2370,6 +2364,12 @@ mm_shared_qmi_ensure_client (MMSharedQmi          *self,
 static void
 shared_qmi_init (gpointer g_iface)
 {
+}
+
+void
+mm_shared_qmi_peek_parent_location_interface (MMIfaceModemLocation *iface)
+{
+    iface_modem_location_parent = g_type_interface_peek_parent (iface);
 }
 
 GType
