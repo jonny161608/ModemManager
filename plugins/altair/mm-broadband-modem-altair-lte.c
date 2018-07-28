@@ -65,8 +65,6 @@ struct _MMBroadbandModemAltairLtePrivate {
     gboolean sim_refresh_detach_in_progress;
     /* Regex for bearer related notifications */
     GRegex *statcm_regex;
-    /* Regex for PCO notifications */
-    GRegex *pcoinfo_regex;
 };
 
 static MMIfaceModem3gpp *iface_modem_3gpp_parent;
@@ -403,110 +401,6 @@ reset (MMIfaceModem *self,
 }
 
 /*****************************************************************************/
-/* Run registration checks (3GPP interface) */
-
-static gboolean
-modem_3gpp_run_registration_checks_finish (MMIfaceModem3gpp *self,
-                                           GAsyncResult *res,
-                                           GError **error)
-{
-    return g_task_propagate_boolean (G_TASK (res), error);
-}
-
-static void
-run_registration_checks_subscription_state_ready (MMIfaceModem3gpp *self,
-                                                  GAsyncResult *res,
-                                                  GTask *task)
-{
-    GError *error = NULL;
-    const gchar *at_response;
-    gchar *ceer_response;
-
-    /* If the AT+CEER command fails, or we fail to obtain a valid result, we
-     * ignore the error. This allows the registration attempt to continue.
-     * So, the async response from this function is *always* True.
-     */
-
-    at_response = mm_base_modem_at_command_finish (MM_BASE_MODEM (self), res, &error);
-    if (!at_response) {
-        g_assert (error);
-        mm_warn ("AT+CEER failed: %s", error->message);
-        g_error_free (error);
-        g_task_return_boolean (task, TRUE);
-        g_object_unref (task);
-        return;
-    }
-
-    ceer_response = mm_altair_parse_ceer_response (at_response, &error);
-    if (!ceer_response) {
-        g_assert (error);
-        mm_warn ("Failed to parse AT+CEER response: %s", error->message);
-        g_error_free (error);
-        g_task_return_boolean (task, TRUE);
-        g_object_unref (task);
-        return;
-    }
-
-    if (g_strcmp0 ("EPS_AND_NON_EPS_SERVICES_NOT_ALLOWED", ceer_response) == 0) {
-        mm_dbg ("Registration failed due to unprovisioned SIM.");
-        mm_iface_modem_3gpp_update_subscription_state (self, MM_MODEM_3GPP_SUBSCRIPTION_STATE_UNPROVISIONED);
-    } else {
-        mm_dbg ("Failed to find a better reason for registration failure.");
-    }
-
-    g_task_return_boolean (task, TRUE);
-    g_object_unref (task);
-    g_free (ceer_response);
-}
-
-static void
-run_registration_checks_ready (MMIfaceModem3gpp *self,
-                               GAsyncResult *res,
-                               GTask *task)
-{
-    GError *error = NULL;
-    gboolean success;
-
-    g_assert (iface_modem_3gpp_parent->run_registration_checks_finish);
-    success = iface_modem_3gpp_parent->run_registration_checks_finish (self, res, &error);
-    if (!success) {
-        g_assert (error);
-        g_task_return_error (task, error);
-        g_object_unref (task);
-        return;
-    }
-
-    mm_dbg ("Checking if SIM is unprovisioned (ignoring registration state).");
-    mm_base_modem_at_command (MM_BASE_MODEM (self),
-                              "+CEER",
-                              6,
-                              FALSE,
-                              (GAsyncReadyCallback) run_registration_checks_subscription_state_ready,
-                              task);
-}
-
-static void
-modem_3gpp_run_registration_checks (MMIfaceModem3gpp *self,
-                                    gboolean cs_supported,
-                                    gboolean ps_supported,
-                                    gboolean eps_supported,
-                                    GAsyncReadyCallback callback,
-                                    gpointer user_data)
-{
-    GTask *task;
-
-    task = g_task_new (self, NULL, callback, user_data);
-
-    g_assert (iface_modem_3gpp_parent->run_registration_checks);
-    iface_modem_3gpp_parent->run_registration_checks (self,
-                                                      cs_supported,
-                                                      ps_supported,
-                                                      eps_supported,
-                                                      (GAsyncReadyCallback) run_registration_checks_ready,
-                                                      task);
-}
-
-/*****************************************************************************/
 /* Register in network (3GPP interface) */
 
 static gboolean
@@ -716,11 +610,6 @@ altair_statcm_changed (MMPortSerialAt *port,
 /* Setup/Cleanup unsolicited events (3GPP interface) */
 
 static void
-altair_pco_info_changed (MMPortSerialAt *port,
-                         GMatchInfo *match_info,
-                         MMBroadbandModemAltairLte *self);
-
-static void
 set_3gpp_unsolicited_events_handlers (MMBroadbandModemAltairLte *self,
                                       gboolean enable)
 {
@@ -748,14 +637,6 @@ set_3gpp_unsolicited_events_handlers (MMBroadbandModemAltairLte *self,
             ports[i],
             self->priv->statcm_regex,
             enable ? (MMPortSerialAtUnsolicitedMsgFn)altair_statcm_changed : NULL,
-            enable ? self : NULL,
-            NULL);
-
-        /* PCO info handler */
-        mm_port_serial_at_add_unsolicited_msg_handler (
-            ports[i],
-            self->priv->pcoinfo_regex,
-            enable ? (MMPortSerialAtUnsolicitedMsgFn)altair_pco_info_changed : NULL,
             enable ? self : NULL,
             NULL);
     }
@@ -860,7 +741,6 @@ response_processor_no_result_stop_on_error (MMBaseModem *self,
 static const MMBaseModemAtCommand unsolicited_events_enable_sequence[] = {
   { "%STATCM=1", 10, FALSE, response_processor_no_result_stop_on_error },
   { "%NOTIFYEV=\"SIMREFRESH\",1", 10, FALSE, NULL },
-  { "%PCOINFO=1", 10, FALSE, NULL },
   { NULL }
 };
 
@@ -932,7 +812,6 @@ modem_3gpp_enable_unsolicited_events (MMIfaceModem3gpp *self,
 static const MMBaseModemAtCommand unsolicited_events_disable_sequence[] = {
   { "%STATCM=0", 10, FALSE, NULL },
   { "%NOTIFYEV=\"SIMREFRESH\",0", 10, FALSE, NULL },
-  { "%PCOINFO=0", 10, FALSE, NULL },
   { NULL }
 };
 
@@ -1099,164 +978,6 @@ modem_3gpp_load_operator_name (MMIfaceModem3gpp *self,
 }
 
 /*****************************************************************************/
-/* Subscription State loading (3GPP interface) */
-
-typedef struct {
-    gchar *pco_info;
-} LoadSubscriptionStateContext;
-
-static void
-load_subscription_state_context_free (LoadSubscriptionStateContext *ctx)
-{
-    g_free (ctx->pco_info);
-    g_slice_free (LoadSubscriptionStateContext, ctx);
-}
-
-static MMModem3gppSubscriptionState
-altair_vzw_pco_value_to_mm_modem_3gpp_subscription_state (guint pco_value)
-{
-    switch (pco_value) {
-    case 0:
-        return MM_MODEM_3GPP_SUBSCRIPTION_STATE_PROVISIONED;
-    case 3:
-        return MM_MODEM_3GPP_SUBSCRIPTION_STATE_OUT_OF_DATA;
-    case 5:
-        return MM_MODEM_3GPP_SUBSCRIPTION_STATE_UNPROVISIONED;
-    default:
-        return MM_MODEM_3GPP_SUBSCRIPTION_STATE_UNKNOWN;
-    }
-}
-
-static MMModem3gppSubscriptionState
-modem_3gpp_load_subscription_state_finish (MMIfaceModem3gpp *self,
-                                           GAsyncResult *res,
-                                           GError **error)
-{
-    GError *inner_error = NULL;
-    gssize value;
-
-    value = g_task_propagate_int (G_TASK (res), &inner_error);
-    if (inner_error) {
-        g_propagate_error (error, inner_error);
-        return MM_MODEM_3GPP_SUBSCRIPTION_STATE_UNKNOWN;
-    }
-    return (MMModem3gppSubscriptionState)value;
-}
-
-static void
-altair_get_subscription_state (MMIfaceModem3gpp *self,
-                               GTask *task)
-{
-    LoadSubscriptionStateContext *ctx;
-    guint pco_value = -1;
-    GError *error = NULL;
-    MMModem3gppSubscriptionState subscription_state;
-
-    ctx = g_task_get_task_data (task);
-
-    mm_dbg ("Parsing vendor PCO info: %s", ctx->pco_info);
-    pco_value = mm_altair_parse_vendor_pco_info (ctx->pco_info, &error);
-    if (error) {
-        g_task_return_error (task, error);
-        g_object_unref (task);
-        return;
-    }
-    mm_dbg ("PCO value = %d", pco_value);
-
-    subscription_state = altair_vzw_pco_value_to_mm_modem_3gpp_subscription_state (pco_value);
-    g_task_return_int (task, subscription_state);
-    g_object_unref (task);
-}
-
-static void
-altair_load_vendor_pco_info_ready (MMIfaceModem3gpp *self,
-                                   GAsyncResult *res,
-                                   GTask *task)
-{
-    LoadSubscriptionStateContext *ctx;
-    const gchar *response;
-    GError *error = NULL;
-
-    response = mm_base_modem_at_command_finish (MM_BASE_MODEM (self), res, &error);
-    if (error) {
-        mm_dbg ("Failed to load vendor PCO info.");
-        g_task_return_error (task, error);
-        g_object_unref (task);
-        return;
-    }
-    g_assert (response);
-    ctx = g_task_get_task_data (task);
-    ctx->pco_info = g_strdup (response);
-    altair_get_subscription_state (self, task);
-}
-
-static void
-modem_3gpp_load_subscription_state (MMIfaceModem3gpp *self,
-                                    GAsyncReadyCallback callback,
-                                    gpointer user_data)
-{
-    LoadSubscriptionStateContext *ctx;
-    GTask *task;
-
-    ctx = g_slice_new0 (LoadSubscriptionStateContext);
-
-    task = g_task_new (self, NULL, callback, user_data);
-    g_task_set_task_data (task, ctx, (GDestroyNotify)load_subscription_state_context_free);
-
-    mm_dbg ("Loading vendor PCO info...");
-    mm_base_modem_at_command (MM_BASE_MODEM (self),
-                              "%PCOINFO?",
-                              6,
-                              FALSE,
-                              (GAsyncReadyCallback)altair_load_vendor_pco_info_ready,
-                              task);
-}
-
-/*****************************************************************************/
-/* PCOINFO unsolicited event handler */
-
-static void
-altair_get_subscription_state_ready (MMBroadbandModemAltairLte *self,
-                                     GAsyncResult *res,
-                                     gpointer *user_data)
-{
-    GError *error = NULL;
-    MMModem3gppSubscriptionState subscription_state;
-
-    subscription_state = (MMModem3gppSubscriptionState)g_task_propagate_int (G_TASK (res), &error);
-    if (error) {
-        mm_warn ("Couldn't load Subscription State: '%s'", error->message);
-        g_error_free (error);
-        return;
-    }
-
-    if (subscription_state != MM_MODEM_3GPP_SUBSCRIPTION_STATE_UNKNOWN)
-        mm_iface_modem_3gpp_update_subscription_state (MM_IFACE_MODEM_3GPP (self), subscription_state);
-}
-
-static void
-altair_pco_info_changed (MMPortSerialAt *port,
-                         GMatchInfo *match_info,
-                         MMBroadbandModemAltairLte *self)
-{
-    LoadSubscriptionStateContext *ctx;
-    const gchar *response;
-    GTask *task;
-
-    ctx = g_slice_new0 (LoadSubscriptionStateContext);
-    response = g_match_info_fetch (match_info, 0);
-    ctx->pco_info = g_strdup (response);
-
-    task = g_task_new (self,
-                       NULL,
-                       (GAsyncReadyCallback)altair_get_subscription_state_ready,
-                       NULL);
-    g_task_set_task_data (task, ctx, (GDestroyNotify)load_subscription_state_context_free);
-
-    altair_get_subscription_state (MM_IFACE_MODEM_3GPP (self), task);
-}
-
-/*****************************************************************************/
 /* Generic ports open/close context */
 
 static const gchar *primary_init_sequence[] = {
@@ -1318,7 +1039,6 @@ mm_broadband_modem_altair_lte_is_sim_refresh_detach_in_progress (MMBroadbandMode
 static void
 mm_broadband_modem_altair_lte_init (MMBroadbandModemAltairLte *self)
 {
-
     /* Initialize private data */
     self->priv = G_TYPE_INSTANCE_GET_PRIVATE ((self),
                                               MM_TYPE_BROADBAND_MODEM_ALTAIR_LTE,
@@ -1330,8 +1050,6 @@ mm_broadband_modem_altair_lte_init (MMBroadbandModemAltairLte *self)
     self->priv->sim_refresh_timer_id = 0;
     self->priv->statcm_regex = g_regex_new ("\\r\\n\\%STATCM:\\s*(\\d*),?(\\d*)\\r+\\n",
                                             G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
-    self->priv->pcoinfo_regex = g_regex_new ("\\r\\n\\%PCOINFO:\\s*(\\d*),([^,\\s]*),([^,\\s]*)\\r+\\n",
-                                             G_REGEX_RAW | G_REGEX_OPTIMIZE, 0, NULL);
 }
 
 static void
@@ -1343,7 +1061,6 @@ finalize (GObject *object)
         g_source_remove (self->priv->sim_refresh_timer_id);
     g_regex_unref (self->priv->sim_refresh_regex);
     g_regex_unref (self->priv->statcm_regex);
-    g_regex_unref (self->priv->pcoinfo_regex);
     G_OBJECT_CLASS (mm_broadband_modem_altair_lte_parent_class)->finalize (object);
 }
 
@@ -1401,8 +1118,6 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
 
     iface->register_in_network = modem_3gpp_register_in_network;
     iface->register_in_network_finish = modem_3gpp_register_in_network_finish;
-    iface->run_registration_checks = modem_3gpp_run_registration_checks;
-    iface->run_registration_checks_finish = modem_3gpp_run_registration_checks_finish;
 
     /* Scanning is not currently supported */
     iface->scan_networks = NULL;
@@ -1413,8 +1128,6 @@ iface_modem_3gpp_init (MMIfaceModem3gpp *iface)
     iface->load_operator_code_finish = modem_3gpp_load_operator_code_finish;
     iface->load_operator_name = modem_3gpp_load_operator_name;
     iface->load_operator_name_finish = modem_3gpp_load_operator_name_finish;
-    iface->load_subscription_state = modem_3gpp_load_subscription_state;
-    iface->load_subscription_state_finish = modem_3gpp_load_subscription_state_finish;
 }
 
 static void
