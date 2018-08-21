@@ -30,6 +30,7 @@
 #include "mm-broadband-bearer.h"
 #include "mm-broadband-modem-ublox.h"
 #include "mm-broadband-bearer-ublox.h"
+#include "mm-sim-ublox.h"
 #include "mm-modem-helpers-ublox.h"
 #include "mm-ublox-enums-types.h"
 #include "mm-call-ublox.h"
@@ -1135,6 +1136,28 @@ modem_create_bearer (MMIfaceModem        *self,
 }
 
 /*****************************************************************************/
+/* Create SIM (Modem interface) */
+
+static MMBaseSim *
+modem_create_sim_finish (MMIfaceModem  *self,
+                         GAsyncResult  *res,
+                         GError       **error)
+{
+    return mm_sim_ublox_new_finish (res, error);
+}
+
+static void
+modem_create_sim (MMIfaceModem        *self,
+                  GAsyncReadyCallback  callback,
+                  gpointer             user_data)
+{
+    mm_sim_ublox_new (MM_BASE_MODEM (self),
+                      NULL, /* cancellable */
+                      callback,
+                      user_data);
+}
+
+/*****************************************************************************/
 /* Setup ports (Broadband modem class) */
 
 static void
@@ -1203,6 +1226,8 @@ mm_broadband_modem_ublox_init (MMBroadbandModemUblox *self)
 static void
 iface_modem_init (MMIfaceModem *iface)
 {
+    iface->create_sim = modem_create_sim;
+    iface->create_sim_finish = modem_create_sim_finish;
     iface->create_bearer        = modem_create_bearer;
     iface->create_bearer_finish = modem_create_bearer_finish;
     iface->load_unlock_retries        = load_unlock_retries;
