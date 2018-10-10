@@ -7,8 +7,9 @@ dnl
 m4_define([mm_major_version], [1])
 m4_define([mm_minor_version], [9])
 m4_define([mm_micro_version], [0])
+m4_define([mm_revision_version], [next-20181010-1])
 m4_define([mm_version],
-          [mm_major_version.mm_minor_version.mm_micro_version])
+          [mm_major_version.mm_minor_version.mm_micro_version.mm_revision_version])
 
 dnl libtool versioning for libmm-glib (-version-info c:r:a)
 dnl    If the interface is unchanged, but the implementation has changed or
