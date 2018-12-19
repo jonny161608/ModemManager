@@ -56,6 +56,13 @@ typedef struct {
     guint32                  total_size;
 } ConfigInfo;
 
+static void
+config_info_clear (ConfigInfo *config_info)
+{
+    g_array_unref (config_info->id);
+    g_free (config_info->description);
+}
+
 typedef struct {
     /* Capabilities & modes helpers */
     MMModemCapability  current_capabilities;
@@ -2669,10 +2676,10 @@ list_configs_indication (QmiClientPdc                      *client,
                          GTask                             *task)
 {
     LoadCarrierConfigContext *ctx;
-    GError                    *error = NULL;
-    GArray                    *configs = NULL;
-    int                        i;
-    guint16                    error_code = 0;
+    GError                   *error = NULL;
+    GArray                   *configs = NULL;
+    int                       i;
+    guint16                   error_code = 0;
 
     ctx = g_task_get_task_data (task);
 
@@ -2703,6 +2710,7 @@ list_configs_indication (QmiClientPdc                      *client,
     mm_dbg ("found %u carrier configurations...", configs->len);
     ctx->config_list = g_array_sized_new (FALSE, TRUE, sizeof (ConfigInfo), configs->len);
     g_array_set_size (ctx->config_list, configs->len);
+    g_array_set_clear_func (ctx->config_list, (GDestroyNotify) config_info_clear);
 
     ctx->get_config_info_indication_id = g_signal_connect (ctx->client,
                                                            "get-config-info",
