@@ -4995,14 +4995,12 @@ interface_initialization_step (GTask *task)
                                                                                (GAsyncReadyCallback)setup_carrier_config_ready,
                                                                                task);
                     g_object_unref (sim);
+                    g_free (carrier_config_mapping);
                     return;
                 }
-
                 mm_warn ("couldn't setup carrier config: unknown IMSI");
-                g_object_unref (sim);
-                g_free (carrier_config_mapping);
-                return;
             }
+            g_clear_object (&sim);
             g_free (carrier_config_mapping);
         }
         /* Fall down to next step */
