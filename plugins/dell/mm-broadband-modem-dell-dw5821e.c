@@ -65,6 +65,68 @@ firmware_load_update_settings_finish (MMIfaceModemFirmware  *self,
     return g_task_propagate_pointer (G_TASK (res), error);
 }
 
+static gboolean
+add_dw5821e_version (MMBaseModem               *self,
+                     MMFirmwareUpdateSettings  *update_settings,
+                     GError                   **error)
+{
+    const gchar  *firmware_revision;
+    gchar       **split_firmware_revision;
+    gchar        *firmware_version;
+    const gchar  *carrier_revision;
+    gchar        *combined;
+
+    /* DW5812e firmware revision is given as a multiline string, e.g.:
+     *     T77W968.T1.0.0.3.6.DF.027
+     *     021
+     *
+     * The previous string contains not only the firmware version (T77W968.T1.0.0.3.6)
+     * but also the apps version (021) and the MCFG type and version (DF,027).
+     *
+     * For firmware update purposes, we want to provide *just* the firmware version
+     * part (first siz dot-separated fields), plus the current carrier config revision
+     * (if any).
+     */
+
+    firmware_revision = mm_iface_modem_get_revision (MM_IFACE_MODEM (self));
+    if (!firmware_revision) {
+        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                     "Unknown revision");
+        return FALSE;
+    }
+
+    split_firmware_revision = g_strsplit (firmware_revision, ".", -1);
+    if (g_strv_length (split_firmware_revision) < 6) {
+        g_strfreev (split_firmware_revision);
+        g_set_error (error, MM_CORE_ERROR, MM_CORE_ERROR_FAILED,
+                     "Unknown dw5821e revision format: %s", firmware_revision);
+        return FALSE;
+    }
+
+    firmware_version = g_strjoin (".",
+                                  split_firmware_revision[0],
+                                  split_firmware_revision[1],
+                                  split_firmware_revision[2],
+                                  split_firmware_revision[3],
+                                  split_firmware_revision[4],
+                                  split_firmware_revision[5],
+                                  NULL);
+    g_strfreev (split_firmware_revision);
+
+    mm_iface_modem_get_carrier_config (MM_IFACE_MODEM (self), NULL, &carrier_revision);
+    if (!carrier_revision) {
+        mm_firmware_update_settings_set_version (update_settings, firmware_version);
+        g_free (firmware_version);
+        return TRUE;
+    }
+
+    combined = g_strdup_printf ("%s - %s", firmware_version, carrier_revision);
+    mm_firmware_update_settings_set_version (update_settings, combined);
+    g_free (combined);
+    g_free (firmware_version);
+    return TRUE;
+}
+
 static void
 firmware_load_update_settings (MMIfaceModemFirmware *self,
                                GAsyncReadyCallback   callback,
@@ -72,14 +134,18 @@ firmware_load_update_settings (MMIfaceModemFirmware *self,
 {
     MMFirmwareUpdateSettings *update_settings;
     GTask                    *task;
+    GError                   *error = NULL;
 
     task = g_task_new (self, NULL, callback, user_data);
 
     update_settings = mm_firmware_update_settings_new (MM_MODEM_FIRMWARE_UPDATE_METHOD_FASTBOOT |
                                                        MM_MODEM_FIRMWARE_UPDATE_METHOD_QMI_PDC);
     mm_firmware_update_settings_set_fastboot_at (update_settings, "AT^FASTBOOT");
-
-    g_task_return_pointer (task, update_settings, g_object_unref);
+    if (!add_dw5821e_version (MM_BASE_MODEM (self), update_settings, &error)) {
+        g_clear_object (&update_settings);
+        g_task_return_error (task, error);
+    } else
+        g_task_return_pointer (task, update_settings, g_object_unref);
     g_object_unref (task);
 }
 
