@@ -881,9 +881,16 @@ libmm_plugin_telit_la_SOURCES = \
 	telit/mm-plugin-telit.c \
 	telit/mm-plugin-telit.h \
 	$(NULL)
-libmm_plugin_telit_la_CPPFLAGS = $(PLUGIN_COMMON_COMPILER_FLAGS) $(PLUGIN_TELIT_COMPILER_FLAGS)
+libmm_plugin_telit_la_CPPFLAGS = \
+	$(PLUGIN_COMMON_COMPILER_FLAGS) \
+	$(XMM_COMMON_COMPILER_FLAGS) \
+	$(PLUGIN_TELIT_COMPILER_FLAGS) \
+	$(NULL)
 libmm_plugin_telit_la_LDFLAGS  = $(PLUGIN_COMMON_LINKER_FLAGS)
-libmm_plugin_telit_la_LIBADD   = $(TELIT_COMMON_LIBADD_FLAGS)
+libmm_plugin_telit_la_LIBADD = \
+	$(XMM_COMMON_LIBADD_FLAGS) \
+	$(TELIT_COMMON_LIBADD_FLAGS) \
+	$(NULL)
 
 dist_udevrules_DATA += telit/77-mm-telit-port-types.rules
 
